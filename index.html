@@ -194,7 +194,7 @@
 
   <div class="hdr">
     <div class="hdr-icon">⚡</div>
-    <div><h1>tip scale</h1>
+    <div><h1>TipScale</h1>
     <p>Nässe-Ortung · Widerstands-Referenz-Messverfahren · LUWA · Fernwärme</p></div>
   </div>
 
@@ -880,9 +880,9 @@ function exportPDF(){
 
   // Header
   doc.setFillColor(27,61,94);doc.rect(0,0,W,28,'F');
-  doc.setFont('helvetica','bold');doc.setFontSize(16);wh();doc.text('tip scale · Nässe-Ortung',M,14);
+  doc.setFont('helvetica','bold');doc.setFontSize(16);wh();doc.text('TipScale · Naesse-Ortung',M,14);
   doc.setFont('helvetica','normal');doc.setFontSize(9);doc.setTextColor(180,200,220);
-  doc.text('Widerstands-Referenz-Messverfahren · LUWA · Fernwärme',M,20);
+  doc.text('Widerstands-Referenz-Messverfahren · LUWA · Fernwaerme',M,20);
   const now=new Date();
   doc.text(now.toLocaleDateString('de-DE')+' '+now.toLocaleTimeString('de-DE',{hour:'2-digit',minute:'2-digit'}),W-M,20,{align:'right'});
   y=36;
@@ -904,6 +904,12 @@ function exportPDF(){
     doc.setFont('helvetica','bold');doc.setFontSize(6.5);
     doc.setTextColor(...(active?[255,255,255]:[160,170,185]));
     doc.text(txt,x+nw/2,yy+nh/2+0.5,{align:'center',baseline:'middle'});
+    // Inaktive Nodes: 2 diagonale Kreuze
+    if(!active){
+      doc.setDrawColor(140,150,160);doc.setLineWidth(0.4);
+      doc.line(x+1,yy+1,x+nw-1,yy+nh-1);
+      doc.line(x+nw-1,yy+1,x+1,yy+nh-1);
+    }
   }
   function tl(x1,y1,x2,y2,active){
     doc.setDrawColor(...(active?[27,61,94]:[210,215,225]));
@@ -911,25 +917,36 @@ function exportPDF(){
   }
 
   const sy=y,sx=M;
+  const nw=24; // node width — single source of truth
   const tNodes=[
-    {x:sx,    t:'MP-A',  a:true, c:[27,61,94]},
-    {x:sx+32, t:'KA-A',  a:hasKAA,c:[192,57,43]},
-    {x:sx+66, t:'Meld.', a:true, c:[26,95,168]},
-    {x:sx+102,t:'KA-B',  a:hasKAB,c:[26,95,168]},
-    {x:sx+136,t:'MP-B',  a:true, c:[27,61,94]},
+    {x:sx,       t:'MP-A',  a:true,   c:[27,61,94]},
+    {x:sx+32,    t:'KA-A',  a:hasKAA, c:[192,57,43]},
+    {x:sx+66,    t:'Meld.', a:true,   c:[26,95,168]},
+    {x:sx+102,   t:'KA-B',  a:hasKAB, c:[26,95,168]},
+    {x:sx+136,   t:'MP-B',  a:true,   c:[27,61,94]},
   ];
   tNodes.forEach((n,i)=>{
     tn(n.x,sy,n.t,n.a,n.c);
-    if(i<tNodes.length-1) tl(n.x+24,sy+4,tNodes[i+1].x,sy+4,n.a&&tNodes[i+1].a);
+    if(i<tNodes.length-1) tl(n.x+nw,sy+4,tNodes[i+1].x,sy+4,n.a&&tNodes[i+1].a);
   });
-  // Nassmarker
-  doc.setFillColor(192,57,43);doc.circle(sx+79,sy+4,2.2,'F');
-  doc.setFont('helvetica','bold');doc.setFontSize(7);doc.setTextColor(192,57,43);
-  doc.text('💧',sx+77,sy+1.5);
-  // HFL Bogen
+
+  // Nassmarker: kleiner roter Kreis zwischen Nodes 2 und 3 (auf Verbindungslinie)
+  const nassX = sx+66 + nw/2; // Mitte von Meld.-Node
+  doc.setFillColor(192,57,43);
+  doc.circle(nassX, sy+4, 2.5, 'F');
+  doc.setDrawColor(255,255,255);doc.setLineWidth(0.5);
+  doc.circle(nassX, sy+4, 2.5, 'S');
+
+  // HFL-Bogen: symmetrisch — beide Streben an der Mitte der Endnodes
   const hy=sy+19;
-  tl(sx+160,sy+8,sx+160,hy,hasHFL);tl(sx+160,hy,sx+12,hy,hasHFL);tl(sx+12,hy,sx+12,sy+8,hasHFL);
-  tn(sx+75,hy-4,'HFL',hasHFL,[26,118,78]);
+  const hflLeft  = sx + nw/2;           // Mitte MP-A
+  const hflRight = sx+136 + nw/2;       // Mitte MP-B
+  const hflNodeW = 24, hflNodeH = 8;
+  const hflNodeX = (hflLeft+hflRight)/2 - hflNodeW/2; // HFL-Node zentriert
+  tl(hflLeft, sy+8, hflLeft, hy, hasHFL);             // linke Strebe
+  tl(hflLeft, hy, hflRight, hy, hasHFL);              // Querbalken
+  tl(hflRight, hy, hflRight, sy+8, hasHFL);           // rechte Strebe
+  tn(hflNodeX, hy-4, 'HFL', hasHFL,[26,118,78]);
   // Legende
   ln(24);
   doc.setFontSize(7);
@@ -1010,7 +1027,7 @@ function exportPDF(){
   for(let i=1;i<=doc.getNumberOfPages();i++){
     doc.setPage(i);
     doc.setFont('helvetica','normal');doc.setFontSize(8);doc.setTextColor(160,170,185);
-    doc.text(`tip scale · Nässe-Ortung · Seite ${i}/${doc.getNumberOfPages()}`,W/2,290,{align:'center'});
+    doc.text(`TipScale · Naesse-Ortung · Seite ${i}/${doc.getNumberOfPages()}`,W/2,290,{align:'center'});
   }
 
   const lid=document.getElementById('proj-lid').value||'Messung';
