@@ -3,16 +3,23 @@
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0">
-  <meta name="theme-color" content="#1B3D5E">
-  <title>Messbrücke · Nässe-Ortung</title>
+  <meta name="theme-color" content="#0F1923">
+  <title>TipScale</title>
   <script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf/2.5.1/jspdf.umd.min.js"></script>
   <style>
-    :root{--bg:#F2F4F7;--card:#fff;--navy:#1B3D5E;--navy2:#2D6291;--red:#C0392B;--red-bg:#FDEDEC;
-          --blue-t:#1A6FA8;--amber:#B7770D;--amber-bg:#FEF9E7;--green:#1A7A4A;--green-bg:#EAFAF1;
-          --border:#D8DCE5;--text:#1C2B3A;--text2:#5A6880;--radius:11px;}
+    :root{
+      --bg:#0F1923;--card:#1A2433;--navy:#1B3D5E;--navy2:#3A7FBF;
+      --red:#E05252;--red-bg:#2D1A1A;--blue-t:#6BB8E8;
+      --amber:#E0A840;--amber-bg:#2A1E0A;--green:#4DC87A;--green-bg:#0D2018;
+      --border:#2D4060;--text:#D8E8F8;--text2:#9BBDD8;--radius:11px;
+    }
     *{box-sizing:border-box;margin:0;padding:0;-webkit-tap-highlight-color:transparent}
     html,body{min-height:100%;background:var(--bg);color:var(--text)}
     body{font-family:'Helvetica Neue',Arial,-apple-system,sans-serif;font-size:15px;line-height:1.5}
+    /* hide number input spinners */
+    input[type=number]::-webkit-inner-spin-button,
+    input[type=number]::-webkit-outer-spin-button{-webkit-appearance:none;margin:0}
+    input[type=number]{-moz-appearance:textfield;appearance:textfield}
     .app{max-width:520px;margin:0 auto;padding:14px 10px 60px}
 
     .hdr{display:flex;align-items:center;gap:12px;background:var(--navy);border-radius:var(--radius);
@@ -27,18 +34,18 @@
     .card-hdr:active{background:var(--bg)}
     .card-htitle{display:flex;align-items:center;gap:9px}
     .card-icon{font-size:15px}
-    .card-htitle h2{font-size:13.5px;font-weight:600;color:var(--navy)}
-    .badge{font-size:11px;padding:2px 8px;border-radius:20px;background:var(--bg);color:var(--text2);font-weight:500}
+    .card-htitle h2{font-size:13.5px;font-weight:600;color:#fff}
+    .badge{font-size:11px;padding:2px 8px;border-radius:20px;background:rgba(255,255,255,.08);color:var(--text2);font-weight:500}
     .toggle-arr{font-size:11px;color:var(--text2);transition:transform .2s}
     .toggle-arr.open{transform:rotate(180deg)}
     .card-body{padding:0 15px 15px;border-top:1px solid var(--border);display:none}
     .card-body.open{display:block}
 
     .field{margin-top:13px}
-    .field label{display:block;font-size:11px;font-weight:600;color:var(--text2);
+    .field label{display:block;font-size:11px;font-weight:600;color:#C0C8D8;
                  text-transform:uppercase;letter-spacing:.05em;margin-bottom:5px}
     .fld{width:100%;padding:10px 12px;border:1.5px solid var(--border);border-radius:7px;
-         font-size:15px;color:var(--text);background:#fff;font-family:inherit;outline:none;transition:border-color .15s}
+         font-size:15px;color:#1A2433;background:#FAFAC0;font-family:inherit;outline:none;transition:border-color .15s}
     .fld:focus{border-color:var(--navy2)}
     .fld-row{display:flex;gap:8px;align-items:center}
     .fld-unit{font-size:13px;color:var(--text2);white-space:nowrap}
@@ -46,11 +53,11 @@
               font-weight:700;text-transform:uppercase;margin-left:5px;vertical-align:middle}
 
     .info-row{display:flex;justify-content:space-between;align-items:center;
-              padding:8px 11px;background:var(--bg);border-radius:7px;margin-top:9px}
+              padding:8px 11px;background:#0F1923;border-radius:7px;margin-top:9px}
     .info-row .lbl{font-size:12px;color:var(--text2)}
-    .info-row .val{font-size:13.5px;font-weight:600;color:var(--navy);font-variant-numeric:tabular-nums}
+    .info-row .val{font-size:13.5px;font-weight:600;color:#E8F4FF;font-variant-numeric:tabular-nums}
 
-    .rges-box{margin-top:9px;background:#EAF4FB;border:1.5px solid #7FB3D3;border-radius:8px;padding:10px 13px}
+    .rges-box{margin-top:9px;background:#0F1923;border:1.5px solid #1B3D5E;border-radius:8px;padding:10px 13px}
     .rges-title{font-size:10px;font-weight:700;text-transform:uppercase;letter-spacing:.06em;color:#1A5276;margin-bottom:7px}
     .rges-row{display:flex;justify-content:space-between;align-items:center;margin-bottom:4px}
     .rges-row .rl{font-size:12px;color:var(--text2)}
@@ -78,30 +85,30 @@
     .seg-panel.open{display:block}
     .seg-grid{display:grid;grid-template-columns:repeat(5,1fr);gap:5px;max-height:240px;overflow-y:auto;margin-bottom:8px}
     .seg-inp{padding:7px 3px;border:1px solid var(--border);border-radius:5px;font-size:13px;
-             text-align:center;background:#fff;width:100%;font-family:inherit;outline:none}
+             text-align:center;background:#FAFAC0;color:#1A2433;width:100%;font-family:inherit;outline:none}
     .seg-inp:focus{border-color:var(--navy2)}
     .seg-useBtn{width:100%;padding:8px;background:var(--navy);color:#fff;border:none;border-radius:6px;
                 cursor:pointer;font-size:13px;font-weight:500;font-family:inherit;margin-top:4px}
 
     .ka-cols{display:grid;grid-template-columns:1fr 1fr;gap:9px;margin-top:10px}
-    .ka-col{background:var(--bg);border-radius:8px;padding:10px}
+    .ka-col{background:#0F1923;border-radius:8px;padding:10px}
     .ka-col h3{font-size:11px;font-weight:700;text-transform:uppercase;letter-spacing:.06em;margin-bottom:8px}
     .ka-col.ka-a h3{color:var(--red)} .ka-col.ka-b h3{color:var(--blue-t)}
     .ka-fld{width:100%;padding:8px 9px;border:1.5px solid var(--border);border-radius:6px;
-            font-size:13px;background:#fff;font-family:inherit;outline:none;margin-bottom:5px}
+            font-size:13px;background:#FAFAC0;color:#1A2433;font-family:inherit;outline:none;margin-bottom:5px}
     .ka-fld:focus{border-color:var(--navy2)}
     .ka-r{font-size:12px;color:var(--text2);margin-top:4px}
-    .ka-r b{color:var(--text);font-variant-numeric:tabular-nums}
+    .ka-r b{color:#E8F4FF;font-variant-numeric:tabular-nums}
 
     .side-lbl{font-size:11px;font-weight:700;text-transform:uppercase;letter-spacing:.07em;
-              color:var(--text2);margin-top:16px;padding-bottom:5px;border-bottom:2px solid var(--border);margin-bottom:2px}
-    .term-pair{display:grid;grid-template-columns:1fr 1fr;gap:9px;margin-top:10px}
+              color:#C0C8D8;margin-top:16px;padding-bottom:5px;border-bottom:2px solid var(--border);margin-bottom:6px}
+    .term-pair{display:grid;grid-template-columns:1fr 1fr;gap:9px;margin-top:10px;align-items:end}
     .term-field label{display:flex;align-items:center;gap:6px;font-size:11px;font-weight:600;
                       text-transform:uppercase;letter-spacing:.05em;color:var(--text2);margin-bottom:5px}
     .tdot{width:11px;height:11px;border-radius:50%;display:inline-block;flex-shrink:0}
     .tdot.r{background:var(--red)} .tdot.b{background:var(--blue-t)}
     .term-inp{width:100%;padding:12px;border:2px solid var(--border);border-radius:7px;font-size:20px;
-              font-weight:500;text-align:center;color:var(--text);background:#fff;font-family:inherit;
+              font-weight:500;text-align:center;color:#1A2433;background:#FAFAC0;font-family:inherit;
               outline:none;transition:border-color .15s}
     .term-field.tf-r .term-inp:focus{border-color:var(--red)}
     .term-field.tf-b .term-inp:focus{border-color:var(--blue-t)}
@@ -181,7 +188,53 @@
              background:rgba(192,57,43,.15);color:#F1948A;border:1px solid rgba(192,57,43,.3);margin-bottom:8px}
     .rec-box b{color:#fff}
 
-    .pdf-btn{display:flex;align-items:center;justify-content:center;gap:8px;width:100%;
+    /* dual scale */
+    .dual-scale{margin-bottom:10px}
+    .ds-row{position:relative;margin-bottom:2px}
+    .ds-label{font-size:9px;font-weight:700;text-transform:uppercase;letter-spacing:.06em;
+              color:rgba(255,255,255,.4);margin-bottom:3px}
+    .ds-track{position:absolute;left:0;right:0;height:3px;background:rgba(255,255,255,.15);border-radius:2px}
+    .ds-lbl-a{position:absolute;font-size:9px;color:rgba(255,255,255,.35);left:0}
+    .ds-lbl-b{position:absolute;font-size:9px;color:rgba(255,255,255,.35);right:0}
+    .ds-band{position:absolute;top:16px;height:7px;border-radius:3px;opacity:.25}
+    .ds-dot{position:absolute;top:12px;width:14px;height:14px;border-radius:50%;
+            transform:translateX(-50%);border:2px solid rgba(255,255,255,.8);cursor:pointer;
+            transition:left .3s,opacity .3s}
+    .ds-dot.disabled{opacity:.25;border-style:dashed}
+    .ds-mean{position:absolute;top:10px;width:0;height:0;
+             border-left:8px solid transparent;border-right:8px solid transparent;
+             border-bottom:16px solid #fff;transform:translateX(-50%);
+             transition:left .3s;filter:drop-shadow(0 1px 2px rgba(0,0,0,.4))}
+    .ds-lbl-a{position:absolute;bottom:0;left:0;font-size:9px;color:rgba(255,255,255,.35)}
+    .ds-lbl-b{position:absolute;bottom:0;right:0;font-size:9px;color:rgba(255,255,255,.35)}
+    .ds-sep{height:1px;background:rgba(255,255,255,.08);margin:4px 0 6px}
+
+    /* detail rows */
+    .det-row{display:flex;align-items:center;gap:6px;padding:5px 0;
+             border-bottom:1px solid rgba(255,255,255,.06)}
+    .det-row:last-child{border-bottom:none}
+    .det-chk{width:16px;height:16px;cursor:pointer;accent-color:#C8A45A;flex-shrink:0}
+    .det-fall{font-size:10px;font-weight:700;text-transform:uppercase;
+              letter-spacing:.04em;color:rgba(255,255,255,.5);width:52px;flex-shrink:0}
+    .det-val{font-size:14px;font-weight:600;color:#fff;font-variant-numeric:tabular-nums;
+             width:68px;flex-shrink:0}
+    .det-val.disabled{color:rgba(255,255,255,.25)}
+    .det-wbar-wrap{flex:1;height:6px;background:rgba(255,255,255,.1);border-radius:3px;overflow:hidden}
+    .det-wbar{height:100%;border-radius:3px;transition:width .3s}
+    .det-wlbl{font-size:10px;color:rgba(255,255,255,.4);width:32px;text-align:right;flex-shrink:0}
+    .det-wlbl.disabled{color:rgba(255,255,255,.15)}
+    .det-delta{font-size:10px;color:rgba(255,255,255,.35);width:44px;text-align:right;flex-shrink:0}
+
+    /* mean summary strip */
+    .mean-strip{display:flex;justify-content:space-between;align-items:center;
+                padding:8px 10px;background:rgba(255,255,255,.08);border-radius:7px;
+                margin-top:8px;margin-bottom:6px}
+    .mean-strip .ms-lbl{font-size:11px;color:rgba(255,255,255,.45)}
+    .mean-strip .ms-val{font-size:18px;font-weight:700;color:#fff;font-variant-numeric:tabular-nums}
+    .mean-strip .ms-sub{font-size:10px;color:rgba(255,255,255,.3);margin-top:1px}
+    .mean-strip .ms-r{text-align:right}
+    .mader-hdr{font-size:10px;font-weight:700;text-transform:uppercase;letter-spacing:.07em;
+               margin-bottom:4px;padding-bottom:3px;border-bottom:1px solid rgba(255,255,255,.1)}
              padding:12px;background:var(--navy2);color:#fff;border:none;border-radius:var(--radius);
              cursor:pointer;font-size:14px;font-weight:600;font-family:inherit;margin-top:10px}
     .pdf-btn:hover{background:#1B4F72} .pdf-btn:active{transform:scale(.98)}
@@ -224,7 +277,7 @@
     <div class="card-body open" id="s1">
       <!-- Abschnitt 1 -->
       <div style="font-size:10px;font-weight:700;text-transform:uppercase;letter-spacing:.06em;
-                  color:var(--navy);padding:8px 0 4px;border-bottom:1px solid var(--border);margin-bottom:4px">
+                  color:#8A9BB0;padding:8px 0 4px;border-bottom:1px solid var(--border);margin-bottom:4px">
         Abschnitt 1 · Meldeader mit Nässebefall
       </div>
       <div class="field"><label>Meldeader (Adertyp)</label>
@@ -260,7 +313,10 @@
         <div style="font-size:11px;color:var(--text2);margin-bottom:7px">Längen in m · Reihenfolge wie im Plan</div>
         <div class="seg-grid" id="seg-grid"></div>
         <div class="info-row"><span class="lbl">Summe</span><span class="val" id="seg-sum">0,00 m</span></div>
-        <button class="seg-useBtn" onclick="useSeg()">↑ Als Gesamtlänge übernehmen</button>
+        <div style="display:grid;grid-template-columns:1fr 1fr;gap:7px;margin-top:4px">
+          <button class="seg-useBtn" onclick="useSeg()">↑ Gesamtlänge übernehmen</button>
+          <button class="seg-useBtn" onclick="clearSeg()" style="background:#7A2020">✕ Leeren</button>
+        </div>
       </div>
       <div class="info-row"><span class="lbl">R Abschnitt 1 gesamt</span><span class="val" id="r-main-lbl">–</span></div>
 
@@ -268,7 +324,7 @@
       <div style="margin-top:14px">
         <label style="display:flex;align-items:center;gap:10px;cursor:pointer;user-select:none">
           <input type="checkbox" id="sec2-active" onchange="toggleSec2()" style="width:18px;height:18px;cursor:pointer">
-          <span style="font-size:12px;font-weight:600;color:var(--navy)">
+          <span style="font-size:13.5px;font-weight:600;color:#fff">
             2. Leitungsabschnitt verwenden (trockene Rückführader)
           </span>
         </label>
@@ -403,51 +459,133 @@
     </div>
   </div>
 
-  <!-- S5 Messwerte -->
+  <!-- S5a Messwerte Meldeader 1 -->
   <div class="card">
-    <div class="card-hdr" onclick="toggleCard('s5')">
-      <div class="card-htitle"><span class="card-icon">📊</span><h2>Messwerte · 4 × %</h2></div>
-      <span class="toggle-arr open" id="arr-s5">▼</span>
+    <div class="card-hdr" onclick="toggleCard('s5a')">
+      <div class="card-htitle"><span class="card-icon">📊</span>
+        <h2>Messwerte · <span style="color:var(--red);font-weight:700">Meldeader <span style="font-weight:800">1</span></span></h2>
+      </div>
+      <span class="toggle-arr open" id="arr-s5a">▼</span>
     </div>
-    <div class="card-body open" id="s5">
-      <p style="font-size:12px;color:var(--text2);margin-top:8px;line-height:1.4">
-        Brücken-Drehknopfstellung ablesen.
-        <b style="color:var(--red)">MKL rot</b> = Richtung Meldeader,
-        <b style="color:var(--blue-t)">MKL blau</b> = über HFL. Summe ≈ 100 %.
-      </p>
+    <div class="card-body open" id="s5a" style="position:relative;overflow:hidden">
+      <!-- Hintergrundziffer -->
+      <div aria-hidden="true" style="pointer-events:none;position:absolute;
+           left:50%;top:50%;transform:translate(-50%,-50%);
+           font-size:800px;font-weight:900;color:rgba(192,57,43,0.10);line-height:1;
+           font-family:'Helvetica Neue',Arial,sans-serif;user-select:none;z-index:0">1</div>
+      <div style="position:relative;z-index:1">
+        <p style="font-size:12px;color:var(--text2);margin-top:8px;line-height:1.4">
+          Brücken-Drehknopfstellung ablesen.
+          <b style="color:var(--red)">MKL rot</b> = Richtung Meldeader,
+          <b style="color:var(--blue-t)">MKL blau</b> = über HFL. Summe ≈ 100 %.
+        </p>
+        <div class="side-lbl">Messung am Messpunkt A</div>
 
-      <div class="side-lbl">Messung am Messpunkt A</div>
-      <div id="chain-a" class="chain-display"></div>
-      <div class="term-pair">
-        <div class="term-field tf-r">
-          <label><span class="tdot r"></span> Fall 1 · MKL rot → Meldeader</label>
-          <input class="term-inp" type="number" id="pRA" min="0" max="100" step="0.01" inputmode="decimal" placeholder="%" oninput="calc()">
+        <!-- Schleife 1 Kette -->
+        <div id="chain-a-s1" class="chain-display" style="margin-bottom:6px"></div>
+        <!-- Eingaben S1 + S2 nebeneinander -->
+        <div class="term-pair" style="margin-bottom:6px">
+          <div class="term-field tf-r">
+            <label><span class="tdot r"></span> Schleife 1 · MKL rot → Meldeader</label>
+            <input class="term-inp" type="number" id="pRA" min="0" max="100" step="0.01" inputmode="decimal" placeholder="%" oninput="calc()">
+          </div>
+          <div class="term-field tf-b">
+            <label><span class="tdot b"></span> Schleife 2 · MKL rot → HFL</label>
+            <input class="term-inp" type="number" id="pBA" min="0" max="100" step="0.01" inputmode="decimal" placeholder="%" oninput="calc()">
+          </div>
         </div>
-        <div class="term-field tf-b">
-          <label><span class="tdot b"></span> Fall 2 · MKL rot → HFL</label>
-          <input class="term-inp" type="number" id="pBA" min="0" max="100" step="0.01" inputmode="decimal" placeholder="%" oninput="calc()">
+        <!-- Schleife 2 Kette -->
+        <div id="chain-a-s2" class="chain-display" style="margin-bottom:4px"></div>
+        <div class="sum-chk" id="sum-a"></div>
+
+        <div class="side-lbl" style="margin-top:18px">Messung am Messpunkt B (optional)</div>
+
+        <!-- Schleife 3 Kette -->
+        <div id="chain-b-s3" class="chain-display" style="margin-bottom:6px"></div>
+        <!-- Eingaben S3 + S4 nebeneinander -->
+        <div class="term-pair" style="margin-bottom:6px">
+          <div class="term-field tf-r">
+            <label><span class="tdot r"></span> Schleife 3 · MKL rot → Meldeader</label>
+            <input class="term-inp" type="number" id="pRB" min="0" max="100" step="0.01" inputmode="decimal" placeholder="%" oninput="calc()">
+          </div>
+          <div class="term-field tf-b">
+            <label><span class="tdot b"></span> Schleife 4 · MKL rot → HFL</label>
+            <input class="term-inp" type="number" id="pBB" min="0" max="100" step="0.01" inputmode="decimal" placeholder="%" oninput="calc()">
+          </div>
         </div>
+        <!-- Schleife 4 Kette -->
+        <div id="chain-b-s4" class="chain-display" style="margin-bottom:4px"></div>
+        <div class="sum-chk" id="sum-b"></div>
+        <p style="font-size:11px;color:var(--text2);margin-top:12px;line-height:1.5">
+          <b>Schleife 1 ≈ Schleife 4</b> · MP-A-Seite — sollten übereinstimmen.<br>
+          <b>Schleife 2 ≈ Schleife 3</b> · MP-B-Seite — sollten übereinstimmen.
+        </p>
       </div>
-      <div class="sum-chk" id="sum-a"></div>
+    </div>
+  </div>
 
-      <div class="side-lbl" style="margin-top:18px">Messung am Messpunkt B (optional)</div>
-      <div id="chain-b" class="chain-display"></div>
-      <div class="term-pair">
-        <div class="term-field tf-r">
-          <label><span class="tdot r"></span> Fall 3 · MKL rot → Meldeader</label>
-          <input class="term-inp" type="number" id="pRB" min="0" max="100" step="0.01" inputmode="decimal" placeholder="%" oninput="calc()">
-        </div>
-        <div class="term-field tf-b">
-          <label><span class="tdot b"></span> Fall 4 · MKL rot → HFL</label>
-          <input class="term-inp" type="number" id="pBB" min="0" max="100" step="0.01" inputmode="decimal" placeholder="%" oninput="calc()">
-        </div>
+  <!-- S5b Messwerte Meldeader 2 -->
+  <div class="card">
+    <div class="card-hdr" onclick="toggleCard('s5b')">
+      <div class="card-htitle"><span class="card-icon">📊</span>
+        <h2>Messwerte · <span style="color:var(--blue-t);font-weight:700">Meldeader <span style="font-weight:800">2</span></span></h2>
       </div>
-      <div class="sum-chk" id="sum-b"></div>
+      <span class="toggle-arr open" id="arr-s5b">▼</span>
+    </div>
+    <div class="card-body open" id="s5b" style="position:relative;overflow:hidden">
+      <!-- Hintergrundziffer -->
+      <div aria-hidden="true" style="pointer-events:none;position:absolute;
+           left:50%;top:50%;transform:translate(-50%,-50%);
+           font-size:800px;font-weight:900;color:rgba(26,111,168,0.10);line-height:1;
+           font-family:'Helvetica Neue',Arial,sans-serif;user-select:none;z-index:0">2</div>
+      <div style="position:relative;z-index:1">
+        <p style="font-size:12px;color:var(--text2);margin-top:8px;line-height:1.4">
+          Brücken-Drehknopfstellung ablesen.
+          <b style="color:var(--red)">MKL rot</b> = Richtung Meldeader,
+          <b style="color:var(--blue-t)">MKL blau</b> = über HFL. Summe ≈ 100 %.
+        </p>
+        <div class="side-lbl">Messung am Messpunkt A</div>
 
-      <p style="font-size:11px;color:var(--text2);margin-top:12px;line-height:1.5">
-        <b>Fall 1 ≈ Fall 4</b> · MP-A-Seite — sollten übereinstimmen.<br>
-        <b>Fall 2 ≈ Fall 3</b> · MP-B-Seite — sollten übereinstimmen.
-      </p>
+        <!-- Schleife 1 Kette -->
+        <div id="chain-a2-s1" class="chain-display" style="margin-bottom:6px"></div>
+        <!-- Eingaben S1 + S2 nebeneinander -->
+        <div class="term-pair" style="margin-bottom:6px">
+          <div class="term-field tf-r">
+            <label><span class="tdot r"></span> Schleife 1 · MKL rot → Meldeader</label>
+            <input class="term-inp" type="number" id="pRA2" min="0" max="100" step="0.01" inputmode="decimal" placeholder="%" oninput="calc()">
+          </div>
+          <div class="term-field tf-b">
+            <label><span class="tdot b"></span> Schleife 2 · MKL rot → HFL</label>
+            <input class="term-inp" type="number" id="pBA2" min="0" max="100" step="0.01" inputmode="decimal" placeholder="%" oninput="calc()">
+          </div>
+        </div>
+        <!-- Schleife 2 Kette -->
+        <div id="chain-a2-s2" class="chain-display" style="margin-bottom:4px"></div>
+        <div class="sum-chk" id="sum-a2"></div>
+
+        <div class="side-lbl" style="margin-top:18px">Messung am Messpunkt B (optional)</div>
+
+        <!-- Schleife 3 Kette -->
+        <div id="chain-b2-s3" class="chain-display" style="margin-bottom:6px"></div>
+        <!-- Eingaben S3 + S4 nebeneinander -->
+        <div class="term-pair" style="margin-bottom:6px">
+          <div class="term-field tf-r">
+            <label><span class="tdot r"></span> Schleife 3 · MKL rot → Meldeader</label>
+            <input class="term-inp" type="number" id="pRB2" min="0" max="100" step="0.01" inputmode="decimal" placeholder="%" oninput="calc()">
+          </div>
+          <div class="term-field tf-b">
+            <label><span class="tdot b"></span> Schleife 4 · MKL rot → HFL</label>
+            <input class="term-inp" type="number" id="pBB2" min="0" max="100" step="0.01" inputmode="decimal" placeholder="%" oninput="calc()">
+          </div>
+        </div>
+        <!-- Schleife 4 Kette -->
+        <div id="chain-b2-s4" class="chain-display" style="margin-bottom:4px"></div>
+        <div class="sum-chk" id="sum-b2"></div>
+        <p style="font-size:11px;color:var(--text2);margin-top:12px;line-height:1.5">
+          <b>Schleife 1 ≈ Schleife 4</b> · MP-A-Seite — sollten übereinstimmen.<br>
+          <b>Schleife 2 ≈ Schleife 3</b> · MP-B-Seite — sollten übereinstimmen.
+        </p>
+      </div>
     </div>
   </div>
 
@@ -456,31 +594,41 @@
     <div class="res-title">📍 Ergebnis</div>
     <div class="no-res" id="no-res">Leitungsdaten und Messwerte eingeben.</div>
     <div id="res-content" style="display:none">
+
       <div class="chips" id="chips"></div>
+
+      <!-- Tab R_ges -->
       <div class="res-tabs" id="res-tabs" style="display:none">
-        <button class="res-tab active" id="tab-calc" onclick="switchTab('calc')">Berechnet</button>
-        <button class="res-tab" id="tab-man" onclick="switchTab('man')">Manuell R<sub>ges</sub></button>
+        <button class="res-tab active" id="tab-calc" onclick="switchTab('calc')">R<sub>ges</sub> berechnet</button>
+        <button class="res-tab" id="tab-man" onclick="switchTab('man')">R<sub>ges</sub> manuell</button>
       </div>
+
+      <!-- Pane: berechnet -->
       <div class="res-pane active" id="pane-calc">
-        <div class="ruler" id="ruler-calc"><div class="ruler-track"></div>
-          <div class="ruler-lbl la">MP-A  0 m</div>
-          <div class="ruler-lbl lb" id="rlbl-calc">MP-B  – m</div></div>
-        <div class="ruler-legend" id="rleg-calc"></div>
-        <div class="pos-grid" id="pgrid-calc"></div>
-        <div class="mean-box" id="mbox-calc"></div>
+
+        <!-- Duale Skala -->
+        <div id="dual-scale-calc"></div>
+
+        <!-- Meldeader 1 Detailzeilen -->
+        <div id="detail-calc-1" style="margin-top:10px"></div>
+
+        <!-- Meldeader 2 Detailzeilen -->
+        <div id="detail-calc-2" style="margin-top:6px"></div>
+
+        <!-- Konsistenz & Empfehlung -->
         <div class="cons" id="cons-calc"></div>
         <div class="rec-box" id="rec-calc" style="display:none"></div>
       </div>
+
+      <!-- Pane: manuell -->
       <div class="res-pane" id="pane-man">
-        <div class="ruler" id="ruler-man"><div class="ruler-track"></div>
-          <div class="ruler-lbl la">MP-A  0 m</div>
-          <div class="ruler-lbl lb" id="rlbl-man">MP-B  – m</div></div>
-        <div class="ruler-legend" id="rleg-man"></div>
-        <div class="pos-grid" id="pgrid-man"></div>
-        <div class="mean-box" id="mbox-man"></div>
+        <div id="dual-scale-man"></div>
+        <div id="detail-man-1" style="margin-top:10px"></div>
+        <div id="detail-man-2" style="margin-top:6px"></div>
         <div class="cons" id="cons-man"></div>
         <div class="rec-box" id="rec-man" style="display:none"></div>
       </div>
+
       <button class="pdf-btn" onclick="exportPDF()">📄 Messbericht als PDF exportieren</button>
     </div>
   </div>
@@ -595,6 +743,11 @@ function getSegSum(){
   let s=0;document.querySelectorAll('#seg-grid .seg-inp').forEach(i=>s+=parseFloat(i.value)||0);return s;
 }
 function useSeg(){document.getElementById('len-total').value=getSegSum().toFixed(2);updateRMain();calc();}
+function clearSeg(){
+  document.querySelectorAll('#seg-grid .seg-inp').forEach(i=>i.value='');
+  document.getElementById('seg-sum').textContent='0,00 m';
+  calc();
+}
 function getLen(){return parseFloat(document.getElementById('len-total').value)||0;}
 function onLen1(){updateRMain();calc();}
 function updateRMain(){
@@ -679,9 +832,9 @@ function checkSum(elId,a,b){
 
 function nd(cls,txt){return `<span class="ch-node ${cls}">${txt}</span>`;}
 function ar(){return `<span class="ch-arrow">▶</span>`;}
-function nassNode(){return `<span class="ch-node ch-nass">💧</span>`;}
+function nassNode(){return `<span class="ch-node ch-nass">💧</span><div style="flex-basis:100%;height:0"></div>`;}
 function row(lbl,nodes){
-  let h=`<div class="chain-row"><span class="ms-lbl">${lbl}</span>`;
+  let h=`<div class="chain-row" style="flex-wrap:wrap"><span class="ms-lbl">${lbl}</span>`;
   nodes.forEach((n,i)=>{if(i>0)h+=ar();h+=n;});
   return h+`</div>`;
 }
@@ -723,17 +876,164 @@ function updateChainDisplay(){
   if(rkaB>0)f4.push(nd('ch-ka','KA-B'));
   f4.push(nd('ch-mklb','MKL blau'));
 
-  document.getElementById('chain-a').innerHTML=row('Fall 1',f1)+row('Fall 2',f2);
-  document.getElementById('chain-b').innerHTML=row('Fall 3',f3)+row('Fall 4',f4);
+  // Schleife 1: MKL rot → Meldeader (MP-A)
+  const c1=row('Schleife 1',f1);
+  // Schleife 2: MKL rot → HFL (MP-A)
+  const c2=row('Schleife 2',f2);
+  // Schleife 3: MKL rot → Meldeader (MP-B)
+  const c3=row('Schleife 3',f3);
+  // Schleife 4: MKL rot → HFL (MP-B)
+  const c4=row('Schleife 4',f4);
+
+  // Meldeader 1
+  ['chain-a-s1','chain-a2-s1'].forEach(id=>{const el=document.getElementById(id);if(el)el.innerHTML=c1;});
+  ['chain-a-s2','chain-a2-s2'].forEach(id=>{const el=document.getElementById(id);if(el)el.innerHTML=c2;});
+  ['chain-b-s3','chain-b2-s3'].forEach(id=>{const el=document.getElementById(id);if(el)el.innerHTML=c3;});
+  ['chain-b-s4','chain-b2-s4'].forEach(id=>{const el=document.getElementById(id);if(el)el.innerHTML=c4;});
 }
 
-function computeSet(Rt,suffix){
-  const L=getLen(),r=getRpm(),Ra=getRa(),Rka=getKAR('a'),Rkb=getKAR('b');
-  const pRA=parseFloat(document.getElementById('pRA').value);
-  const pBA=parseFloat(document.getElementById('pBA').value);
-  const pRB=parseFloat(document.getElementById('pRB').value);
-  const pBB=parseFloat(document.getElementById('pBB').value);
+// calc2: identische Logik wie calc(), liest aber pRA2/pBA2/pRB2/pBB2
+// Ergebnis wird separat in pane-calc2/pane-man2 ausgegeben (noch nicht verdrahtet —
+// Meldeader 2 Messwerte werden im PDF als eigener Block ausgegeben)
+function calc2(){
+  checkSum('sum-a2',
+    parseFloat(document.getElementById('pRA2').value),
+    parseFloat(document.getElementById('pBA2').value));
+  checkSum('sum-b2',
+    parseFloat(document.getElementById('pRB2').value),
+    parseFloat(document.getElementById('pBB2').value));
+}
 
+// ═══ GEWICHTETE BERECHNUNG ═══════════════════════════════
+// Offset-Widerstände je Fall (was MKL rot "vor" der Nassstelle trägt ausser Meldeader):
+// x₁: R_KA-A                    → kleiner Offset, hohe Genauigkeit
+// x₂: R_HFL + R_KA-B            → grosser Offset, niedrige Genauigkeit
+// x₃: R_KA-B                    → kleiner Offset, gute Genauigkeit
+// x₄: R_HFL + R_KA-A            → grosser Offset, niedrige Genauigkeit
+function getOffsets(){
+  const Ra=getRa(),Rka=getKAR('a'),Rkb=getKAR('b');
+  return [Rka, Ra+Rkb, Rkb, Ra+Rka]; // Fall 1,2,3,4
+}
+function getWeights(offsets){
+  const eps=0.001;
+  const raw=offsets.map(o=>1/(o+eps));
+  const sum=raw.reduce((a,b)=>a+b,0);
+  return raw.map(w=>w/sum); // normiert: Summe=1
+}
+
+function renderDualScale(L, sets, suffix){
+  const el=document.getElementById('dual-scale-'+suffix);
+  const lblB='MP-B  '+fL(L)+' m';
+  const COL=['#E74C3C','#3A8BBF','#27AE60','#D4AC0D'];
+  // P%-rot Werte für Strichlänge: Fall 1 + Fall 3 haben MKL rot direkt (kein HFL-Offset)
+  // Nähe = P%_rot für Fall 1 und Fall 3; für Fall 2 und 4 = (100 - P%_blau) = P%_rot-äquiv.
+  // Einfacher: Strichlänge = Gewicht normiert auf 6..28px
+  const MIN_H=6, MAX_H=28;
+  const weights=getWeights(getOffsets());
+  const maxW=Math.max(...weights);
+
+  let html='<div class="dual-scale">';
+  sets.forEach((s,si)=>{
+    const rowH = MAX_H + 44;
+    const trackTop = MAX_H/2 + 14; // mehr Platz oben für MP-Labels
+    html+=`<div class="ds-label">${s.label}</div>`;
+    html+=`<div class="ds-row" style="height:${rowH}px">`;
+    html+=`<div class="ds-track" style="top:${trackTop}px"></div>`;
+
+    // MP-A / MP-B Labels knapp OBERHALB der Skala
+    html+=`<div class="ds-lbl-a" style="top:${(trackTop-12).toFixed(0)}px">MP-A</div>`;
+    html+=`<div class="ds-lbl-b" style="top:${(trackTop-12).toFixed(0)}px">${fL(L)} m</div>`;
+
+    // 5 Orientierungsmarken: reiner Zahlenwert, kein Nachkomma, keine Einheit
+    for(let t=1;t<=5;t++){
+      const tp=(t/6*100).toFixed(2);
+      const tickVal=Math.round(L*t/6);
+      // Strich: 8px unterhalb Track-Mitte (Abstand vergrössert)
+      html+=`<div style="position:absolute;left:${tp}%;top:${(trackTop+3).toFixed(0)}px;
+        width:1px;height:8px;background:rgba(255,255,255,.18);transform:translateX(-50%)"></div>`;
+      // Zahl: 14px unterhalb Track-Mitte
+      html+=`<div style="position:absolute;left:${tp}%;top:${(trackTop+13).toFixed(0)}px;
+        font-size:8px;color:rgba(255,255,255,.28);transform:translateX(-50%);white-space:nowrap">${tickVal}</div>`;
+    }
+
+    // Striche pro Messwert
+    s.xs.forEach((x,i)=>{
+      if(x===null||!s.enabled[i]) return;
+      const pct=Math.max(0,Math.min(100,x/L*100));
+      const h=MIN_H+(MAX_H-MIN_H)*(weights[i]/maxW);
+      const top=trackTop-h/2;
+      html+=`<div style="position:absolute;left:${pct.toFixed(2)}%;
+        top:${top.toFixed(1)}px;width:3px;height:${h.toFixed(1)}px;
+        background:${COL[i]};border-radius:2px;transform:translateX(-50%);
+        transition:left .3s"></div>`;
+    });
+    // Deaktivierte Striche
+    s.xs.forEach((x,i)=>{
+      if(x===null||s.enabled[i]) return;
+      const pct=Math.max(0,Math.min(100,x/L*100));
+      html+=`<div style="position:absolute;left:${pct.toFixed(2)}%;
+        top:${(trackTop-3).toFixed(1)}px;width:3px;height:6px;
+        background:rgba(255,255,255,.15);border-radius:2px;transform:translateX(-50%);
+        transition:left .3s"></div>`;
+    });
+
+    html+='</div>';
+    if(si<sets.length-1) html+='<div class="ds-sep"></div>';
+  });
+  html+='</div>';
+  el.innerHTML=html;
+}
+
+function renderDetailRows(L, xs, weights, enabled, mean, suffix, maderIdx){
+  const el=document.getElementById('detail-'+suffix+'-'+maderIdx);
+  const COL=['#E74C3C','#3A8BBF','#27AE60','#D4AC0D'];
+  const FALL=['Schleife 1','Schleife 2','Schleife 3','Schleife 4'];
+  const maxW=Math.max(...weights);
+  // Header
+  let html=`<div class="mader-hdr" style="color:rgba(255,255,255,.4)">Meldeader ${maderIdx}</div>`;
+  xs.forEach((x,i)=>{
+    const dis=!enabled[i]||(x===null);
+    const wPct=(weights[i]/maxW*100).toFixed(0);
+    const delta=(!dis&&mean!==null)?Math.abs(x-mean):null;
+    html+=`<div class="det-row">
+      <input type="checkbox" class="det-chk" ${enabled[i]?'checked':''} onchange="toggleMeas(${maderIdx},${i},this.checked,'${suffix}')">
+      <span class="det-fall" style="color:${dis?'rgba(255,255,255,.2)':COL[i]}">${FALL[i]}</span>
+      <span class="det-val${dis?' disabled':''}">${x!==null?fL(x)+' m':'–'}</span>
+      <div class="det-wbar-wrap">
+        <div class="det-wbar" style="width:${dis?0:wPct}%;background:${COL[i]}"></div>
+      </div>
+      <span class="det-wlbl${dis?' disabled':''}">${dis?'–':(weights[i]*100).toFixed(0)+'%'}</span>
+      <span class="det-delta">${delta!==null?'Δ '+fL(delta)+' m':'–'}</span>
+    </div>`;
+  });
+  // Mean strip
+  if(mean!==null){
+    const validW=weights.filter((_,i)=>enabled[i]&&xs[i]!==null);
+    const sw=validW.reduce((a,b)=>a+b,0);
+    const sigma=Math.sqrt(xs.reduce((s,x,i)=>!enabled[i]||x===null?s:s+(x-mean)**2*weights[i],0)/sw);
+    const maxD=Math.max(...xs.map((x,i)=>(!enabled[i]||x===null)?0:Math.abs(x-mean)));
+    html+=`<div class="mean-strip">
+      <div><div class="ms-lbl">⌀ gewichtet · Meldeader ${maderIdx}</div>
+           <div class="ms-val">${fL(mean)} m</div>
+           <div class="ms-sub">${fL(L-mean)} m ab MP-B</div></div>
+      <div class="ms-r"><div class="ms-lbl">σ gewichtet</div>
+           <div class="ms-val" style="font-size:14px">${fL(sigma)} m</div>
+           <div class="ms-sub">max. Δ ${fL(maxD)} m</div></div>
+    </div>`;
+  }
+  el.innerHTML=html;
+}
+
+// enabled-state pro Meldeader: [true,true,true,true]
+let enabled1=[true,true,true,true];
+let enabled2=[true,true,true,true];
+function toggleMeas(maderIdx,i,val,suffix){
+  if(maderIdx===1) enabled1[i]=val; else enabled2[i]=val;
+  calc();
+}
+
+function computeWeightedXs(pRA,pBA,pRB,pBB,Rt,L){
+  const r=getRpm(),Ra=getRa(),Rka=getKAR('a'),Rkb=getKAR('b');
   function xi(p,mode){
     if(isNaN(p)||p<0||p>100) return null;
     const f=p/100;
@@ -742,59 +1042,74 @@ function computeSet(Rt,suffix){
     if(mode==='rb') return L-(f*Rt-Rkb)/r;
     if(mode==='bb') return (f*Rt-Ra-Rka)/r;
   }
-  const x1=xi(pRA,'ra'),x2=xi(pBA,'ba'),x3=xi(pRB,'rb'),x4=xi(pBB,'bb');
-  const xs=[x1,x2,x3,x4];
-  const valid=xs.filter(x=>x!==null&&x>=-0.5&&x<=L+0.5);
-  if(valid.length===0) return false;
+  return [xi(pRA,'ra'),xi(pBA,'ba'),xi(pRB,'rb'),xi(pBB,'bb')];
+}
 
-  const mean=valid.reduce((a,b)=>a+b,0)/valid.length;
-  const maxD=Math.max(...valid.map(x=>Math.abs(x-mean)));
-  const sigma=Math.sqrt(valid.reduce((s,x)=>s+(x-mean)**2,0)/valid.length);
-
-  document.getElementById('rlbl-'+suffix).textContent='MP-B  '+fL(L)+' m';
-  buildRuler('ruler-'+suffix,'rleg-'+suffix,L,x1,x2,x3,x4,mean);
-
-  const COL=['#E74C3C','#3A8BBF','#27AE60','#D4AC0D'];
-  const LABS=['Fall 1 · x₁','Fall 2 · x₂','Fall 3 · x₃','Fall 4 · x₄'];
-  const pg=document.getElementById('pgrid-'+suffix);pg.innerHTML='';
+function weightedMean(xs,weights,enabled){
+  let sumW=0,sumWX=0;
   xs.forEach((x,i)=>{
-    const c=document.createElement('div');c.className='pos-card';
-    if(x===null){
-      c.innerHTML=`<div class="pc-lbl"><span class="pc-dot" style="background:${COL[i]}"></span>${LABS[i]}</div><div class="pc-val" style="opacity:.35">–</div>`;
-    }else if(x<-0.5||x>L+0.5){
-      c.classList.add('oor');
-      c.innerHTML=`<div class="pc-lbl"><span class="pc-dot" style="background:${COL[i]}"></span>${LABS[i]}</div><div class="pc-val">${fL(x)} <span class="pc-unit">m</span></div><div class="pc-sub">ausserhalb</div>`;
-    }else{
-      const dv=valid.length>1?`<div class="pc-sub">Δ ${fL(Math.abs(x-mean))} m</div>`:'';
-      c.innerHTML=`<div class="pc-lbl"><span class="pc-dot" style="background:${COL[i]}"></span>${LABS[i]}</div><div class="pc-val">${fL(x)} <span class="pc-unit">m</span></div>${dv}`;
-    }
-    pg.appendChild(c);
+    if(x===null||!enabled[i]||x<-0.5) return;
+    sumW+=weights[i]; sumWX+=weights[i]*x;
   });
+  return sumW>0?sumWX/sumW:null;
+}
 
-  document.getElementById('mbox-'+suffix).innerHTML=
-    `<div><div class="ml">⌀ Nassposition ab MP-A</div><div class="mv">${fL(mean)} <span style="font-size:14px;color:rgba(255,255,255,.4)">m</span></div><div class="ms">${fL(L-mean)} m ab MP-B</div></div>
-     <div class="mr"><div class="ml">max. Δ</div><div class="sv">${fL(maxD)} <span style="font-size:12px;color:rgba(255,255,255,.4)">m</span></div><div class="ms">σ = ${fL(sigma)} m</div></div>`;
+function renderResults(Rt,suffix){
+  const L=getLen(),r=getRpm();
+  if(!L||!r||!Rt) return;
 
-  const ce=document.getElementById('cons-'+suffix),re=document.getElementById('rec-'+suffix);
+  const pRA=parseFloat(document.getElementById('pRA').value);
+  const pBA=parseFloat(document.getElementById('pBA').value);
+  const pRB=parseFloat(document.getElementById('pRB').value);
+  const pBB=parseFloat(document.getElementById('pBB').value);
+  const pRA2=parseFloat(document.getElementById('pRA2').value);
+  const pBA2=parseFloat(document.getElementById('pBA2').value);
+  const pRB2=parseFloat(document.getElementById('pRB2').value);
+  const pBB2=parseFloat(document.getElementById('pBB2').value);
+
+  const offsets=getOffsets();
+  const weights=getWeights(offsets);
+
+  const xs1=computeWeightedXs(pRA,pBA,pRB,pBB,Rt,L);
+  const xs2=computeWeightedXs(pRA2,pBA2,pRB2,pBB2,Rt,L);
+
+  const mean1=weightedMean(xs1,weights,enabled1);
+  const mean2=weightedMean(xs2,weights,enabled2);
+
+  // Sigma für Skala-Band (ungewichtet für Visualisierung)
+  function sigmaOf(xs,enabled,mean){
+    if(mean===null) return 0;
+    const vx=xs.filter((x,i)=>x!==null&&enabled[i]&&x>=-0.5&&x<=L+0.5);
+    if(!vx.length) return 0;
+    return Math.sqrt(vx.reduce((s,x)=>s+(x-mean)**2,0)/vx.length);
+  }
+  const sigma1=sigmaOf(xs1,enabled1,mean1);
+  const sigma2=sigmaOf(xs2,enabled2,mean2);
+
+  const sets=[
+    {xs:xs1,enabled:enabled1,weights,mean:mean1,sigma:sigma1,label:'Meldeader 1',color:'#C0392B'},
+    {xs:xs2,enabled:enabled2,weights,mean:mean2,sigma:sigma2,label:'Meldeader 2',color:'#1A6FA8'},
+  ];
+
+  renderDualScale(L,sets,suffix);
+  renderDetailRows(L,xs1,weights,enabled1,mean1,suffix,1);
+  renderDetailRows(L,xs2,weights,enabled2,mean2,suffix,2);
+
+  // Konsistenz (Meldeader 1 als primär)
+  const ce=document.getElementById('cons-'+suffix);
+  const re=document.getElementById('rec-'+suffix);
+  if(mean1===null){ce.className='cons warn';ce.innerHTML='◑ Messwerte Meldeader 1 eingeben.';return;}
+  const vx1=xs1.filter((x,i)=>x!==null&&enabled1[i]&&x>=-0.5&&x<=L+0.5);
+  const maxD=Math.max(...vx1.map(x=>Math.abs(x-mean1)));
   let cls,icon,msg;
-  if(valid.length===1){cls='warn';icon='◑';msg='Nur 1 Messwert – keine Konsistenzprüfung.';}
-  else if(maxD<5){
-    cls='good';icon='✓';
-    msg=`<b>Nassstelle</b> · max. Δ ${fL(maxD)} m — punktförmig, Ortung zuverlässig.`;
-    re.style.display='none';
-  }else if(maxD<=10){
-    cls='warn';icon='⚠';
-    msg=`<b>Nasszone</b> · max. Δ ${fL(maxD)} m — ausgedehnte Feuchtigkeit, Messung wiederholen.`;
-    re.style.display='none';
-  }else{
-    cls='bad';icon='✗';
-    msg=`<b>Sondierungsgraben empfohlen</b> · max. Δ ${fL(maxD)} m — Messung nicht auflösbar.`;
+  if(maxD<5){cls='good';icon='✓';msg=`<b>Nassstelle</b> · max. Δ ${fL(maxD)} m — Ortung zuverlässig.`;re.style.display='none';}
+  else if(maxD<=10){cls='warn';icon='⚠';msg=`<b>Nasszone</b> · max. Δ ${fL(maxD)} m — ausgedehnte Feuchtigkeit.`;re.style.display='none';}
+  else{
+    cls='bad';icon='✗';msg=`<b>Sondierungsgraben empfohlen</b> · max. Δ ${fL(maxD)} m.`;
     re.style.display='block';
-    re.innerHTML=`<b>📍 Empfohlener Grabenmittelpunkt:</b><br>${fL(mean)} m ab MP-A · ${fL(L-mean)} m ab MP-B<br>
-      <small>Graben öffnet Schleife → Neuaufteilung in 2 Abschnitte möglich.</small>`;
+    re.innerHTML=`<b>📍 Grabenmittelpunkt:</b> ${fL(mean1)} m ab MP-A · ${fL(L-mean1)} m ab MP-B`;
   }
   ce.className='cons '+cls;ce.innerHTML=`<span class="ci">${icon}</span>${msg}`;
-  return {x1,x2,x3,x4,mean,maxD,sigma,fromB:L-mean};
 }
 
 function calc(){
@@ -804,15 +1119,19 @@ function calc(){
   const pBA=parseFloat(document.getElementById('pBA').value);
   const pRB=parseFloat(document.getElementById('pRB').value);
   const pBB=parseFloat(document.getElementById('pBB').value);
+  const pRA2=parseFloat(document.getElementById('pRA2').value);
+  const pBA2=parseFloat(document.getElementById('pBA2').value);
+  const pRB2=parseFloat(document.getElementById('pRB2').value);
+  const pBB2=parseFloat(document.getElementById('pBB2').value);
 
   checkSum('sum-a',pRA,pBA);checkSum('sum-b',pRB,pBB);
+  checkSum('sum-a2',pRA2,pBA2);checkSum('sum-b2',pRB2,pBB2);
 
   const Rc=getRgesCalc();
   const anyVal=[pRA,pBA,pRB,pBB].some(v=>!isNaN(v));
   if(!L||!r||!Rc||!anyVal){showEmpty();return;}
 
   const Rm=parseFloat(document.getElementById('rges-man').value)||0;
-  const Ra=getRa();
 
   // Chips
   document.getElementById('chips').innerHTML=
@@ -826,10 +1145,10 @@ function calc(){
   document.getElementById('no-res').style.display='none';
   document.getElementById('res-content').style.display='block';
 
-  computeSet(Rc,'calc');
+  renderResults(Rc,'calc');
 
   const tabs=document.getElementById('res-tabs');
-  if(Rm>0){tabs.style.display='flex';computeSet(Rm,'man');}
+  if(Rm>0){tabs.style.display='flex';renderResults(Rm,'man');}
   else{tabs.style.display='none';if(activeTab==='man')switchTab('calc');}
 }
 
@@ -853,7 +1172,7 @@ function buildRuler(rid,lid,L,x1,x2,x3,x4,mean){
     m.style.left=(mean/L*100).toFixed(2)+'%';ruler.appendChild(m);
   }
   document.getElementById(lid).innerHTML=
-    ['Fall 1','Fall 2','Fall 3','Fall 4','⌀ Mittel'].map((n,i)=>
+    ['Schleife 1','Schleife 2','Schleife 3','Schleife 4','⌀ Mittel'].map((n,i)=>
       `<div class="rl-item"><span class="rl-dot" style="background:${[...COL,'#fff'][i]}"></span>${n}</div>`
     ).join('');
 }
@@ -884,7 +1203,7 @@ function exportPDF(){
   doc.setFont('helvetica','normal');doc.setFontSize(9);doc.setTextColor(180,200,220);
   doc.text('Widerstands-Referenz-Messverfahren · LUWA · Fernwaerme',M,20);
   const now=new Date();
-  doc.text(now.toLocaleDateString('de-DE')+' '+now.toLocaleTimeString('de-DE',{hour:'2-digit',minute:'2-digit'}),W-M,20,{align:'right'});
+  doc.text(now.toLocaleDateString('de-DE'),W-M,20,{align:'right'});
   y=36;
 
   // Projekt
