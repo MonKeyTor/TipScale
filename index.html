@@ -336,7 +336,7 @@
         <div style="font-size:11px;color:var(--text2);margin-top:3px" id="temp-info"></div>
       </div>
       <div class="info-row">
-        <span class="lbl">r Abschnitt 1 (temperaturkorrigiert)</span>
+        <span class="lbl">Leiterwiderstand Abschnitt 1 (temperaturkorrigiert)</span>
         <span class="val" id="r-per-m-lbl">0,01149 Ω/m</span>
       </div>
       <div class="field"><label>Gesamtlänge Leitungsabschnitt</label>
@@ -357,7 +357,7 @@
           <button class="seg-useBtn" onclick="clearSeg()" style="background:#7A2020">✕ Leeren</button>
         </div>
       </div>
-      <div class="info-row"><span class="lbl">R Abschnitt 1 gesamt</span><span class="val" id="r-main-lbl">–</span></div>
+      <div class="info-row"><span class="lbl">Widerstand Abschnitt 1 gesamt</span><span class="val" id="r-main-lbl">–</span></div>
 
       <!-- Abschnitt 2 Toggle -->
       <div style="margin-top:14px">
@@ -434,7 +434,7 @@
           <div style="font-size:11px;color:var(--text2);margin-top:3px" id="temp-info2"></div>
         </div>
         <div class="info-row" style="margin-top:6px">
-          <span class="lbl">r Abschnitt 2 (temperaturkorrigiert)</span>
+          <span class="lbl">Leiterwiderstand Abschnitt 2 (temperaturkorrigiert)</span>
           <span class="val" id="r-per-m-lbl2">0,01149 Ω/m</span>
         </div>
         <div class="field">
@@ -448,7 +448,7 @@
             Leer lassen = gleiche Länge wie Abschnitt 1 (VL = RL)
           </div>
         </div>
-        <div class="info-row"><span class="lbl">R Abschnitt 2 gesamt</span><span class="val" id="r-main-lbl2">–</span></div>
+        <div class="info-row"><span class="lbl">Widerstand Abschnitt 2 gesamt</span><span class="val" id="r-main-lbl2">–</span></div>
       </div>
     </div>
   </div>
@@ -466,7 +466,7 @@
       </p>
       <div class="aux-list" id="aux-list"></div>
       <button class="btn-add" id="btn-add" onclick="addAux()">＋ HFL hinzufügen</button>
-      <div class="info-row"><span class="lbl">R HFL total</span><span class="val" id="r-aux-lbl">0,00 Ω</span></div>
+      <div class="info-row"><span class="lbl">Widerstand HFL total</span><span class="val" id="r-aux-lbl">0,00 Ω</span></div>
     </div>
   </div>
 
@@ -1243,7 +1243,104 @@ function renderDetailRows(L, xs, weights, enabled, mean, suffix, maderIdx){
   el.innerHTML=html;
 }
 
-// enabled-state pro Meldeader: [true,true,true,true]
+function computeXs(pRA,pBA,pRB,pBB,Rt,L,rpm){
+  // rpm = spez. Leiterwiderstand der jeweiligen Meldeader (Ω/m)
+  const Ra=getRa(),Rka=getKAR('a'),Rkb=getKAR('b');
+  function xi(p,mode){
+    if(isNaN(p)||p<0||p>100) return null;
+    const f=p/100;
+    if(mode==='ra') return (f*Rt-Rka)/rpm;
+    if(mode==='ba') return L-(f*Rt-Ra-Rkb)/rpm;
+    if(mode==='rb') return L-(f*Rt-Rkb)/rpm;
+    if(mode==='bb') return (f*Rt-Ra-Rka)/rpm;
+  }
+  return [xi(pRA,'ra'),xi(pBA,'ba'),xi(pRB,'rb'),xi(pBB,'bb')];
+}
+
+function renderDualScale(L, sets, suffix){
+  const el=document.getElementById('dual-scale-'+suffix);
+  const COL=['#E74C3C','#3A8BBF','#27AE60','#D4AC0D'];
+  const MIN_H=6, MAX_H=32;
+
+  let html='<div class="dual-scale">';
+  sets.forEach((s,si)=>{
+    const rowH=MAX_H+44;
+    const trackTop=MAX_H/2+14;
+    html+=`<div class="ds-label">${s.label}</div>`;
+    html+=`<div class="ds-row" style="height:${rowH}px">`;
+    html+=`<div class="ds-track" style="top:${trackTop}px"></div>`;
+    html+=`<div class="ds-lbl-a" style="top:${trackTop-12}px">MP-A</div>`;
+    html+=`<div class="ds-lbl-b" style="top:${trackTop-12}px">${fL(L)} m</div>`;
+    // 5 Orientierungsmarken
+    for(let t=1;t<=5;t++){
+      const tp=(t/6*100).toFixed(2);
+      html+=`<div style="position:absolute;left:${tp}%;top:${trackTop+3}px;
+        width:1px;height:8px;background:rgba(255,255,255,.18);transform:translateX(-50%)"></div>`;
+      html+=`<div style="position:absolute;left:${tp}%;top:${trackTop+13}px;
+        font-size:8px;color:rgba(255,255,255,.28);transform:translateX(-50%);white-space:nowrap">${Math.round(L*t/6)}</div>`;
+    }
+    // Striche: Länge proportional zur Nähe (= 1 - x/L für Schleifen von MP-A, x/L für MP-B-Seite)
+    // Schleife 1+4: messen ab MP-A → Nähe = 1 - x/L (je kleiner x, desto länger Strich)
+    // Schleife 2+3: messen ab MP-B → Nähe = x/L (je grösser x, desto kleiner Distanz zu MP-B)
+    const proximity=[
+      x=>x===null?0:Math.max(0,1-x/L),   // S1: ab MP-A
+      x=>x===null?0:Math.max(0,x/L),      // S2: ab MP-B (x gross = nah MP-B)
+      x=>x===null?0:Math.max(0,x/L),      // S3: ab MP-B
+      x=>x===null?0:Math.max(0,1-x/L),   // S4: ab MP-A
+    ];
+    s.xs.forEach((x,i)=>{
+      if(x===null) return;
+      const pct=Math.max(0,Math.min(100,x/L*100));
+      const prox=proximity[i](x);
+      const h=MIN_H+(MAX_H-MIN_H)*prox;
+      const top=trackTop-h/2;
+      const dis=!s.enabled[i];
+      html+=`<div style="position:absolute;left:${pct.toFixed(2)}%;
+        top:${top.toFixed(1)}px;width:3px;height:${h.toFixed(1)}px;
+        background:${dis?'rgba(255,255,255,.15)':COL[i]};border-radius:2px;
+        transform:translateX(-50%);transition:left .3s"></div>`;
+    });
+    html+='</div>';
+    if(si<sets.length-1) html+='<div class="ds-sep"></div>';
+  });
+  html+='</div>';
+  el.innerHTML=html;
+}
+
+function renderDetailRows(L, xs, enabled, suffix, maderIdx){
+  const el=document.getElementById('detail-'+suffix+'-'+maderIdx);
+  if(!el) return;
+  const COL=['#E74C3C','#3A8BBF','#27AE60','#D4AC0D'];
+  const LABS=['Schleife 1','Schleife 2','Schleife 3','Schleife 4'];
+  // Nähe je Schleife (gleiche Logik wie oben)
+  const proximity=[
+    x=>x===null?0:Math.max(0,1-x/L),
+    x=>x===null?0:Math.max(0,x/L),
+    x=>x===null?0:Math.max(0,x/L),
+    x=>x===null?0:Math.max(0,1-x/L),
+  ];
+  const maxProx=Math.max(...xs.map((x,i)=>x!==null&&enabled[i]?proximity[i](x):0),0.001);
+
+  let html=`<div class="mader-hdr" style="color:rgba(255,255,255,.4)">Meldeader ${maderIdx}</div>`;
+  xs.forEach((x,i)=>{
+    const dis=!enabled[i]||x===null;
+    const prox=dis?0:proximity[i](x);
+    const barW=(prox/maxProx*100).toFixed(0);
+    const oor=x!==null&&(x<-0.5||x>L+0.5);
+    html+=`<div class="det-row">
+      <input type="checkbox" class="det-chk" ${enabled[i]?'checked':''}
+             onchange="toggleMeas(${maderIdx},${i},this.checked,'${suffix}')">
+      <span class="det-fall" style="color:${dis?'rgba(255,255,255,.2)':COL[i]}">${LABS[i]}</span>
+      <span class="det-val${dis?' disabled':''}">${x!==null?(oor?'<span style="opacity:.4">'+fL(x)+' m</span>':fL(x)+' m'):'–'}</span>
+      <div class="det-wbar-wrap">
+        <div class="det-wbar" style="width:${dis||oor?0:barW}%;background:${COL[i]}"></div>
+      </div>
+    </div>`;
+  });
+  el.innerHTML=html;
+}
+
+// enabled-state pro Meldeader
 let enabled1=[true,true,true,true];
 let enabled2=[true,true,true,true];
 function toggleMeas(maderIdx,i,val,suffix){
@@ -1251,75 +1348,41 @@ function toggleMeas(maderIdx,i,val,suffix){
   calc();
 }
 
-function computeWeightedXs(pRA,pBA,pRB,pBB,Rt,L){
-  const r=getRpm(),Ra=getRa(),Rka=getKAR('a'),Rkb=getKAR('b');
-  function xi(p,mode){
-    if(isNaN(p)||p<0||p>100) return null;
-    const f=p/100;
-    if(mode==='ra') return (f*Rt-Rka)/r;
-    if(mode==='ba') return L-(f*Rt-Ra-Rkb)/r;
-    if(mode==='rb') return L-(f*Rt-Rkb)/r;
-    if(mode==='bb') return (f*Rt-Ra-Rka)/r;
-  }
-  return [xi(pRA,'ra'),xi(pBA,'ba'),xi(pRB,'rb'),xi(pBB,'bb')];
-}
-
-function weightedMean(xs,weights,enabled){
-  let sumW=0,sumWX=0;
-  xs.forEach((x,i)=>{
-    if(x===null||!enabled[i]||x<-0.5) return;
-    sumW+=weights[i]; sumWX+=weights[i]*x;
-  });
-  return sumW>0?sumWX/sumW:null;
-}
-
 function renderResults(Rt,suffix){
-  const L=getLen(),r=getRpm();
-  if(!L||!r||!Rt) return;
+  const L=getLen();
+  const rpm1=getRpm();   // Meldeader 1 — Leiterwiderstand der Messader
+  const rpm2=getRpm();   // Meldeader 2 — identische Ader im selben Rohr, gleicher rpm
+  if(!L||!rpm1||!Rt) return;
 
-  const pRA=parseFloat(document.getElementById('pRA').value);
-  const pBA=parseFloat(document.getElementById('pBA').value);
-  const pRB=parseFloat(document.getElementById('pRB').value);
-  const pBB=parseFloat(document.getElementById('pBB').value);
+  const pRA =parseFloat(document.getElementById('pRA').value);
+  const pBA =parseFloat(document.getElementById('pBA').value);
+  const pRB =parseFloat(document.getElementById('pRB').value);
+  const pBB =parseFloat(document.getElementById('pBB').value);
   const pRA2=parseFloat(document.getElementById('pRA2').value);
   const pBA2=parseFloat(document.getElementById('pBA2').value);
   const pRB2=parseFloat(document.getElementById('pRB2').value);
   const pBB2=parseFloat(document.getElementById('pBB2').value);
 
-  const offsets=getOffsets();
-  const weights=getWeights(offsets);
-
-  const xs1=computeWeightedXs(pRA,pBA,pRB,pBB,Rt,L);
-  const xs2=computeWeightedXs(pRA2,pBA2,pRB2,pBB2,Rt,L);
-
-  const mean1=weightedMean(xs1,weights,enabled1);
-  const mean2=weightedMean(xs2,weights,enabled2);
-
-  // Sigma für Skala-Band (ungewichtet für Visualisierung)
-  function sigmaOf(xs,enabled,mean){
-    if(mean===null) return 0;
-    const vx=xs.filter((x,i)=>x!==null&&enabled[i]&&x>=-0.5&&x<=L+0.5);
-    if(!vx.length) return 0;
-    return Math.sqrt(vx.reduce((s,x)=>s+(x-mean)**2,0)/vx.length);
-  }
-  const sigma1=sigmaOf(xs1,enabled1,mean1);
-  const sigma2=sigmaOf(xs2,enabled2,mean2);
+  // Meldeader 1: rpm1; Meldeader 2: rpm2 (korrekt getrennt)
+  const xs1=computeXs(pRA,pBA,pRB,pBB,Rt,L,rpm1);
+  const xs2=computeXs(pRA2,pBA2,pRB2,pBB2,Rt,L,rpm2);
 
   const sets=[
-    {xs:xs1,enabled:enabled1,weights,mean:mean1,sigma:sigma1,label:'Meldeader 1',color:'#C0392B'},
-    {xs:xs2,enabled:enabled2,weights,mean:mean2,sigma:sigma2,label:'Meldeader 2',color:'#1A6FA8'},
+    {xs:xs1,enabled:enabled1,label:'Meldeader 1',color:'#C0392B'},
+    {xs:xs2,enabled:enabled2,label:'Meldeader 2',color:'#1A6FA8'},
   ];
 
   renderDualScale(L,sets,suffix);
-  renderDetailRows(L,xs1,weights,enabled1,mean1,suffix,1);
-  renderDetailRows(L,xs2,weights,enabled2,mean2,suffix,2);
+  renderDetailRows(L,xs1,enabled1,suffix,1);
+  renderDetailRows(L,xs2,enabled2,suffix,2);
 
-  // Konsistenz (Meldeader 1 als primär)
+  // Konsistenz: alle gültigen Werte von Meldeader 1
   const ce=document.getElementById('cons-'+suffix);
   const re=document.getElementById('rec-'+suffix);
-  if(mean1===null){ce.className='cons warn';ce.innerHTML='◑ Messwerte Meldeader 1 eingeben.';return;}
-  const vx1=xs1.filter((x,i)=>x!==null&&enabled1[i]&&x>=-0.5&&x<=L+0.5);
-  const maxD=Math.max(...vx1.map(x=>Math.abs(x-mean1)));
+  const valid1=xs1.filter((x,i)=>x!==null&&enabled1[i]&&x>=-0.5&&x<=L+0.5);
+  if(!valid1.length){ce.className='cons warn';ce.innerHTML='◑ Messwerte Meldeader 1 eingeben.';re.style.display='none';return;}
+  const mean1=valid1.reduce((a,b)=>a+b,0)/valid1.length;
+  const maxD=Math.max(...valid1.map(x=>Math.abs(x-mean1)));
   let cls,icon,msg;
   if(maxD<5){cls='good';icon='✓';msg=`<b>Nassstelle</b> · max. Δ ${fL(maxD)} m — Ortung zuverlässig.`;re.style.display='none';}
   else if(maxD<=10){cls='warn';icon='⚠';msg=`<b>Nasszone</b> · max. Δ ${fL(maxD)} m — ausgedehnte Feuchtigkeit.`;re.style.display='none';}
@@ -1498,29 +1561,29 @@ function exportPDF(){
   rw('Abschnitt 1 · Meldeader',WIRE_NAME[wt]);
   const T=parseFloat(document.getElementById('temp-op').value);
   rw('Betriebstemperatur Abs. 1',isNaN(T)?'20 (Referenz)':T.toFixed(0),'°C');
-  rw('r Abs. 1 (korrigiert)',fR4(getRpm()),'Ω/m');
+  rw('Leiterwiderstand Abs. 1 (korr.)',fR4(getRpm()),'Ω/m');
   rw('Gesamtlänge',fL(getLen()),'m');
-  rw('R Abschnitt 1 gesamt',fR4(getLen()*getRpm()),'Ω');
+  rw('Widerstand Abschnitt 1',fR4(getLen()*getRpm()),'Ω');
   if(isSec2Active()){
     const wt2=document.getElementById('wire-type2').value;
     const T2=parseFloat(document.getElementById('temp-op2').value);
     rw('Abschnitt 2 · Meldeader (RL)',WIRE_NAME[wt2]);
     rw('Betriebstemperatur Abs. 2',isNaN(T2)?'20 (Referenz)':T2.toFixed(0),'°C');
-    rw('r Abs. 2 (korrigiert)',fR4(getRpm2()),'Ω/m');
+    rw('Leiterwiderstand Abs. 2 (korr.)',fR4(getRpm2()),'Ω/m');
     rw('Länge Abschnitt 2',fL(getLen2()),'m');
-    rw('R Abschnitt 2 gesamt',fR4(getSec2R()),'Ω');
+    rw('Widerstand Abschnitt 2',fR4(getSec2R()),'Ω');
   }
 
   // HFL & KA
   sec('HILFSLEITUNGEN & KABELAUSFÜHRUNGEN');
-  rw('R HFL total',getAuxR().toFixed(2),'Ω');
-  if(isSec2Active()) rw('R Abschnitt 2 Rückführung',fR4(getSec2R()),'Ω');
-  rw('R Rückführung total',fR4(getRa()),'Ω');
-  rw('R KA-A',getKAR('a').toFixed(2),'Ω');
-  rw('R KA-B',getKAR('b').toFixed(2),'Ω');
-  rw('R ges (berechnet)',fR4(getRgesCalc()),'Ω');
+  rw('Widerstand HFL total',getAuxR().toFixed(2),'Ω');
+  if(isSec2Active()) rw('Widerstand Abschnitt 2 Rückführung',fR4(getSec2R()),'Ω');
+  rw('Widerstand Rückführung total',fR4(getRa()),'Ω');
+  rw('Widerstand KA-A',getKAR('a').toFixed(2),'Ω');
+  rw('Widerstand KA-B',getKAR('b').toFixed(2),'Ω');
+  rw('Widerstand ges. (berechnet)',fR4(getRgesCalc()),'Ω');
   const Rm=parseFloat(document.getElementById('rges-man').value)||0;
-  if(Rm>0) rw('R ges (manuell gemessen)',fR4(Rm),'Ω');
+  if(Rm>0) rw('Widerstand ges. (manuell)',fR4(Rm),'Ω');
 
   // Messwerte
   sec('MESSWERTE — Brückenabgleich (%)');
@@ -1558,8 +1621,8 @@ function exportPDF(){
     if(maxD>10) rw('Empf. Grabenmittelpunkt',fL(mean)+' m / '+fL(L-mean)+' m ab MP-B');
   }
 
-  writeRes(getRgesCalc(),'R ges berechnet');
-  if(Rm>0) writeRes(Rm,'R ges manuell');
+  writeRes(getRgesCalc(),'Widerstand ges. berechnet');
+  if(Rm>0) writeRes(Rm,'Widerstand ges. manuell');
 
   // Footer
   for(let i=1;i<=doc.getNumberOfPages();i++){
