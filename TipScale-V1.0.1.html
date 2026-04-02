@@ -1,0 +1,1599 @@
+<!DOCTYPE html>
+<html lang="de">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0">
+  <meta name="theme-color" content="#0F1923">
+  <title>TipScale</title>
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf/2.5.1/jspdf.umd.min.js"></script>
+  <style>
+    :root{
+      --bg:#0F1923;--card:#1A2433;--navy:#1B3D5E;--navy2:#3A7FBF;
+      --red:#E05252;--red-bg:#2D1A1A;--blue-t:#6BB8E8;
+      --amber:#E0A840;--amber-bg:#2A1E0A;--green:#4DC87A;--green-bg:#0D2018;
+      --border:#2D4060;--text:#D8E8F8;--text2:#9BBDD8;--radius:11px;
+    }
+    *{box-sizing:border-box;margin:0;padding:0;-webkit-tap-highlight-color:transparent}
+    html,body{min-height:100%;background:var(--bg);color:var(--text)}
+    body{font-family:'Helvetica Neue',Arial,-apple-system,sans-serif;font-size:15px;line-height:1.5}
+    /* hide number input spinners */
+    input[type=number]::-webkit-inner-spin-button,
+    input[type=number]::-webkit-outer-spin-button{-webkit-appearance:none;margin:0}
+    input[type=number]{-moz-appearance:textfield;appearance:textfield}
+    .app{max-width:520px;margin:0 auto;padding:14px 10px 60px}
+
+    .hdr{display:flex;align-items:center;gap:12px;background:var(--navy);border-radius:var(--radius);
+         padding:14px 16px;margin-bottom:10px;color:#fff}
+    .hdr-icon{font-size:26px;line-height:1}
+    .hdr h1{font-size:15px;font-weight:700;letter-spacing:.02em}
+    .hdr p{font-size:11px;opacity:.55;margin-top:1px}
+
+    .card{background:var(--card);border:1px solid var(--border);border-radius:var(--radius);margin-bottom:8px;overflow:hidden}
+    .card-hdr{display:flex;align-items:center;justify-content:space-between;padding:13px 15px;
+              cursor:pointer;user-select:none;-webkit-user-select:none}
+    .card-hdr:active{background:var(--bg)}
+    .card-htitle{display:flex;align-items:center;gap:9px}
+    .card-icon{font-size:15px}
+    .card-htitle h2{font-size:13.5px;font-weight:600;color:#fff}
+    .badge{font-size:11px;padding:2px 8px;border-radius:20px;background:rgba(255,255,255,.08);color:var(--text2);font-weight:500}
+    .toggle-arr{font-size:11px;color:var(--text2);transition:transform .2s}
+    .toggle-arr.open{transform:rotate(180deg)}
+    .card-body{padding:0 15px 15px;border-top:1px solid var(--border);display:none}
+    .card-body.open{display:block}
+
+    .field{margin-top:13px}
+    .field label{display:block;font-size:11px;font-weight:600;color:#C0C8D8;
+                 text-transform:uppercase;letter-spacing:.05em;margin-bottom:5px}
+    .fld{width:100%;padding:10px 12px;border:1.5px solid var(--border);border-radius:7px;
+         font-size:15px;color:#1A2433;background:#FAFAC0;font-family:inherit;outline:none;transition:border-color .15s}
+    .fld:focus{border-color:var(--navy2)}
+    .fld-row{display:flex;gap:8px;align-items:center}
+    .fld-unit{font-size:13px;color:var(--text2);white-space:nowrap}
+    .beta-tag{font-size:9px;padding:1px 5px;background:#FEF3C7;color:#92400E;border-radius:3px;
+              font-weight:700;text-transform:uppercase;margin-left:5px;vertical-align:middle}
+
+    .info-row{display:flex;justify-content:space-between;align-items:center;
+              padding:8px 11px;background:#0F1923;border-radius:7px;margin-top:9px}
+    .info-row .lbl{font-size:12px;color:var(--text2)}
+    .info-row .val{font-size:13.5px;font-weight:600;color:#E8F4FF;font-variant-numeric:tabular-nums}
+
+    .rges-box{margin-top:9px;background:#0F1923;border:1.5px solid #1B3D5E;border-radius:8px;padding:10px 13px}
+    .rges-title{font-size:10px;font-weight:700;text-transform:uppercase;letter-spacing:.06em;color:#1A5276;margin-bottom:7px}
+    .rges-row{display:flex;justify-content:space-between;align-items:center;margin-bottom:4px}
+    .rges-row .rl{font-size:12px;color:var(--text2)}
+    .rges-row .rv{font-size:13px;font-weight:600;color:var(--navy);font-variant-numeric:tabular-nums}
+    .rges-row .rv.manual{color:var(--red)}
+    .rges-diff{font-size:11px;margin-top:5px;padding:4px 8px;border-radius:5px;text-align:center;display:none}
+    .rges-diff.ok{background:var(--green-bg);color:var(--green)}
+    .rges-diff.warn{background:var(--amber-bg);color:var(--amber)}
+
+    .aux-list{margin-top:10px}
+    .aux-row{display:grid;grid-template-columns:1fr 95px auto;gap:7px;align-items:center;margin-bottom:7px}
+    .aux-row .fld{font-size:14px;padding:9px 10px}
+    .btn-rm{background:none;border:none;cursor:pointer;color:#B0BBC9;font-size:17px;padding:4px 5px;line-height:1}
+    .btn-rm:hover{color:var(--red)}
+    .btn-add{display:flex;align-items:center;justify-content:center;gap:6px;padding:9px 14px;
+             background:var(--bg);border:1.5px dashed var(--border);border-radius:7px;cursor:pointer;
+             font-size:13px;color:var(--navy2);font-weight:500;width:100%;margin-top:4px;font-family:inherit}
+    .btn-add:hover{background:#E8EDF5;border-color:var(--navy2)}
+    .btn-add:disabled{opacity:.35;cursor:not-allowed}
+
+    .seg-btn{display:flex;align-items:center;gap:7px;padding:9px 12px;background:var(--bg);
+             border:1.5px solid var(--border);border-radius:7px;cursor:pointer;font-size:13px;
+             color:var(--navy2);font-weight:500;width:100%;margin-top:10px;font-family:inherit}
+    .seg-panel{display:none;margin-top:9px;background:var(--bg);border-radius:7px;padding:11px}
+    .seg-panel.open{display:block}
+    .seg-grid{display:grid;grid-template-columns:repeat(5,1fr);gap:5px;max-height:240px;overflow-y:auto;margin-bottom:8px}
+    .seg-inp{padding:7px 3px;border:1px solid var(--border);border-radius:5px;font-size:13px;
+             text-align:center;background:#FAFAC0;color:#1A2433;width:100%;font-family:inherit;outline:none}
+    .seg-inp:focus{border-color:var(--navy2)}
+    .seg-useBtn{width:100%;padding:8px;background:var(--navy);color:#fff;border:none;border-radius:6px;
+                cursor:pointer;font-size:13px;font-weight:500;font-family:inherit;margin-top:4px}
+
+    .ka-cols{display:grid;grid-template-columns:1fr 1fr;gap:9px;margin-top:10px}
+    .ka-col{background:#0F1923;border-radius:8px;padding:10px}
+    .ka-col h3{font-size:11px;font-weight:700;text-transform:uppercase;letter-spacing:.06em;margin-bottom:8px}
+    .ka-col.ka-a h3{color:var(--red)} .ka-col.ka-b h3{color:var(--blue-t)}
+    .ka-fld{width:100%;padding:8px 9px;border:1.5px solid var(--border);border-radius:6px;
+            font-size:13px;background:#FAFAC0;color:#1A2433;font-family:inherit;outline:none;margin-bottom:5px}
+    .ka-fld:focus{border-color:var(--navy2)}
+    .ka-r{font-size:12px;color:var(--text2);margin-top:4px}
+    .ka-r b{color:#E8F4FF;font-variant-numeric:tabular-nums}
+
+    .side-lbl{font-size:11px;font-weight:700;text-transform:uppercase;letter-spacing:.07em;
+              color:#C0C8D8;margin-top:16px;padding-bottom:5px;border-bottom:2px solid var(--border);margin-bottom:6px}
+    .term-pair{display:grid;grid-template-columns:1fr 1fr;gap:9px;margin-top:10px;align-items:end}
+    .term-field label{display:flex;align-items:center;gap:6px;font-size:11px;font-weight:600;
+                      text-transform:uppercase;letter-spacing:.05em;color:var(--text2);margin-bottom:5px}
+    .tdot{width:11px;height:11px;border-radius:50%;display:inline-block;flex-shrink:0}
+    .tdot.r{background:var(--red)} .tdot.b{background:var(--blue-t)}
+    .term-inp{width:100%;padding:12px;border:2px solid var(--border);border-radius:7px;font-size:20px;
+              font-weight:500;text-align:center;color:#1A2433;background:#FAFAC0;font-family:inherit;
+              outline:none;transition:border-color .15s}
+    .term-field.tf-r .term-inp:focus{border-color:var(--red)}
+    .term-field.tf-b .term-inp:focus{border-color:var(--blue-t)}
+    .sum-chk{font-size:12px;text-align:center;margin-top:7px;padding:5px;border-radius:6px;min-height:20px}
+    .sum-chk.ok{background:var(--green-bg);color:var(--green)}
+    .sum-chk.wn{background:var(--amber-bg);color:var(--amber)}
+    .sum-chk.er{background:var(--red-bg);color:var(--red)}
+
+    /* Chain */
+    .chain-display{display:flex;flex-direction:column;gap:6px;margin:8px 0 5px}
+    .chain-row{display:flex;flex-wrap:wrap;align-items:center;gap:3px}
+    .ms-lbl{font-size:9px;font-weight:700;letter-spacing:.05em;color:var(--text2);
+            text-transform:uppercase;min-width:42px;flex-shrink:0}
+    .ch-node{padding:3px 7px;border-radius:4px;font-size:9.5px;font-weight:600;
+             white-space:nowrap;text-transform:uppercase;letter-spacing:.04em}
+    .ch-ka  {background:#F2F4F7;color:#3D5166;border:1px solid #C5CDD8}
+    .ch-fw  {background:#EAF4FB;color:#1A5276;border:1px solid #7FB3D3}
+    .ch-hfl {background:#E8F8F5;color:#1A6645;border:1px solid #7DCEA0}
+    .ch-mklr{background:#FDEDEC;color:#A93226;border:1px solid #F1948A}
+    .ch-mklb{background:#EAF4FB;color:#1565A3;border:1px solid #7FB3D3}
+    .ch-nass{background:#1B3D5E;color:#fff;border:1px solid #2D6291;padding:2px 6px}
+    .ch-arrow{font-size:9px;color:#A0AEC0}
+
+    /* Results */
+    .results{background:var(--navy);border-radius:var(--radius);padding:15px;margin-bottom:8px}
+    .res-title{font-size:11px;font-weight:700;text-transform:uppercase;
+               letter-spacing:.08em;color:rgba(255,255,255,.45);margin-bottom:13px}
+    .no-res{text-align:center;color:rgba(255,255,255,.35);font-size:13px;padding:18px 0}
+    .res-tabs{display:flex;gap:6px;margin-bottom:12px}
+    .res-tab{flex:1;padding:6px;border-radius:7px;border:1.5px solid rgba(255,255,255,.15);
+             background:rgba(255,255,255,.05);color:rgba(255,255,255,.45);font-size:11px;
+             font-weight:600;text-align:center;cursor:pointer;font-family:inherit;
+             text-transform:uppercase;letter-spacing:.04em}
+    .res-tab.active{background:rgba(255,255,255,.15);border-color:rgba(255,255,255,.4);color:#fff}
+    .res-pane{display:none} .res-pane.active{display:block}
+
+    .ruler{position:relative;height:60px;margin-bottom:14px;padding:0 2px}
+    .ruler-track{position:absolute;top:30px;left:0;right:0;height:4px;background:rgba(255,255,255,.18);border-radius:2px}
+    .ruler-lbl{position:absolute;top:38px;font-size:10px;color:rgba(255,255,255,.4)}
+    .ruler-lbl.la{left:0} .ruler-lbl.lb{right:0}
+    .r-mark{position:absolute;transform:translateX(-50%);border-radius:2px;transition:left .3s ease}
+    .r-mark.m1,.r-mark.m2,.r-mark.m3,.r-mark.m4{top:21px;width:4px;height:18px}
+    .r-mark.m-mean{top:18px;width:6px;height:24px;background:#fff;border-radius:3px}
+    .ruler-legend{display:flex;flex-wrap:wrap;gap:8px;margin-bottom:12px}
+    .rl-item{display:flex;align-items:center;gap:5px;font-size:10px;color:rgba(255,255,255,.5)}
+    .rl-dot{width:8px;height:8px;border-radius:2px;flex-shrink:0}
+
+    .pos-grid{display:grid;grid-template-columns:1fr 1fr;gap:7px;margin-bottom:11px}
+    .pos-card{padding:10px 11px;border-radius:8px;background:rgba(255,255,255,.07)}
+    .pos-card .pc-lbl{font-size:10px;color:rgba(255,255,255,.45);text-transform:uppercase;
+                      letter-spacing:.04em;display:flex;align-items:center;gap:5px;margin-bottom:3px}
+    .pc-dot{width:8px;height:8px;border-radius:50%;display:inline-block;flex-shrink:0}
+    .pos-card .pc-val{font-size:21px;font-weight:600;color:#fff;font-variant-numeric:tabular-nums;line-height:1.15}
+    .pos-card .pc-unit{font-size:12px;color:rgba(255,255,255,.45)}
+    .pos-card .pc-sub{font-size:10px;color:rgba(255,255,255,.3);margin-top:1px}
+    .pos-card.oor .pc-val{color:#F1948A}
+
+    .mean-box{background:rgba(255,255,255,.11);border-radius:8px;padding:13px;
+              display:flex;justify-content:space-between;align-items:center;margin-bottom:10px}
+    .mean-box .ml{font-size:12px;color:rgba(255,255,255,.5);margin-bottom:3px}
+    .mean-box .mv{font-size:30px;font-weight:700;color:#fff;font-variant-numeric:tabular-nums;line-height:1.1}
+    .mean-box .ms{font-size:12px;color:rgba(255,255,255,.4);margin-top:2px}
+    .mean-box .mr{text-align:right}
+    .mean-box .sv{font-size:21px;font-weight:600;color:#fff;font-variant-numeric:tabular-nums}
+
+    .chips{display:flex;flex-wrap:wrap;gap:6px;margin-bottom:11px}
+    .chip{padding:3px 9px;background:rgba(255,255,255,.08);border-radius:20px;font-size:11px;color:rgba(255,255,255,.55)}
+    .chip b{color:#fff;font-variant-numeric:tabular-nums}
+
+    .cons{padding:10px 13px;border-radius:8px;font-size:13px;font-weight:500;line-height:1.4;margin-bottom:8px}
+    .cons.good{background:rgba(26,122,74,.22);color:#A9DFBF}
+    .cons.warn{background:rgba(183,119,13,.22);color:#F8C471}
+    .cons.bad {background:rgba(192,57,43,.22);color:#F1948A}
+    .cons .ci{font-size:15px;margin-right:5px}
+
+    .rec-box{padding:10px 13px;border-radius:8px;font-size:12px;line-height:1.5;
+             background:rgba(192,57,43,.15);color:#F1948A;border:1px solid rgba(192,57,43,.3);margin-bottom:8px}
+    .rec-box b{color:#fff}
+
+    /* dual scale */
+    .dual-scale{margin-bottom:10px}
+    .ds-row{position:relative;margin-bottom:2px}
+    .ds-label{font-size:9px;font-weight:700;text-transform:uppercase;letter-spacing:.06em;
+              color:rgba(255,255,255,.4);margin-bottom:3px}
+    .ds-track{position:absolute;left:0;right:0;height:3px;background:rgba(255,255,255,.15);border-radius:2px}
+    .ds-lbl-a{position:absolute;font-size:9px;color:rgba(255,255,255,.35);left:0}
+    .ds-lbl-b{position:absolute;font-size:9px;color:rgba(255,255,255,.35);right:0}
+    .ds-band{position:absolute;top:16px;height:7px;border-radius:3px;opacity:.25}
+    .ds-dot{position:absolute;top:12px;width:14px;height:14px;border-radius:50%;
+            transform:translateX(-50%);border:2px solid rgba(255,255,255,.8);cursor:pointer;
+            transition:left .3s,opacity .3s}
+    .ds-dot.disabled{opacity:.25;border-style:dashed}
+    .ds-mean{position:absolute;top:10px;width:0;height:0;
+             border-left:8px solid transparent;border-right:8px solid transparent;
+             border-bottom:16px solid #fff;transform:translateX(-50%);
+             transition:left .3s;filter:drop-shadow(0 1px 2px rgba(0,0,0,.4))}
+    .ds-lbl-a{position:absolute;bottom:0;left:0;font-size:9px;color:rgba(255,255,255,.35)}
+    .ds-lbl-b{position:absolute;bottom:0;right:0;font-size:9px;color:rgba(255,255,255,.35)}
+    .ds-sep{height:1px;background:rgba(255,255,255,.08);margin:4px 0 6px}
+
+    /* detail rows */
+    .det-row{display:flex;align-items:center;gap:6px;padding:5px 0;
+             border-bottom:1px solid rgba(255,255,255,.06)}
+    .det-row:last-child{border-bottom:none}
+    .det-chk{width:16px;height:16px;cursor:pointer;accent-color:#C8A45A;flex-shrink:0}
+    .det-fall{font-size:10px;font-weight:700;text-transform:uppercase;
+              letter-spacing:.04em;color:rgba(255,255,255,.5);width:52px;flex-shrink:0}
+    .det-val{font-size:14px;font-weight:600;color:#fff;font-variant-numeric:tabular-nums;
+             width:68px;flex-shrink:0}
+    .det-val.disabled{color:rgba(255,255,255,.25)}
+    .det-wbar-wrap{flex:1;height:6px;background:rgba(255,255,255,.1);border-radius:3px;overflow:hidden}
+    .det-wbar{height:100%;border-radius:3px;transition:width .3s}
+    .det-wlbl{font-size:10px;color:rgba(255,255,255,.4);width:32px;text-align:right;flex-shrink:0}
+    .det-wlbl.disabled{color:rgba(255,255,255,.15)}
+    .det-delta{font-size:10px;color:rgba(255,255,255,.35);width:44px;text-align:right;flex-shrink:0}
+
+    /* mean summary strip */
+    .mean-strip{display:flex;justify-content:space-between;align-items:center;
+                padding:8px 10px;background:rgba(255,255,255,.08);border-radius:7px;
+                margin-top:8px;margin-bottom:6px}
+    .mean-strip .ms-lbl{font-size:11px;color:rgba(255,255,255,.45)}
+    .mean-strip .ms-val{font-size:18px;font-weight:700;color:#fff;font-variant-numeric:tabular-nums}
+    .mean-strip .ms-sub{font-size:10px;color:rgba(255,255,255,.3);margin-top:1px}
+    .mean-strip .ms-r{text-align:right}
+    .mader-hdr{font-size:10px;font-weight:700;text-transform:uppercase;letter-spacing:.07em;
+               margin-bottom:4px;padding-bottom:3px;border-bottom:1px solid rgba(255,255,255,.1)}
+             padding:12px;background:var(--navy2);color:#fff;border:none;border-radius:var(--radius);
+             cursor:pointer;font-size:14px;font-weight:600;font-family:inherit;margin-top:10px}
+    .pdf-btn:hover{background:#1B4F72} .pdf-btn:active{transform:scale(.98)}
+
+    .proj-grid{display:grid;grid-template-columns:1fr 1fr;gap:8px;margin-top:10px}
+  </style>
+</head>
+<body>
+<div class="app">
+
+  <div class="hdr">
+    <div class="hdr-icon">⚡</div>
+    <div><h1>TipScale</h1>
+    <p>Nässe-Ortung · Widerstands-Referenz-Messverfahren · LUWA · Fernwärme</p></div>
+  </div>
+
+  <!-- S0 Projekt -->
+  <div class="card">
+    <div class="card-hdr" onclick="toggleCard('s0')">
+      <div class="card-htitle"><span class="card-icon">🏷️</span><h2>Projekt &amp; Identifikation</h2></div>
+      <span class="toggle-arr open" id="arr-s0">▼</span>
+    </div>
+    <div class="card-body open" id="s0">
+      <div class="proj-grid">
+        <div class="field"><label>Kunde / Projekt</label>
+          <input class="fld" type="text" id="proj-name" placeholder="z. B. Muster AG"></div>
+        <div class="field"><label>Leitungs-ID</label>
+          <input class="fld" type="text" id="proj-lid" placeholder="z. B. VL-Nord-03"></div>
+      </div>
+    </div>
+  </div>
+
+  <!-- S1 Leitungsabschnitt -->
+  <div class="card">
+    <div class="card-hdr" onclick="toggleCard('s1')">
+      <div class="card-htitle"><span class="card-icon">📏</span><h2>Leitungsabschnitt &amp; Meldeader</h2>
+        <span class="badge" id="bdg1">–</span></div>
+      <span class="toggle-arr open" id="arr-s1">▼</span>
+    </div>
+    <div class="card-body open" id="s1">
+      <!-- Abschnitt 1 -->
+      <div style="font-size:10px;font-weight:700;text-transform:uppercase;letter-spacing:.06em;
+                  color:#8A9BB0;padding:8px 0 4px;border-bottom:1px solid var(--border);margin-bottom:4px">
+        Abschnitt 1 · Meldeader mit Nässebefall
+      </div>
+      <div class="field"><label>Meldeader (Adertyp)</label>
+        <select class="fld" id="wire-type" onchange="onWireType()">
+          <option value="nicr">Brandes Fühlerader · NiCr 80/20 · 0,189 mm²</option>
+          <option value="curet">Brandes Rückführader · Cu · 0,490 mm²</option>
+          <option value="cu15" selected>Nordic · Cu blank · 1,5 mm²</option>
+        </select>
+      </div>
+      <!-- ρ-Quelle — direkt unter Adertyp, über Temperatur -->
+      <div id="rho-panel-1" style="display:block;margin-top:6px;background:#0F1923;border-radius:8px;border:1px solid var(--border);overflow:hidden">
+        <div onclick="toggleRho(1)" style="display:flex;justify-content:space-between;align-items:center;
+             padding:8px 11px;cursor:pointer;user-select:none">
+          <div>
+            <div style="font-size:11px;font-weight:600;color:#C0C8D8;text-transform:uppercase;letter-spacing:.05em"
+                 id="rho-title-1">ρ-Quelle wählen · Cu 1,5 mm²</div>
+            <div id="rho-active-1" style="font-size:11px;color:#C8A45A;margin-top:2px"></div>
+          </div>
+          <span id="rho-arr-1" style="font-size:11px;color:var(--text2);flex-shrink:0;margin-left:8px">▶</span>
+        </div>
+        <div id="rho-body-1" style="display:none;border-top:1px solid var(--border)">
+          <div style="font-size:11px;color:var(--text2);padding:8px 11px 4px;line-height:1.5">
+            Wähle den ρ-Wert passend zur Drahtqualität. Beeinflusst direkt die Positionsberechnung.
+          </div>
+          <div id="rho-opts-1"></div>
+        </div>
+      </div>
+      <div class="field">
+        <label>Betriebstemperatur<span class="beta-tag">Beta</span></label>
+        <!-- Temp-Foldout -->
+        <div style="margin-bottom:6px;background:#0F1923;border-radius:8px;border:1px solid var(--border);overflow:hidden">
+          <div onclick="toggleTemp(1)" style="display:flex;justify-content:space-between;align-items:center;
+               padding:8px 11px;cursor:pointer;user-select:none">
+            <div>
+              <div style="font-size:11px;font-weight:600;color:#C0C8D8;text-transform:uppercase;letter-spacing:.05em">Vorauswahl</div>
+              <div id="temp-active-1" style="font-size:11px;color:#C8A45A;margin-top:2px"></div>
+            </div>
+            <span id="temp-arr-1" style="font-size:11px;color:var(--text2);flex-shrink:0;margin-left:8px">▶</span>
+          </div>
+          <div id="temp-body-1" style="display:none;border-top:1px solid var(--border)">
+            <div onclick="selectTemp(1,45,'Vorlauf allgemein · 45 °C (DS 2)')" style="padding:9px 11px;cursor:pointer;border-bottom:1px solid var(--border)">
+              <div style="font-size:12px;font-weight:600;color:#C0C8D8">Vorlauf allgemein · DS 2</div>
+              <div style="font-size:11px;color:var(--text2);margin-top:2px">45 °C — typischer Vorlauf Niedrigtemperaturnetz</div>
+            </div>
+            <div onclick="selectTemp(1,30,'Rücklauf allgemein · 30 °C (DS 2)')" style="padding:9px 11px;cursor:pointer">
+              <div style="font-size:12px;font-weight:600;color:#C0C8D8">Rücklauf allgemein · DS 2</div>
+              <div style="font-size:11px;color:var(--text2);margin-top:2px">30 °C — typischer Rücklauf Niedrigtemperaturnetz</div>
+            </div>
+          </div>
+        </div>
+        <div class="fld-row">
+          <input class="fld" type="number" id="temp-op" min="0" max="200" step="1"
+                 placeholder="20 °C (Referenz)" oninput="onTempManual(1)">
+          <span class="fld-unit">°C</span>
+        </div>
+        <div style="font-size:11px;color:var(--text2);margin-top:3px" id="temp-info"></div>
+      </div>
+      <div class="info-row">
+        <span class="lbl">r Abschnitt 1 (temperaturkorrigiert)</span>
+        <span class="val" id="r-per-m-lbl">0,01149 Ω/m</span>
+      </div>
+      <div class="field"><label>Gesamtlänge Leitungsabschnitt</label>
+        <div class="fld-row">
+          <input class="fld" type="number" id="len-total" min="0" step="0.01" placeholder="Länge in m" oninput="onLen1()">
+          <span class="fld-unit">m</span>
+        </div>
+      </div>
+      <button class="seg-btn" onclick="toggleSeg()">
+        <span id="seg-arr">▶</span> Aus Teilabschnitten (max. 70)
+      </button>
+      <div class="seg-panel" id="seg-panel">
+        <div style="font-size:11px;color:var(--text2);margin-bottom:7px">Längen in m · Reihenfolge wie im Plan</div>
+        <div class="seg-grid" id="seg-grid"></div>
+        <div class="info-row"><span class="lbl">Summe</span><span class="val" id="seg-sum">0,00 m</span></div>
+        <div style="display:grid;grid-template-columns:1fr 1fr;gap:7px;margin-top:4px">
+          <button class="seg-useBtn" onclick="useSeg()">↑ Gesamtlänge übernehmen</button>
+          <button class="seg-useBtn" onclick="clearSeg()" style="background:#7A2020">✕ Leeren</button>
+        </div>
+      </div>
+      <div class="info-row"><span class="lbl">R Abschnitt 1 gesamt</span><span class="val" id="r-main-lbl">–</span></div>
+
+      <!-- Abschnitt 2 Toggle -->
+      <div style="margin-top:14px">
+        <label style="display:flex;align-items:center;gap:10px;cursor:pointer;user-select:none">
+          <input type="checkbox" id="sec2-active" onchange="toggleSec2()" style="width:18px;height:18px;cursor:pointer">
+          <span style="font-size:13.5px;font-weight:600;color:#fff">
+            2. Leitungsabschnitt verwenden (trockene Rückführader)
+          </span>
+        </label>
+        <div style="font-size:11px;color:var(--text2);margin-top:3px;margin-left:28px">
+          Trockene Rückführader ersetzt HFL · unabhängige Temperatur möglich
+        </div>
+      </div>
+
+      <!-- Abschnitt 2 Panel -->
+      <div id="sec2-panel" style="display:none;margin-top:10px;background:var(--bg);border-radius:8px;padding:11px;border:1.5px solid var(--border)">
+        <div style="font-size:10px;font-weight:700;text-transform:uppercase;letter-spacing:.06em;
+                    color:var(--navy);margin-bottom:8px">
+          Abschnitt 2 · Trockene Rückführader
+        </div>
+        <div class="field" style="margin-top:0"><label>Meldeader (Adertyp)</label>
+          <select class="fld" id="wire-type2" onchange="onWireType2()">
+            <option value="nicr">Brandes Fühlerader · NiCr 80/20 · 0,189 mm²</option>
+            <option value="curet">Brandes Rückführader · Cu · 0,490 mm²</option>
+            <option value="cu15" selected>Nordic · Cu blank · 1,5 mm²</option>
+          </select>
+        </div>
+        <!-- ρ-Quelle Abschnitt 2 -->
+        <div id="rho-panel-2" style="display:block;margin-top:6px;background:#0F1923;border-radius:8px;border:1px solid var(--border);overflow:hidden">
+          <div onclick="toggleRho(2)" style="display:flex;justify-content:space-between;align-items:center;
+               padding:8px 11px;cursor:pointer;user-select:none">
+            <div>
+              <div style="font-size:11px;font-weight:600;color:#C0C8D8;text-transform:uppercase;letter-spacing:.05em"
+                   id="rho-title-2">ρ-Quelle wählen · Cu 1,5 mm²</div>
+              <div id="rho-active-2" style="font-size:11px;color:#C8A45A;margin-top:2px"></div>
+            </div>
+            <span id="rho-arr-2" style="font-size:11px;color:var(--text2);flex-shrink:0;margin-left:8px">▶</span>
+          </div>
+          <div id="rho-body-2" style="display:none;border-top:1px solid var(--border)">
+            <div style="font-size:11px;color:var(--text2);padding:8px 11px 4px;line-height:1.5">
+              Wähle den ρ-Wert passend zur Drahtqualität. Beeinflusst direkt die Positionsberechnung.
+            </div>
+            <div id="rho-opts-2"></div>
+          </div>
+        </div>
+        <div class="field">
+          <label>Betriebstemperatur<span class="beta-tag">Beta</span></label>
+          <!-- Temp-Foldout Abschnitt 2 -->
+          <div style="margin-bottom:6px;background:#0F1923;border-radius:8px;border:1px solid var(--border);overflow:hidden">
+            <div onclick="toggleTemp(2)" style="display:flex;justify-content:space-between;align-items:center;
+                 padding:8px 11px;cursor:pointer;user-select:none">
+              <div>
+                <div style="font-size:11px;font-weight:600;color:#C0C8D8;text-transform:uppercase;letter-spacing:.05em">Vorauswahl</div>
+                <div id="temp-active-2" style="font-size:11px;color:#C8A45A;margin-top:2px"></div>
+              </div>
+              <span id="temp-arr-2" style="font-size:11px;color:var(--text2);flex-shrink:0;margin-left:8px">▶</span>
+            </div>
+            <div id="temp-body-2" style="display:none;border-top:1px solid var(--border)">
+              <div onclick="selectTemp(2,45,'Vorlauf allgemein · 45 °C (DS 2)')" style="padding:9px 11px;cursor:pointer;border-bottom:1px solid var(--border)">
+                <div style="font-size:12px;font-weight:600;color:#C0C8D8">Vorlauf allgemein · DS 2</div>
+                <div style="font-size:11px;color:var(--text2);margin-top:2px">45 °C — typischer Vorlauf Niedrigtemperaturnetz</div>
+              </div>
+              <div onclick="selectTemp(2,30,'Rücklauf allgemein · 30 °C (DS 2)')" style="padding:9px 11px;cursor:pointer">
+                <div style="font-size:12px;font-weight:600;color:#C0C8D8">Rücklauf allgemein · DS 2</div>
+                <div style="font-size:11px;color:var(--text2);margin-top:2px">30 °C — typischer Rücklauf Niedrigtemperaturnetz</div>
+              </div>
+            </div>
+          </div>
+          <div class="fld-row">
+            <input class="fld" type="number" id="temp-op2" min="0" max="200" step="1"
+                   placeholder="20 °C (Referenz)" oninput="onTempManual(2)">
+            <span class="fld-unit">°C</span>
+          </div>
+          <div style="font-size:11px;color:var(--text2);margin-top:3px" id="temp-info2"></div>
+        </div>
+        <div class="info-row" style="margin-top:6px">
+          <span class="lbl">r Abschnitt 2 (temperaturkorrigiert)</span>
+          <span class="val" id="r-per-m-lbl2">0,01149 Ω/m</span>
+        </div>
+        <div class="field">
+          <label>Länge Abschnitt 2</label>
+          <div class="fld-row">
+            <input class="fld" type="number" id="len-total2" min="0" step="0.01"
+                   placeholder="Wie Abschnitt 1 wenn leer" oninput="calc()">
+            <span class="fld-unit">m</span>
+          </div>
+          <div style="font-size:11px;color:var(--text2);margin-top:3px">
+            Leer lassen = gleiche Länge wie Abschnitt 1 (VL = RL)
+          </div>
+        </div>
+        <div class="info-row"><span class="lbl">R Abschnitt 2 gesamt</span><span class="val" id="r-main-lbl2">–</span></div>
+      </div>
+    </div>
+  </div>
+
+  <!-- S2 HFL -->
+  <div class="card">
+    <div class="card-hdr" onclick="toggleCard('s2')">
+      <div class="card-htitle"><span class="card-icon">🔌</span><h2>Hilfsleitungen (HFL)</h2>
+        <span class="badge" id="bdg2">0,00 Ω</span></div>
+      <span class="toggle-arr open" id="arr-s2">▼</span>
+    </div>
+    <div class="card-body open" id="s2">
+      <p style="font-size:12px;color:var(--text2);margin-top:8px;line-height:1.4">
+        Rückführung der Messschleife · Gesamtwiderstand je HFL · max. 5 in Serie.
+      </p>
+      <div class="aux-list" id="aux-list"></div>
+      <button class="btn-add" id="btn-add" onclick="addAux()">＋ HFL hinzufügen</button>
+      <div class="info-row"><span class="lbl">R HFL total</span><span class="val" id="r-aux-lbl">0,00 Ω</span></div>
+    </div>
+  </div>
+
+  <!-- S3 KA -->
+  <div class="card">
+    <div class="card-hdr" onclick="toggleCard('s3')">
+      <div class="card-htitle"><span class="card-icon">🔗</span><h2>Kabelausführungen (KA)</h2>
+        <span class="badge" id="bdg3">optional</span></div>
+      <span class="toggle-arr" id="arr-s3">▼</span>
+    </div>
+    <div class="card-body" id="s3">
+      <p style="font-size:12px;color:var(--text2);margin-top:8px;margin-bottom:10px;line-height:1.4">
+        Ausführungskabel von MKL bis Meldeader · Cu DIN 47001.
+      </p>
+      <div class="ka-cols">
+        <div class="ka-col ka-a"><h3>🔴 Messpunkt A</h3>
+          <select class="ka-fld" id="ka-a-cross" onchange="calcKA('a')">
+            <option value="0">Kein KA</option><option value="0.5">0,5 mm²</option>
+            <option value="1.0">1,0 mm²</option><option value="1.5">1,5 mm²</option>
+            <option value="cust">Manuell (Ω)</option>
+          </select>
+          <input class="ka-fld" type="number" id="ka-a-len" min="0" step="0.01" placeholder="Länge (m)" oninput="calcKA('a')">
+          <div id="ka-a-ohm-wrap" style="display:none">
+            <input class="ka-fld" type="number" id="ka-a-ohm" min="0" step="0.01" placeholder="Widerstand (Ω)" oninput="calcKA('a')">
+          </div>
+          <div class="ka-r">R<sub>KA-A</sub> = <b id="ka-a-r">0,00 Ω</b></div>
+        </div>
+        <div class="ka-col ka-b"><h3>🔵 Messpunkt B</h3>
+          <select class="ka-fld" id="ka-b-cross" onchange="calcKA('b')">
+            <option value="0">Kein KA</option><option value="0.5">0,5 mm²</option>
+            <option value="1.0">1,0 mm²</option><option value="1.5">1,5 mm²</option>
+            <option value="cust">Manuell (Ω)</option>
+          </select>
+          <input class="ka-fld" type="number" id="ka-b-len" min="0" step="0.01" placeholder="Länge (m)" oninput="calcKA('b')">
+          <div id="ka-b-ohm-wrap" style="display:none">
+            <input class="ka-fld" type="number" id="ka-b-ohm" min="0" step="0.01" placeholder="Widerstand (Ω)" oninput="calcKA('b')">
+          </div>
+          <div class="ka-r">R<sub>KA-B</sub> = <b id="ka-b-r">0,00 Ω</b></div>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- S4 R_ges -->
+  <div class="card">
+    <div class="card-hdr" onclick="toggleCard('s4')">
+      <div class="card-htitle"><span class="card-icon">🔢</span><h2>Gesamtschleifenwiderstand R<sub>ges</sub></h2>
+        <span class="badge" id="bdg4">–</span></div>
+      <span class="toggle-arr open" id="arr-s4">▼</span>
+    </div>
+    <div class="card-body open" id="s4">
+      <div class="rges-box">
+        <div class="rges-title">R<sub>ges</sub> Übersicht</div>
+        <div class="rges-row"><span class="rl">Berechnet aus Eingaben</span><span class="rv" id="rges-calc-lbl">–</span></div>
+        <div class="rges-row"><span class="rl">Manuell gemessen</span><span class="rv manual" id="rges-man-lbl">–</span></div>
+        <div class="rges-diff" id="rges-diff"></div>
+      </div>
+      <div class="field"><label>Manuell gemessener R<sub>ges</sub> (Ohmmeter)</label>
+        <div class="fld-row">
+          <input class="fld" type="number" id="rges-man" min="0" step="0.01"
+                 placeholder="Gemessener Gesamtwiderstand" oninput="calc()">
+          <span class="fld-unit">Ω</span>
+        </div>
+        <div style="font-size:11px;color:var(--text2);margin-top:4px;line-height:1.4">
+          Erfasst reale Übergangswiderstände · erzeugt 2. unabhängigen Ergebnissatz.
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- S5a Messwerte Meldeader 1 -->
+  <div class="card">
+    <div class="card-hdr" onclick="toggleCard('s5a')">
+      <div class="card-htitle"><span class="card-icon">📊</span>
+        <h2>Messwerte · <span style="color:var(--red);font-weight:700">Meldeader <span style="font-weight:800">1</span></span></h2>
+      </div>
+      <span class="toggle-arr open" id="arr-s5a">▼</span>
+    </div>
+    <div class="card-body open" id="s5a" style="position:relative;overflow:hidden">
+      <!-- Hintergrundziffer -->
+      <div aria-hidden="true" style="pointer-events:none;position:absolute;
+           left:50%;top:50%;transform:translate(-50%,-50%);
+           font-size:800px;font-weight:900;color:rgba(192,57,43,0.10);line-height:1;
+           font-family:'Helvetica Neue',Arial,sans-serif;user-select:none;z-index:0">1</div>
+      <div style="position:relative;z-index:1">
+        <p style="font-size:12px;color:var(--text2);margin-top:8px;line-height:1.4">
+          Brücken-Drehknopfstellung ablesen.
+          <b style="color:var(--red)">MKL rot</b> = Richtung Meldeader,
+          <b style="color:var(--blue-t)">MKL blau</b> = über HFL. Summe ≈ 100 %.
+        </p>
+        <div class="side-lbl">Messung am Messpunkt A</div>
+
+        <!-- Schleife 1 Kette -->
+        <div id="chain-a-s1" class="chain-display" style="margin-bottom:6px"></div>
+        <!-- Eingaben S1 + S2 nebeneinander -->
+        <div class="term-pair" style="margin-bottom:6px">
+          <div class="term-field tf-r">
+            <label><span class="tdot r"></span> Schleife 1 · MKL rot → Meldeader</label>
+            <input class="term-inp" type="number" id="pRA" min="0" max="100" step="0.01" inputmode="decimal" placeholder="%" oninput="calc()">
+          </div>
+          <div class="term-field tf-b">
+            <label><span class="tdot b"></span> Schleife 2 · MKL rot → HFL</label>
+            <input class="term-inp" type="number" id="pBA" min="0" max="100" step="0.01" inputmode="decimal" placeholder="%" oninput="calc()">
+          </div>
+        </div>
+        <!-- Schleife 2 Kette -->
+        <div id="chain-a-s2" class="chain-display" style="margin-bottom:4px"></div>
+        <div class="sum-chk" id="sum-a"></div>
+
+        <div class="side-lbl" style="margin-top:18px">Messung am Messpunkt B (optional)</div>
+
+        <!-- Schleife 3 Kette -->
+        <div id="chain-b-s3" class="chain-display" style="margin-bottom:6px"></div>
+        <!-- Eingaben S3 + S4 nebeneinander -->
+        <div class="term-pair" style="margin-bottom:6px">
+          <div class="term-field tf-r">
+            <label><span class="tdot r"></span> Schleife 3 · MKL rot → Meldeader</label>
+            <input class="term-inp" type="number" id="pRB" min="0" max="100" step="0.01" inputmode="decimal" placeholder="%" oninput="calc()">
+          </div>
+          <div class="term-field tf-b">
+            <label><span class="tdot b"></span> Schleife 4 · MKL rot → HFL</label>
+            <input class="term-inp" type="number" id="pBB" min="0" max="100" step="0.01" inputmode="decimal" placeholder="%" oninput="calc()">
+          </div>
+        </div>
+        <!-- Schleife 4 Kette -->
+        <div id="chain-b-s4" class="chain-display" style="margin-bottom:4px"></div>
+        <div class="sum-chk" id="sum-b"></div>
+        <p style="font-size:11px;color:var(--text2);margin-top:12px;line-height:1.5">
+          <b>Schleife 1 ≈ Schleife 4</b> · MP-A-Seite — sollten übereinstimmen.<br>
+          <b>Schleife 2 ≈ Schleife 3</b> · MP-B-Seite — sollten übereinstimmen.
+        </p>
+      </div>
+    </div>
+  </div>
+
+  <!-- S5b Messwerte Meldeader 2 -->
+  <div class="card">
+    <div class="card-hdr" onclick="toggleCard('s5b')">
+      <div class="card-htitle"><span class="card-icon">📊</span>
+        <h2>Messwerte · <span style="color:var(--blue-t);font-weight:700">Meldeader <span style="font-weight:800">2</span></span></h2>
+      </div>
+      <span class="toggle-arr open" id="arr-s5b">▼</span>
+    </div>
+    <div class="card-body open" id="s5b" style="position:relative;overflow:hidden">
+      <!-- Hintergrundziffer -->
+      <div aria-hidden="true" style="pointer-events:none;position:absolute;
+           left:50%;top:50%;transform:translate(-50%,-50%);
+           font-size:800px;font-weight:900;color:rgba(26,111,168,0.10);line-height:1;
+           font-family:'Helvetica Neue',Arial,sans-serif;user-select:none;z-index:0">2</div>
+      <div style="position:relative;z-index:1">
+        <p style="font-size:12px;color:var(--text2);margin-top:8px;line-height:1.4">
+          Brücken-Drehknopfstellung ablesen.
+          <b style="color:var(--red)">MKL rot</b> = Richtung Meldeader,
+          <b style="color:var(--blue-t)">MKL blau</b> = über HFL. Summe ≈ 100 %.
+        </p>
+        <div class="side-lbl">Messung am Messpunkt A</div>
+
+        <!-- Schleife 1 Kette -->
+        <div id="chain-a2-s1" class="chain-display" style="margin-bottom:6px"></div>
+        <!-- Eingaben S1 + S2 nebeneinander -->
+        <div class="term-pair" style="margin-bottom:6px">
+          <div class="term-field tf-r">
+            <label><span class="tdot r"></span> Schleife 1 · MKL rot → Meldeader</label>
+            <input class="term-inp" type="number" id="pRA2" min="0" max="100" step="0.01" inputmode="decimal" placeholder="%" oninput="calc()">
+          </div>
+          <div class="term-field tf-b">
+            <label><span class="tdot b"></span> Schleife 2 · MKL rot → HFL</label>
+            <input class="term-inp" type="number" id="pBA2" min="0" max="100" step="0.01" inputmode="decimal" placeholder="%" oninput="calc()">
+          </div>
+        </div>
+        <!-- Schleife 2 Kette -->
+        <div id="chain-a2-s2" class="chain-display" style="margin-bottom:4px"></div>
+        <div class="sum-chk" id="sum-a2"></div>
+
+        <div class="side-lbl" style="margin-top:18px">Messung am Messpunkt B (optional)</div>
+
+        <!-- Schleife 3 Kette -->
+        <div id="chain-b2-s3" class="chain-display" style="margin-bottom:6px"></div>
+        <!-- Eingaben S3 + S4 nebeneinander -->
+        <div class="term-pair" style="margin-bottom:6px">
+          <div class="term-field tf-r">
+            <label><span class="tdot r"></span> Schleife 3 · MKL rot → Meldeader</label>
+            <input class="term-inp" type="number" id="pRB2" min="0" max="100" step="0.01" inputmode="decimal" placeholder="%" oninput="calc()">
+          </div>
+          <div class="term-field tf-b">
+            <label><span class="tdot b"></span> Schleife 4 · MKL rot → HFL</label>
+            <input class="term-inp" type="number" id="pBB2" min="0" max="100" step="0.01" inputmode="decimal" placeholder="%" oninput="calc()">
+          </div>
+        </div>
+        <!-- Schleife 4 Kette -->
+        <div id="chain-b2-s4" class="chain-display" style="margin-bottom:4px"></div>
+        <div class="sum-chk" id="sum-b2"></div>
+        <p style="font-size:11px;color:var(--text2);margin-top:12px;line-height:1.5">
+          <b>Schleife 1 ≈ Schleife 4</b> · MP-A-Seite — sollten übereinstimmen.<br>
+          <b>Schleife 2 ≈ Schleife 3</b> · MP-B-Seite — sollten übereinstimmen.
+        </p>
+      </div>
+    </div>
+  </div>
+
+  <!-- ERGEBNIS (unten) -->
+  <div class="results" id="results">
+    <div class="res-title">📍 Ergebnis</div>
+    <div class="no-res" id="no-res">Leitungsdaten und Messwerte eingeben.</div>
+    <div id="res-content" style="display:none">
+
+      <div class="chips" id="chips"></div>
+
+      <!-- Tab R_ges -->
+      <div class="res-tabs" id="res-tabs" style="display:none">
+        <button class="res-tab active" id="tab-calc" onclick="switchTab('calc')">R<sub>ges</sub> berechnet</button>
+        <button class="res-tab" id="tab-man" onclick="switchTab('man')">R<sub>ges</sub> manuell</button>
+      </div>
+
+      <!-- Pane: berechnet -->
+      <div class="res-pane active" id="pane-calc">
+
+        <!-- Duale Skala -->
+        <div id="dual-scale-calc"></div>
+
+        <!-- Meldeader 1 Detailzeilen -->
+        <div id="detail-calc-1" style="margin-top:10px"></div>
+
+        <!-- Meldeader 2 Detailzeilen -->
+        <div id="detail-calc-2" style="margin-top:6px"></div>
+
+        <!-- Konsistenz & Empfehlung -->
+        <div class="cons" id="cons-calc"></div>
+        <div class="rec-box" id="rec-calc" style="display:none"></div>
+      </div>
+
+      <!-- Pane: manuell -->
+      <div class="res-pane" id="pane-man">
+        <div id="dual-scale-man"></div>
+        <div id="detail-man-1" style="margin-top:10px"></div>
+        <div id="detail-man-2" style="margin-top:6px"></div>
+        <div class="cons" id="cons-man"></div>
+        <div class="rec-box" id="rec-man" style="display:none"></div>
+      </div>
+
+      <button class="pdf-btn" onclick="exportPDF()">📄 Messbericht als PDF exportieren</button>
+    </div>
+  </div>
+
+</div>
+<script>
+const RHO_CU=0.01724;
+const WIRE_R20={nicr:5.820,curet:0.03517,cu15:0.01149};
+const WIRE_ALPHA={nicr:0.00017,curet:0.00393,cu15:0.00393};
+const WIRE_NAME={nicr:'Brandes Fühlerader NiCr 80/20',curet:'Brandes Rückführader Cu 0,490 mm²',cu15:'Nordic Cu blank 1,5 mm²'};
+
+// ρ-Quellen je Adertyp
+const RHO_SOURCES={
+  cu15:[
+    {id:'iec_nom',  rho:0.01724, r:0.01149, label:'IEC 60228 · Nominalwert',
+     desc:'ρ = 0,01724 Ω·mm²/m · Berechnungsnominalwert für Cu-Leiter nach IEC-Norm. Standardwert.'},
+    {id:'pure_cu',  rho:0.01708, r:0.01139, label:'Reinkupfer theoretisch',
+     desc:'ρ = 0,01708 Ω·mm²/m · Theoretischer Wert für 100 % reines Kupfer bei 20 °C. In der Praxis nicht erreichbar.'},
+    {id:'praxis',   rho:0.01750, r:0.01167, label:'Praxiswert Leitungsdraht',
+     desc:'ρ = 0,01750 Ω·mm²/m · Typischer Mittelwert für handelsüblichen Cu-Leitungsdraht inkl. Legierungsanteile.'},
+    {id:'iec_max',  rho:0.01777, r:0.01185, label:'IEC 60228 · Max. Grenzwert',
+     desc:'ρ = 0,01777 Ω·mm²/m · Maximaler zulässiger Widerstand für Klasse-1-Leiter 1,5 mm² nach IEC 60228. Konservativster Wert.'},
+  ],
+  curet:[
+    {id:'iec_nom',  rho:0.01724, r:0.03517, label:'IEC 60228 · Nominalwert',
+     desc:'ρ = 0,01724 Ω·mm²/m · Nominalwert Cu nach IEC. r = ρ/0,490 mm² = 0,03517 Ω/m.'},
+    {id:'pure_cu',  rho:0.01708, r:0.03486, label:'Reinkupfer theoretisch',
+     desc:'ρ = 0,01708 Ω·mm²/m · Theoretischer Reinwert. r = 0,03486 Ω/m.'},
+    {id:'praxis',   rho:0.01750, r:0.03571, label:'Praxiswert Leitungsdraht',
+     desc:'ρ = 0,01750 Ω·mm²/m · Praxistypischer Mittelwert. r = 0,03571 Ω/m.'},
+    {id:'iec_max',  rho:0.01777, r:0.03626, label:'IEC 60228 · Max. Grenzwert',
+     desc:'ρ = 0,01777 Ω·mm²/m · Maximaler IEC-Grenzwert. r = 0,03626 Ω/m.'},
+  ],
+  nicr:[
+    {id:'nicr_nom', rho:1.100, r:5.820, label:'Herstellerangabe Brandes · Nennwert',
+     desc:'ρ = 1,100 Ω·mm²/m · Offizieller Nennwert laut Brandes-Systemdokumentation. Standardwert.'},
+    {id:'nicr_iec', rho:1.090, r:5.767, label:'IEC/DIN NiCr80 · Nominalwert',
+     desc:'ρ = 1,090 Ω·mm²/m · Normwert für NiCr 80/20-Widerstandslegierung nach IEC/DIN. Etwas tiefer als Brandes-Nennwert.'},
+    {id:'nicr_praxis', rho:1.120, r:5.926, label:'Praxiswert · Alterung / Oxidation',
+     desc:'ρ = 1,120 Ω·mm²/m · Erfahrungswert für gealterte oder leicht oxidierte NiCr-Adern. Konservativster Ansatz für ältere Leitungen.'},
+  ],
+};
+
+const RHO_TITLE={cu15:'Cu 1,5 mm²', curet:'Cu 0,490 mm² (Rückführader)', nicr:'NiCr 80/20 · 0,189 mm²'};
+
+// Aktiv gewählte ρ-Quelle je Abschnitt
+let rhoSel={1:{cu15:'iec_nom',curet:'iec_nom',nicr:'nicr_nom'},
+            2:{cu15:'iec_nom',curet:'iec_nom',nicr:'nicr_nom'}};
+
+function getRhoR(abschnitt, wireType){
+  const sources=RHO_SOURCES[wireType]||[];
+  const selId=rhoSel[abschnitt][wireType];
+  const src=sources.find(s=>s.id===selId)||sources[0];
+  return src?src.r:WIRE_R20[wireType];
+}
+
+function toggleRho(n){
+  const body=document.getElementById('rho-body-'+n);
+  const arr=document.getElementById('rho-arr-'+n);
+  const open=body.style.display==='none';
+  body.style.display=open?'block':'none';
+  arr.textContent=open?'▼':'▶';
+  if(open) renderRhoOpts(n);
+}
+
+function renderRhoOpts(n){
+  const wt=document.getElementById('wire-type'+(n===1?'':'2')).value;
+  const sources=RHO_SOURCES[wt]||[];
+  const selId=rhoSel[n][wt];
+  const el=document.getElementById('rho-opts-'+n);
+  el.innerHTML=sources.map(s=>{
+    const active=selId===s.id;
+    return `<div onclick="selectRho(${n},'${s.id}')" style="
+      padding:10px 11px;cursor:pointer;border-bottom:1px solid var(--border);
+      background:${active?'rgba(200,164,90,0.12)':'transparent'}">
+      <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:3px">
+        <span style="font-size:12px;font-weight:600;color:${active?'#C8A45A':'#C0C8D8'}">${s.label}</span>
+        <span style="font-size:12px;font-weight:700;color:${active?'#C8A45A':'#E8F4FF'};font-variant-numeric:tabular-nums">${s.r.toFixed(5)} Ω/m</span>
+      </div>
+      <div style="font-size:11px;color:var(--text2);line-height:1.4">${s.desc}</div>
+      ${active?'<div style="font-size:10px;color:#C8A45A;margin-top:3px;font-weight:600">✓ AKTIV</div>':''}
+    </div>`;
+  }).join('');
+}
+
+function selectRho(n,id){
+  const wt=document.getElementById('wire-type'+(n===1?'':'2')).value;
+  rhoSel[n][wt]=id;
+  const src=(RHO_SOURCES[wt]||[]).find(s=>s.id===id);
+  if(src) WIRE_R20[wt]=src.r;
+  renderRhoOpts(n);
+  updateRhoActiveDisplay(n);
+  if(n===1) onWireType(); else onWireType2();
+}
+
+function updateRhoActiveDisplay(n){
+  const wt=document.getElementById('wire-type'+(n===1?'':'2')).value;
+  const sources=RHO_SOURCES[wt]||[];
+  const selId=rhoSel[n][wt];
+  const src=sources.find(s=>s.id===selId)||sources[0];
+  const el=document.getElementById('rho-active-'+n);
+  if(el&&src) el.textContent=src.label+' · '+src.r.toFixed(5)+' Ω/m';
+}
+
+function toggleTemp(n){
+  const body=document.getElementById('temp-body-'+n);
+  const arr=document.getElementById('temp-arr-'+n);
+  const open=body.style.display==='none';
+  body.style.display=open?'block':'none';
+  arr.textContent=open?'▼':'▶';
+}
+
+function selectTemp(n, val, label){
+  const inp=document.getElementById('temp-op'+(n===1?'':'2'));
+  inp.value=val;
+  document.getElementById('temp-active-'+n).textContent=label;
+  // close foldout
+  document.getElementById('temp-body-'+n).style.display='none';
+  document.getElementById('temp-arr-'+n).textContent='▶';
+  if(n===1) onWireType(); else onWireType2();
+}
+
+function onTempManual(n){
+  // clear preset label when user types manually
+  const el=document.getElementById('temp-active-'+n);
+  if(el) el.textContent='';
+  if(n===1) onWireType(); else onWireType2();
+}
+function updateRhoPanel(n, wt){
+  const panel=document.getElementById('rho-panel-'+n);
+  const title=document.getElementById('rho-title-'+n);
+  if(RHO_SOURCES[wt]){
+    panel.style.display='block';
+    title.textContent='ρ-Quelle wählen · '+(RHO_TITLE[wt]||wt);
+    const src=(RHO_SOURCES[wt]||[]).find(s=>s.id===rhoSel[n][wt]);
+    if(src) WIRE_R20[wt]=src.r;
+    updateRhoActiveDisplay(n);
+  } else {
+    panel.style.display='none';
+  }
+}
+const SEG=70,MAX_AUX=5;
+let auxIdx=0,auxCount=0,segOpen=false,activeTab='calc';
+
+// 2 NK erzwingen
+document.addEventListener('input',function(e){
+  const el=e.target;
+  if(el.type!=='number') return;
+  const v=el.value;
+  if(v===''||v==='-') return;
+  const d=v.indexOf('.');
+  if(d!==-1&&v.length-d-1>2){el.value=parseFloat(v).toFixed(2);el.dispatchEvent(new Event('input',{bubbles:false}));}
+},true);
+
+function init(){
+  const g=document.getElementById('seg-grid');
+  for(let i=0;i<SEG;i++){
+    const inp=document.createElement('input');
+    inp.type='number';inp.className='seg-inp';inp.min='0';inp.step='0.01';inp.placeholder=i+1;
+    inp.oninput=onSeg;g.appendChild(inp);
+  }
+  addAux();onWireType();onWireType2();updateChainDisplay();
+}
+
+function toggleCard(id){
+  const b=document.getElementById(id),a=document.getElementById('arr-'+id);
+  a.classList.toggle('open',b.classList.toggle('open'));
+}
+function switchTab(t){
+  activeTab=t;
+  ['calc','man'].forEach(s=>{
+    document.getElementById('tab-'+s).classList.toggle('active',s===t);
+    document.getElementById('pane-'+s).classList.toggle('active',s===t);
+  });
+}
+
+// ── Abschnitt 1 ──────────────────────────────────────
+function getRpm(){
+  const t=document.getElementById('wire-type').value;
+  const T=parseFloat(document.getElementById('temp-op').value);
+  const temp=(!isNaN(T)&&T>=0)?T:20;
+  return WIRE_R20[t]*(1+WIRE_ALPHA[t]*(temp-20));
+}
+function onWireType(){
+  const t=document.getElementById('wire-type').value;
+  updateRhoPanel(1,t);
+  const r=getRpm(),r20=WIRE_R20[t];
+  document.getElementById('r-per-m-lbl').textContent=fRpm(r)+' Ω/m';
+  const T=parseFloat(document.getElementById('temp-op').value);
+  const ti=document.getElementById('temp-info');
+  if(!isNaN(T)&&T!==20){
+    const c=((r-r20)/r20*100);
+    ti.textContent=`Korrektur bei ${T}°C: ${c>=0?'+':''}${c.toFixed(2)}% ggü. 20°C`;
+  } else { ti.textContent=''; }
+  updateRMain();calc();
+}
+
+// ── Abschnitt 2 ──────────────────────────────────────
+function isSec2Active(){return document.getElementById('sec2-active').checked;}
+function toggleSec2(){
+  document.getElementById('sec2-panel').style.display=isSec2Active()?'block':'none';
+  updateChainDisplay();updateRgesDisplay();calc();
+}
+function getRpm2(){
+  const t=document.getElementById('wire-type2').value;
+  const T=parseFloat(document.getElementById('temp-op2').value);
+  const temp=(!isNaN(T)&&T>=0)?T:20;
+  return WIRE_R20[t]*(1+WIRE_ALPHA[t]*(temp-20));
+}
+function getLen2(){
+  // Leer = gleiche Länge wie Abschnitt 1
+  const v=parseFloat(document.getElementById('len-total2').value);
+  return (!isNaN(v)&&v>0)?v:getLen();
+}
+function getSec2R(){
+  if(!isSec2Active()) return 0;
+  return getLen2()*getRpm2();
+}
+function onWireType2(){
+  const t=document.getElementById('wire-type2').value;
+  updateRhoPanel(2,t);
+  const r=getRpm2(),r20=WIRE_R20[t];
+  document.getElementById('r-per-m-lbl2').textContent=fRpm(r)+' Ω/m';
+  const panel=document.getElementById('rho-panel-2');
+  if(t==='cu15'){
+    panel.style.display='block';
+    const src=(RHO_SOURCES.cu15||[]).find(s=>s.id===rhoSel[2].cu15);
+    if(src) WIRE_R20.cu15=src.r;
+  } else {
+    panel.style.display='none';
+  }
+  const T=parseFloat(document.getElementById('temp-op2').value);
+  const ti=document.getElementById('temp-info2');
+  if(!isNaN(T)&&T!==20){
+    const c=((r-r20)/r20*100);
+    ti.textContent=`Korrektur bei ${T}°C: ${c>=0?'+':''}${c.toFixed(2)}% ggü. 20°C`;
+  } else { ti.textContent=''; }
+  updateRMain();calc();
+}
+
+// ── Ra = R_HFL + R_Abschnitt2 (beide können 0 sein) ──
+function getRa(){return getAuxR()+getSec2R();}
+
+function toggleSeg(){
+  segOpen=!segOpen;
+  document.getElementById('seg-panel').classList.toggle('open',segOpen);
+  document.getElementById('seg-arr').textContent=segOpen?'▼':'▶';
+}
+function onSeg(){
+  document.getElementById('seg-sum').textContent=fL(getSegSum())+' m';calc();
+}
+function getSegSum(){
+  let s=0;document.querySelectorAll('#seg-grid .seg-inp').forEach(i=>s+=parseFloat(i.value)||0);return s;
+}
+function useSeg(){document.getElementById('len-total').value=getSegSum().toFixed(2);updateRMain();calc();}
+function clearSeg(){
+  document.querySelectorAll('#seg-grid .seg-inp').forEach(i=>i.value='');
+  document.getElementById('seg-sum').textContent='0,00 m';
+  calc();
+}
+function getLen(){return parseFloat(document.getElementById('len-total').value)||0;}
+function onLen1(){updateRMain();calc();}
+function updateRMain(){
+  const L=getLen(),r=getRpm();
+  document.getElementById('r-main-lbl').textContent=(L>0&&r>0)?fR4(L*r)+' Ω':'–';
+  document.getElementById('bdg1').textContent=L>0?fL(L)+' m':'–';
+  // Abschnitt 2 Anzeige aktualisieren
+  if(isSec2Active()){
+    const L2=getLen2(),r2=getRpm2();
+    document.getElementById('r-main-lbl2').textContent=(L2>0&&r2>0)?fR4(L2*r2)+' Ω':'–';
+  }
+  updateRgesDisplay();
+}
+
+function addAux(){
+  if(auxCount>=MAX_AUX) return;
+  auxCount++;
+  const id='ax'+(++auxIdx),div=document.createElement('div');
+  div.className='aux-row';div.id=id;
+  div.innerHTML=`<input class="fld" type="text" placeholder="HFL ${auxCount}" style="font-size:13.5px;padding:9px 10px">
+    <input class="fld" type="number" min="0" step="0.01" placeholder="0,00"
+           style="font-size:13.5px;padding:9px 10px;text-align:right" oninput="updateAux()">
+    <button class="btn-rm" onclick="removeAux('${id}')">✕</button>`;
+  document.getElementById('aux-list').appendChild(div);
+  if(auxCount>=MAX_AUX) document.getElementById('btn-add').disabled=true;
+  updateAux();
+}
+function removeAux(id){
+  const el=document.getElementById(id);if(el){el.remove();auxCount--;}
+  document.getElementById('btn-add').disabled=false;updateAux();
+}
+function getAuxR(){
+  let s=0;document.querySelectorAll('#aux-list .aux-row input[type="number"]').forEach(i=>s+=parseFloat(i.value)||0);return s;
+}
+function updateAux(){
+  const R=getAuxR();
+  document.getElementById('r-aux-lbl').textContent=R.toFixed(2)+' Ω';
+  document.getElementById('bdg2').textContent=R.toFixed(2)+' Ω';
+  updateChainDisplay();updateRgesDisplay();calc();
+}
+
+function calcKA(side){
+  const cross=document.getElementById('ka-'+side+'-cross').value;
+  document.getElementById('ka-'+side+'-ohm-wrap').style.display=cross==='cust'?'block':'none';
+  const R=getKAR(side);
+  document.getElementById('ka-'+side+'-r').textContent=R.toFixed(2)+' Ω';
+  document.getElementById('bdg3').textContent=(getKAR('a')||getKAR('b'))?'aktiv':'optional';
+  updateChainDisplay();updateRgesDisplay();calc();
+}
+function getKAR(side){
+  const cross=document.getElementById('ka-'+side+'-cross').value;
+  if(cross==='0') return 0;
+  if(cross==='cust') return parseFloat(document.getElementById('ka-'+side+'-ohm').value)||0;
+  return (RHO_CU/parseFloat(cross))*(parseFloat(document.getElementById('ka-'+side+'-len').value)||0);
+}
+
+function getRgesCalc(){return getKAR('a')+(getLen()*getRpm())+getKAR('b')+getRa();}
+function updateRgesDisplay(){
+  const Rc=getRgesCalc(),Rm=parseFloat(document.getElementById('rges-man').value)||0;
+  document.getElementById('rges-calc-lbl').textContent=Rc>0?fR4(Rc)+' Ω':'–';
+  document.getElementById('bdg4').textContent=Rc>0?fR4(Rc)+' Ω':'–';
+  if(Rm>0){
+    document.getElementById('rges-man-lbl').textContent=fR4(Rm)+' Ω';
+    const diff=Math.abs(Rc-Rm),pct=Rc>0?(diff/Rc*100):0;
+    const el=document.getElementById('rges-diff');el.style.display='block';
+    if(pct<=2){el.className='rges-diff ok';el.textContent=`Δ ${fR4(diff)} Ω (${pct.toFixed(1)}%) – konsistent`;}
+    else{el.className='rges-diff warn';el.textContent=`Δ ${fR4(diff)} Ω (${pct.toFixed(1)}%) – Abweichung prüfen`;}
+  } else {
+    document.getElementById('rges-man-lbl').textContent='–';
+    document.getElementById('rges-diff').style.display='none';
+  }
+}
+
+function checkSum(elId,a,b){
+  const el=document.getElementById(elId);
+  if(isNaN(a)||isNaN(b)){el.textContent='';el.className='sum-chk';return;}
+  const s=a+b,d=Math.abs(s-100);
+  if(d<=1.0){el.className='sum-chk ok';el.textContent=`✓ Summe: ${s.toFixed(1)} % – konsistent`;}
+  else if(d<=3.5){el.className='sum-chk wn';el.textContent=`⚠ Summe: ${s.toFixed(1)} % – geringe Abweichung`;}
+  else{el.className='sum-chk er';el.textContent=`✗ Summe: ${s.toFixed(1)} % – Messkreis prüfen`;}
+}
+
+function nd(cls,txt){return `<span class="ch-node ${cls}">${txt}</span>`;}
+function ar(){return `<span class="ch-arrow">▶</span>`;}
+function nassNode(){return `<span class="ch-node ch-nass">💧</span><div style="flex-basis:100%;height:0"></div>`;}
+function row(lbl,nodes){
+  let h=`<div class="chain-row" style="flex-wrap:wrap"><span class="ms-lbl">${lbl}</span>`;
+  nodes.forEach((n,i)=>{if(i>0)h+=ar();h+=n;});
+  return h+`</div>`;
+}
+
+function updateChainDisplay(){
+  const rkaA=getKAR('a'),rkaB=getKAR('b');
+  const sec2=isSec2Active();
+  const hasHFL=getAuxR()>0;
+  // Rückwegknoten: Abschnitt 2 hat Vorrang, danach HFL, sonst Warnung
+  const retNode = sec2
+    ? nd('ch-hfl','Abs.2 (RL)')
+    : nd('ch-hfl', hasHFL ? 'HFL' : 'HFL⚠');
+
+  // Fall 1: MKL rot → [KA-A] → Meldeader → 💧 → Meldeader → [KA-B] → MP-B → Rückweg → MKL blau
+  const f1=[nd('ch-mklr','MKL rot')];
+  if(rkaA>0)f1.push(nd('ch-ka','KA-A'));
+  f1.push(nd('ch-fw','Meldeader'),nassNode(),nd('ch-fw','Meldeader'));
+  if(rkaB>0)f1.push(nd('ch-ka','KA-B'));
+  f1.push(nd('ch-ka','MP-B'),retNode,nd('ch-mklb','MKL blau'));
+
+  // Fall 2: MKL rot → Rückweg → MP-B → [KA-B] → Meldeader → 💧 → Meldeader → [KA-A] → MKL blau
+  const f2=[nd('ch-mklr','MKL rot'),retNode,nd('ch-ka','MP-B')];
+  if(rkaB>0)f2.push(nd('ch-ka','KA-B'));
+  f2.push(nd('ch-fw','Meldeader'),nassNode(),nd('ch-fw','Meldeader'));
+  if(rkaA>0)f2.push(nd('ch-ka','KA-A'));
+  f2.push(nd('ch-mklb','MKL blau'));
+
+  // Fall 3: MKL rot → [KA-B] → Meldeader → 💧 → Meldeader → [KA-A] → MP-A → Rückweg → MKL blau
+  const f3=[nd('ch-mklr','MKL rot')];
+  if(rkaB>0)f3.push(nd('ch-ka','KA-B'));
+  f3.push(nd('ch-fw','Meldeader'),nassNode(),nd('ch-fw','Meldeader'));
+  if(rkaA>0)f3.push(nd('ch-ka','KA-A'));
+  f3.push(nd('ch-ka','MP-A'),retNode,nd('ch-mklb','MKL blau'));
+
+  // Fall 4: MKL rot → Rückweg → MP-A → [KA-A] → Meldeader → 💧 → Meldeader → [KA-B] → MKL blau
+  const f4=[nd('ch-mklr','MKL rot'),retNode,nd('ch-ka','MP-A')];
+  if(rkaA>0)f4.push(nd('ch-ka','KA-A'));
+  f4.push(nd('ch-fw','Meldeader'),nassNode(),nd('ch-fw','Meldeader'));
+  if(rkaB>0)f4.push(nd('ch-ka','KA-B'));
+  f4.push(nd('ch-mklb','MKL blau'));
+
+  // Schleife 1: MKL rot → Meldeader (MP-A)
+  const c1=row('Schleife 1',f1);
+  // Schleife 2: MKL rot → HFL (MP-A)
+  const c2=row('Schleife 2',f2);
+  // Schleife 3: MKL rot → Meldeader (MP-B)
+  const c3=row('Schleife 3',f3);
+  // Schleife 4: MKL rot → HFL (MP-B)
+  const c4=row('Schleife 4',f4);
+
+  // Meldeader 1
+  ['chain-a-s1','chain-a2-s1'].forEach(id=>{const el=document.getElementById(id);if(el)el.innerHTML=c1;});
+  ['chain-a-s2','chain-a2-s2'].forEach(id=>{const el=document.getElementById(id);if(el)el.innerHTML=c2;});
+  ['chain-b-s3','chain-b2-s3'].forEach(id=>{const el=document.getElementById(id);if(el)el.innerHTML=c3;});
+  ['chain-b-s4','chain-b2-s4'].forEach(id=>{const el=document.getElementById(id);if(el)el.innerHTML=c4;});
+}
+
+// calc2: identische Logik wie calc(), liest aber pRA2/pBA2/pRB2/pBB2
+// Ergebnis wird separat in pane-calc2/pane-man2 ausgegeben (noch nicht verdrahtet —
+// Meldeader 2 Messwerte werden im PDF als eigener Block ausgegeben)
+function calc2(){
+  checkSum('sum-a2',
+    parseFloat(document.getElementById('pRA2').value),
+    parseFloat(document.getElementById('pBA2').value));
+  checkSum('sum-b2',
+    parseFloat(document.getElementById('pRB2').value),
+    parseFloat(document.getElementById('pBB2').value));
+}
+
+// ═══ GEWICHTETE BERECHNUNG ═══════════════════════════════
+// Offset-Widerstände je Fall (was MKL rot "vor" der Nassstelle trägt ausser Meldeader):
+// x₁: R_KA-A                    → kleiner Offset, hohe Genauigkeit
+// x₂: R_HFL + R_KA-B            → grosser Offset, niedrige Genauigkeit
+// x₃: R_KA-B                    → kleiner Offset, gute Genauigkeit
+// x₄: R_HFL + R_KA-A            → grosser Offset, niedrige Genauigkeit
+function getOffsets(){
+  const Ra=getRa(),Rka=getKAR('a'),Rkb=getKAR('b');
+  return [Rka, Ra+Rkb, Rkb, Ra+Rka]; // Fall 1,2,3,4
+}
+function getWeights(offsets){
+  const eps=0.001;
+  const raw=offsets.map(o=>1/(o+eps));
+  const sum=raw.reduce((a,b)=>a+b,0);
+  return raw.map(w=>w/sum); // normiert: Summe=1
+}
+
+function renderDualScale(L, sets, suffix){
+  const el=document.getElementById('dual-scale-'+suffix);
+  const lblB='MP-B  '+fL(L)+' m';
+  const COL=['#E74C3C','#3A8BBF','#27AE60','#D4AC0D'];
+  // P%-rot Werte für Strichlänge: Fall 1 + Fall 3 haben MKL rot direkt (kein HFL-Offset)
+  // Nähe = P%_rot für Fall 1 und Fall 3; für Fall 2 und 4 = (100 - P%_blau) = P%_rot-äquiv.
+  // Einfacher: Strichlänge = Gewicht normiert auf 6..28px
+  const MIN_H=6, MAX_H=28;
+  const weights=getWeights(getOffsets());
+  const maxW=Math.max(...weights);
+
+  let html='<div class="dual-scale">';
+  sets.forEach((s,si)=>{
+    const rowH = MAX_H + 44;
+    const trackTop = MAX_H/2 + 14; // mehr Platz oben für MP-Labels
+    html+=`<div class="ds-label">${s.label}</div>`;
+    html+=`<div class="ds-row" style="height:${rowH}px">`;
+    html+=`<div class="ds-track" style="top:${trackTop}px"></div>`;
+
+    // MP-A / MP-B Labels knapp OBERHALB der Skala
+    html+=`<div class="ds-lbl-a" style="top:${(trackTop-12).toFixed(0)}px">MP-A</div>`;
+    html+=`<div class="ds-lbl-b" style="top:${(trackTop-12).toFixed(0)}px">${fL(L)} m</div>`;
+
+    // 5 Orientierungsmarken: reiner Zahlenwert, kein Nachkomma, keine Einheit
+    for(let t=1;t<=5;t++){
+      const tp=(t/6*100).toFixed(2);
+      const tickVal=Math.round(L*t/6);
+      // Strich: 8px unterhalb Track-Mitte (Abstand vergrössert)
+      html+=`<div style="position:absolute;left:${tp}%;top:${(trackTop+3).toFixed(0)}px;
+        width:1px;height:8px;background:rgba(255,255,255,.18);transform:translateX(-50%)"></div>`;
+      // Zahl: 14px unterhalb Track-Mitte
+      html+=`<div style="position:absolute;left:${tp}%;top:${(trackTop+13).toFixed(0)}px;
+        font-size:8px;color:rgba(255,255,255,.28);transform:translateX(-50%);white-space:nowrap">${tickVal}</div>`;
+    }
+
+    // Striche pro Messwert
+    s.xs.forEach((x,i)=>{
+      if(x===null||!s.enabled[i]) return;
+      const pct=Math.max(0,Math.min(100,x/L*100));
+      const h=MIN_H+(MAX_H-MIN_H)*(weights[i]/maxW);
+      const top=trackTop-h/2;
+      html+=`<div style="position:absolute;left:${pct.toFixed(2)}%;
+        top:${top.toFixed(1)}px;width:3px;height:${h.toFixed(1)}px;
+        background:${COL[i]};border-radius:2px;transform:translateX(-50%);
+        transition:left .3s"></div>`;
+    });
+    // Deaktivierte Striche
+    s.xs.forEach((x,i)=>{
+      if(x===null||s.enabled[i]) return;
+      const pct=Math.max(0,Math.min(100,x/L*100));
+      html+=`<div style="position:absolute;left:${pct.toFixed(2)}%;
+        top:${(trackTop-3).toFixed(1)}px;width:3px;height:6px;
+        background:rgba(255,255,255,.15);border-radius:2px;transform:translateX(-50%);
+        transition:left .3s"></div>`;
+    });
+
+    html+='</div>';
+    if(si<sets.length-1) html+='<div class="ds-sep"></div>';
+  });
+  html+='</div>';
+  el.innerHTML=html;
+}
+
+function renderDetailRows(L, xs, weights, enabled, mean, suffix, maderIdx){
+  const el=document.getElementById('detail-'+suffix+'-'+maderIdx);
+  const COL=['#E74C3C','#3A8BBF','#27AE60','#D4AC0D'];
+  const FALL=['Schleife 1','Schleife 2','Schleife 3','Schleife 4'];
+  const maxW=Math.max(...weights);
+  // Header
+  let html=`<div class="mader-hdr" style="color:rgba(255,255,255,.4)">Meldeader ${maderIdx}</div>`;
+  xs.forEach((x,i)=>{
+    const dis=!enabled[i]||(x===null);
+    const wPct=(weights[i]/maxW*100).toFixed(0);
+    const delta=(!dis&&mean!==null)?Math.abs(x-mean):null;
+    html+=`<div class="det-row">
+      <input type="checkbox" class="det-chk" ${enabled[i]?'checked':''} onchange="toggleMeas(${maderIdx},${i},this.checked,'${suffix}')">
+      <span class="det-fall" style="color:${dis?'rgba(255,255,255,.2)':COL[i]}">${FALL[i]}</span>
+      <span class="det-val${dis?' disabled':''}">${x!==null?fL(x)+' m':'–'}</span>
+      <div class="det-wbar-wrap">
+        <div class="det-wbar" style="width:${dis?0:wPct}%;background:${COL[i]}"></div>
+      </div>
+      <span class="det-wlbl${dis?' disabled':''}">${dis?'–':(weights[i]*100).toFixed(0)+'%'}</span>
+      <span class="det-delta">${delta!==null?'Δ '+fL(delta)+' m':'–'}</span>
+    </div>`;
+  });
+  // Mean strip
+  if(mean!==null){
+    const validW=weights.filter((_,i)=>enabled[i]&&xs[i]!==null);
+    const sw=validW.reduce((a,b)=>a+b,0);
+    const sigma=Math.sqrt(xs.reduce((s,x,i)=>!enabled[i]||x===null?s:s+(x-mean)**2*weights[i],0)/sw);
+    const maxD=Math.max(...xs.map((x,i)=>(!enabled[i]||x===null)?0:Math.abs(x-mean)));
+    html+=`<div class="mean-strip">
+      <div><div class="ms-lbl">⌀ gewichtet · Meldeader ${maderIdx}</div>
+           <div class="ms-val">${fL(mean)} m</div>
+           <div class="ms-sub">${fL(L-mean)} m ab MP-B</div></div>
+      <div class="ms-r"><div class="ms-lbl">σ gewichtet</div>
+           <div class="ms-val" style="font-size:14px">${fL(sigma)} m</div>
+           <div class="ms-sub">max. Δ ${fL(maxD)} m</div></div>
+    </div>`;
+  }
+  el.innerHTML=html;
+}
+
+// enabled-state pro Meldeader: [true,true,true,true]
+let enabled1=[true,true,true,true];
+let enabled2=[true,true,true,true];
+function toggleMeas(maderIdx,i,val,suffix){
+  if(maderIdx===1) enabled1[i]=val; else enabled2[i]=val;
+  calc();
+}
+
+function computeWeightedXs(pRA,pBA,pRB,pBB,Rt,L){
+  const r=getRpm(),Ra=getRa(),Rka=getKAR('a'),Rkb=getKAR('b');
+  function xi(p,mode){
+    if(isNaN(p)||p<0||p>100) return null;
+    const f=p/100;
+    if(mode==='ra') return (f*Rt-Rka)/r;
+    if(mode==='ba') return L-(f*Rt-Ra-Rkb)/r;
+    if(mode==='rb') return L-(f*Rt-Rkb)/r;
+    if(mode==='bb') return (f*Rt-Ra-Rka)/r;
+  }
+  return [xi(pRA,'ra'),xi(pBA,'ba'),xi(pRB,'rb'),xi(pBB,'bb')];
+}
+
+function weightedMean(xs,weights,enabled){
+  let sumW=0,sumWX=0;
+  xs.forEach((x,i)=>{
+    if(x===null||!enabled[i]||x<-0.5) return;
+    sumW+=weights[i]; sumWX+=weights[i]*x;
+  });
+  return sumW>0?sumWX/sumW:null;
+}
+
+function renderResults(Rt,suffix){
+  const L=getLen(),r=getRpm();
+  if(!L||!r||!Rt) return;
+
+  const pRA=parseFloat(document.getElementById('pRA').value);
+  const pBA=parseFloat(document.getElementById('pBA').value);
+  const pRB=parseFloat(document.getElementById('pRB').value);
+  const pBB=parseFloat(document.getElementById('pBB').value);
+  const pRA2=parseFloat(document.getElementById('pRA2').value);
+  const pBA2=parseFloat(document.getElementById('pBA2').value);
+  const pRB2=parseFloat(document.getElementById('pRB2').value);
+  const pBB2=parseFloat(document.getElementById('pBB2').value);
+
+  const offsets=getOffsets();
+  const weights=getWeights(offsets);
+
+  const xs1=computeWeightedXs(pRA,pBA,pRB,pBB,Rt,L);
+  const xs2=computeWeightedXs(pRA2,pBA2,pRB2,pBB2,Rt,L);
+
+  const mean1=weightedMean(xs1,weights,enabled1);
+  const mean2=weightedMean(xs2,weights,enabled2);
+
+  // Sigma für Skala-Band (ungewichtet für Visualisierung)
+  function sigmaOf(xs,enabled,mean){
+    if(mean===null) return 0;
+    const vx=xs.filter((x,i)=>x!==null&&enabled[i]&&x>=-0.5&&x<=L+0.5);
+    if(!vx.length) return 0;
+    return Math.sqrt(vx.reduce((s,x)=>s+(x-mean)**2,0)/vx.length);
+  }
+  const sigma1=sigmaOf(xs1,enabled1,mean1);
+  const sigma2=sigmaOf(xs2,enabled2,mean2);
+
+  const sets=[
+    {xs:xs1,enabled:enabled1,weights,mean:mean1,sigma:sigma1,label:'Meldeader 1',color:'#C0392B'},
+    {xs:xs2,enabled:enabled2,weights,mean:mean2,sigma:sigma2,label:'Meldeader 2',color:'#1A6FA8'},
+  ];
+
+  renderDualScale(L,sets,suffix);
+  renderDetailRows(L,xs1,weights,enabled1,mean1,suffix,1);
+  renderDetailRows(L,xs2,weights,enabled2,mean2,suffix,2);
+
+  // Konsistenz (Meldeader 1 als primär)
+  const ce=document.getElementById('cons-'+suffix);
+  const re=document.getElementById('rec-'+suffix);
+  if(mean1===null){ce.className='cons warn';ce.innerHTML='◑ Messwerte Meldeader 1 eingeben.';return;}
+  const vx1=xs1.filter((x,i)=>x!==null&&enabled1[i]&&x>=-0.5&&x<=L+0.5);
+  const maxD=Math.max(...vx1.map(x=>Math.abs(x-mean1)));
+  let cls,icon,msg;
+  if(maxD<5){cls='good';icon='✓';msg=`<b>Nassstelle</b> · max. Δ ${fL(maxD)} m — Ortung zuverlässig.`;re.style.display='none';}
+  else if(maxD<=10){cls='warn';icon='⚠';msg=`<b>Nasszone</b> · max. Δ ${fL(maxD)} m — ausgedehnte Feuchtigkeit.`;re.style.display='none';}
+  else{
+    cls='bad';icon='✗';msg=`<b>Sondierungsgraben empfohlen</b> · max. Δ ${fL(maxD)} m.`;
+    re.style.display='block';
+    re.innerHTML=`<b>📍 Grabenmittelpunkt:</b> ${fL(mean1)} m ab MP-A · ${fL(L-mean1)} m ab MP-B`;
+  }
+  ce.className='cons '+cls;ce.innerHTML=`<span class="ci">${icon}</span>${msg}`;
+}
+
+function calc(){
+  updateRMain();updateChainDisplay();updateRgesDisplay();
+  const L=getLen(),r=getRpm();
+  const pRA=parseFloat(document.getElementById('pRA').value);
+  const pBA=parseFloat(document.getElementById('pBA').value);
+  const pRB=parseFloat(document.getElementById('pRB').value);
+  const pBB=parseFloat(document.getElementById('pBB').value);
+  const pRA2=parseFloat(document.getElementById('pRA2').value);
+  const pBA2=parseFloat(document.getElementById('pBA2').value);
+  const pRB2=parseFloat(document.getElementById('pRB2').value);
+  const pBB2=parseFloat(document.getElementById('pBB2').value);
+
+  checkSum('sum-a',pRA,pBA);checkSum('sum-b',pRB,pBB);
+  checkSum('sum-a2',pRA2,pBA2);checkSum('sum-b2',pRB2,pBB2);
+
+  const Rc=getRgesCalc();
+  const anyVal=[pRA,pBA,pRB,pBB].some(v=>!isNaN(v));
+  if(!L||!r||!Rc||!anyVal){showEmpty();return;}
+
+  const Rm=parseFloat(document.getElementById('rges-man').value)||0;
+
+  // Chips
+  document.getElementById('chips').innerHTML=
+    `<div class="chip">R<sub>ges</sub> = <b>${fR4(Rc)} Ω</b></div>`+
+    (getAuxR()>0?`<div class="chip">R<sub>HFL</sub> = <b>${getAuxR().toFixed(2)} Ω</b></div>`:'')+
+    (isSec2Active()?`<div class="chip">R<sub>Abs.2</sub> = <b>${fR4(getSec2R())} Ω</b></div>`:'')+
+    (getKAR('a')?`<div class="chip">KA-A = <b>${getKAR('a').toFixed(2)} Ω</b></div>`:'')+
+    (getKAR('b')?`<div class="chip">KA-B = <b>${getKAR('b').toFixed(2)} Ω</b></div>`:'')+
+    `<div class="chip">L = <b>${fL(L)} m</b></div>`;
+
+  document.getElementById('no-res').style.display='none';
+  document.getElementById('res-content').style.display='block';
+
+  renderResults(Rc,'calc');
+
+  const tabs=document.getElementById('res-tabs');
+  if(Rm>0){tabs.style.display='flex';renderResults(Rm,'man');}
+  else{tabs.style.display='none';if(activeTab==='man')switchTab('calc');}
+}
+
+function showEmpty(){
+  document.getElementById('no-res').textContent='Leitungsdaten und Messwerte eingeben.';
+  document.getElementById('no-res').style.display='block';
+  document.getElementById('res-content').style.display='none';
+}
+
+function buildRuler(rid,lid,L,x1,x2,x3,x4,mean){
+  const ruler=document.getElementById(rid);
+  ruler.querySelectorAll('.r-mark').forEach(m=>m.remove());
+  const COL=['#E74C3C','#3A8BBF','#27AE60','#D4AC0D'];
+  [x1,x2,x3,x4].forEach((x,i)=>{
+    if(x===null||x<0||x>L) return;
+    const m=document.createElement('div');m.className='r-mark m'+(i+1);
+    m.style.cssText=`left:${(x/L*100).toFixed(2)}%;background:${COL[i]}`;ruler.appendChild(m);
+  });
+  if(!isNaN(mean)&&mean>=0&&mean<=L){
+    const m=document.createElement('div');m.className='r-mark m-mean';
+    m.style.left=(mean/L*100).toFixed(2)+'%';ruler.appendChild(m);
+  }
+  document.getElementById(lid).innerHTML=
+    ['Schleife 1','Schleife 2','Schleife 3','Schleife 4','⌀ Mittel'].map((n,i)=>
+      `<div class="rl-item"><span class="rl-dot" style="background:${[...COL,'#fff'][i]}"></span>${n}</div>`
+    ).join('');
+}
+
+// ═══ PDF ═══════════════════════════════════════════════
+function exportPDF(){
+  const{jsPDF}=window.jspdf;
+  const doc=new jsPDF({orientation:'portrait',unit:'mm',format:'a4'});
+  const W=210,M=18;let y=M;
+
+  const dk=()=>doc.setTextColor(28,43,58);
+  const gr=()=>doc.setTextColor(90,104,128);
+  const wh=()=>doc.setTextColor(255,255,255);
+  const ln=(h=6)=>{y+=h;};
+  const hl=()=>{doc.setDrawColor(216,220,229);doc.setLineWidth(0.3);doc.line(M,y,W-M,y);ln(4);};
+  const sec=(t)=>{
+    ln(3);doc.setFillColor(27,61,94);doc.rect(M,y,W-2*M,7,'F');
+    doc.setFont('helvetica','bold');doc.setFontSize(9);wh();doc.text(t,M+3,y+5);ln(10);dk();
+  };
+  const rw=(l,v,u='')=>{
+    gr();doc.setFont('helvetica','normal');doc.setFontSize(9);doc.text(l,M,y);
+    dk();doc.setFont('helvetica','bold');doc.text((v||'–')+(u?' '+u:''),M+75,y);ln(6);
+  };
+
+  // Header
+  doc.setFillColor(27,61,94);doc.rect(0,0,W,28,'F');
+  doc.setFont('helvetica','bold');doc.setFontSize(16);wh();doc.text('TipScale · Naesse-Ortung',M,14);
+  doc.setFont('helvetica','normal');doc.setFontSize(9);doc.setTextColor(180,200,220);
+  doc.text('Widerstands-Referenz-Messverfahren · LUWA · Fernwaerme',M,20);
+  const now=new Date();
+  doc.text(now.toLocaleDateString('de-DE'),W-M,20,{align:'right'});
+  y=36;
+
+  // Projekt
+  sec('PROJEKT & IDENTIFIKATION');
+  rw('Kunde / Projekt',document.getElementById('proj-name').value||'–');
+  rw('Leitungs-ID / Messabschnitt',document.getElementById('proj-lid').value||'–');
+
+  // Topologie-Skizze
+  sec('TOPOLOGIE DER MESSSCHLEIFE');
+  const rkaA=getKAR('a'),rkaB=getKAR('b'),Ra=getAuxR();
+  const hasKAA=rkaA>0,hasKAB=rkaB>0,hasHFL=Ra>0;
+
+  function tn(x,yy,txt,active,col){
+    const nw=24,nh=8;
+    doc.setFillColor(...(active?(col||[27,61,94]):[220,225,232]));
+    doc.roundedRect(x,yy,nw,nh,1.5,1.5,'F');
+    doc.setFont('helvetica','bold');doc.setFontSize(6.5);
+    doc.setTextColor(...(active?[255,255,255]:[160,170,185]));
+    doc.text(txt,x+nw/2,yy+nh/2+0.5,{align:'center',baseline:'middle'});
+    // Inaktive Nodes: 2 diagonale Kreuze
+    if(!active){
+      doc.setDrawColor(140,150,160);doc.setLineWidth(0.4);
+      doc.line(x+1,yy+1,x+nw-1,yy+nh-1);
+      doc.line(x+nw-1,yy+1,x+1,yy+nh-1);
+    }
+  }
+  function tl(x1,y1,x2,y2,active){
+    doc.setDrawColor(...(active?[27,61,94]:[210,215,225]));
+    doc.setLineWidth(active?0.6:0.3);doc.line(x1,y1,x2,y2);
+  }
+
+  const sy=y,sx=M;
+  const nw=24; // node width — single source of truth
+  const tNodes=[
+    {x:sx,       t:'MP-A',  a:true,   c:[27,61,94]},
+    {x:sx+32,    t:'KA-A',  a:hasKAA, c:[192,57,43]},
+    {x:sx+66,    t:'Meld.', a:true,   c:[26,95,168]},
+    {x:sx+102,   t:'KA-B',  a:hasKAB, c:[26,95,168]},
+    {x:sx+136,   t:'MP-B',  a:true,   c:[27,61,94]},
+  ];
+  tNodes.forEach((n,i)=>{
+    tn(n.x,sy,n.t,n.a,n.c);
+    if(i<tNodes.length-1) tl(n.x+nw,sy+4,tNodes[i+1].x,sy+4,n.a&&tNodes[i+1].a);
+  });
+
+  // Nassmarker: kleiner roter Kreis zwischen Nodes 2 und 3 (auf Verbindungslinie)
+  const nassX = sx+66 + nw/2; // Mitte von Meld.-Node
+  doc.setFillColor(192,57,43);
+  doc.circle(nassX, sy+4, 2.5, 'F');
+  doc.setDrawColor(255,255,255);doc.setLineWidth(0.5);
+  doc.circle(nassX, sy+4, 2.5, 'S');
+
+  // HFL-Bogen: symmetrisch — beide Streben an der Mitte der Endnodes
+  const hy=sy+19;
+  const hflLeft  = sx + nw/2;           // Mitte MP-A
+  const hflRight = sx+136 + nw/2;       // Mitte MP-B
+  const hflNodeW = 24, hflNodeH = 8;
+  const hflNodeX = (hflLeft+hflRight)/2 - hflNodeW/2; // HFL-Node zentriert
+  tl(hflLeft, sy+8, hflLeft, hy, hasHFL);             // linke Strebe
+  tl(hflLeft, hy, hflRight, hy, hasHFL);              // Querbalken
+  tl(hflRight, hy, hflRight, sy+8, hasHFL);           // rechte Strebe
+  tn(hflNodeX, hy-4, 'HFL', hasHFL,[26,118,78]);
+  // Legende
+  ln(24);
+  doc.setFontSize(7);
+  doc.setFillColor(27,61,94);doc.rect(M,y,4,4,'F');doc.setTextColor(27,61,94);doc.text('Aktiver Teilnehmer',M+6,y+3);
+  doc.setFillColor(220,225,232);doc.rect(M+58,y,4,4,'F');doc.setTextColor(160,170,185);doc.text('Inaktiv / nicht konfiguriert',M+64,y+3);
+  ln(8);hl();
+
+  // Leitungsabschnitt
+  sec('LEITUNGSABSCHNITT & MELDEADER');
+  const wt=document.getElementById('wire-type').value;
+  rw('Abschnitt 1 · Meldeader',WIRE_NAME[wt]);
+  const T=parseFloat(document.getElementById('temp-op').value);
+  rw('Betriebstemperatur Abs. 1',isNaN(T)?'20 (Referenz)':T.toFixed(0),'°C');
+  rw('r Abs. 1 (korrigiert)',fR4(getRpm()),'Ω/m');
+  rw('Gesamtlänge',fL(getLen()),'m');
+  rw('R Abschnitt 1 gesamt',fR4(getLen()*getRpm()),'Ω');
+  if(isSec2Active()){
+    const wt2=document.getElementById('wire-type2').value;
+    const T2=parseFloat(document.getElementById('temp-op2').value);
+    rw('Abschnitt 2 · Meldeader (RL)',WIRE_NAME[wt2]);
+    rw('Betriebstemperatur Abs. 2',isNaN(T2)?'20 (Referenz)':T2.toFixed(0),'°C');
+    rw('r Abs. 2 (korrigiert)',fR4(getRpm2()),'Ω/m');
+    rw('Länge Abschnitt 2',fL(getLen2()),'m');
+    rw('R Abschnitt 2 gesamt',fR4(getSec2R()),'Ω');
+  }
+
+  // HFL & KA
+  sec('HILFSLEITUNGEN & KABELAUSFÜHRUNGEN');
+  rw('R HFL total',getAuxR().toFixed(2),'Ω');
+  if(isSec2Active()) rw('R Abschnitt 2 Rückführung',fR4(getSec2R()),'Ω');
+  rw('R Rückführung total',fR4(getRa()),'Ω');
+  rw('R KA-A',getKAR('a').toFixed(2),'Ω');
+  rw('R KA-B',getKAR('b').toFixed(2),'Ω');
+  rw('R ges (berechnet)',fR4(getRgesCalc()),'Ω');
+  const Rm=parseFloat(document.getElementById('rges-man').value)||0;
+  if(Rm>0) rw('R ges (manuell gemessen)',fR4(Rm),'Ω');
+
+  // Messwerte
+  sec('MESSWERTE — Brückenabgleich (%)');
+  const pRA=parseFloat(document.getElementById('pRA').value);
+  const pBA=parseFloat(document.getElementById('pBA').value);
+  const pRB=parseFloat(document.getElementById('pRB').value);
+  const pBB=parseFloat(document.getElementById('pBB').value);
+  rw('Fall 1 · MP-A · MKL rot → Meldeader',isNaN(pRA)?'–':pRA.toFixed(2),'%');
+  rw('Fall 2 · MP-A · MKL rot → HFL',isNaN(pBA)?'–':pBA.toFixed(2),'%');
+  rw('Fall 3 · MP-B · MKL rot → Meldeader',isNaN(pRB)?'–':pRB.toFixed(2),'%');
+  rw('Fall 4 · MP-B · MKL rot → HFL',isNaN(pBB)?'–':pBB.toFixed(2),'%');
+
+  // Ergebnisfunktion
+  function writeRes(Rt,label){
+    sec('ERGEBNIS — '+label.toUpperCase());
+    const L=getLen(),r=getRpm(),Ra=getRa(),Rka=getKAR('a'),Rkb=getKAR('b');
+    function xi(p,mode){
+      if(isNaN(p)||p<0||p>100) return null;const f=p/100;
+      if(mode==='ra') return (f*Rt-Rka)/r;
+      if(mode==='ba') return L-(f*Rt-Ra-Rkb)/r;
+      if(mode==='rb') return L-(f*Rt-Rkb)/r;
+      if(mode==='bb') return (f*Rt-Ra-Rka)/r;
+    }
+    const xs=[xi(pRA,'ra'),xi(pBA,'ba'),xi(pRB,'rb'),xi(pBB,'bb')];
+    const valid=xs.filter(x=>x!==null&&x>=-0.5&&x<=L+0.5);
+    if(!valid.length){rw('Ergebnis','Keine gültigen Werte');return;}
+    const mean=valid.reduce((a,b)=>a+b,0)/valid.length;
+    const maxD=Math.max(...valid.map(x=>Math.abs(x-mean)));
+    xs.forEach((x,i)=>rw(`x${i+1} (Fall ${i+1})`,x!==null?fL(x):'–','m ab MP-A'));
+    rw('⌀ Nassposition ab MP-A',fL(mean),'m');
+    rw('Nassposition ab MP-B',fL(L-mean),'m');
+    rw('max. Δ zwischen Messungen',fL(maxD),'m');
+    let diag=maxD<5?'Nassstelle (< 5 m)':maxD<=10?'Nasszone (5–10 m)':'Sondierungsgraben empfohlen (> 10 m)';
+    rw('Diagnose',diag);
+    if(maxD>10) rw('Empf. Grabenmittelpunkt',fL(mean)+' m / '+fL(L-mean)+' m ab MP-B');
+  }
+
+  writeRes(getRgesCalc(),'R ges berechnet');
+  if(Rm>0) writeRes(Rm,'R ges manuell');
+
+  // Footer
+  for(let i=1;i<=doc.getNumberOfPages();i++){
+    doc.setPage(i);
+    doc.setFont('helvetica','normal');doc.setFontSize(8);doc.setTextColor(160,170,185);
+    doc.text(`TipScale · Naesse-Ortung · Seite ${i}/${doc.getNumberOfPages()}`,W/2,290,{align:'center'});
+  }
+
+  const lid=document.getElementById('proj-lid').value||'Messung';
+  doc.save(`Messbericht_${lid.replace(/[^a-zA-Z0-9_-]/g,'_')}_${now.toISOString().slice(0,10)}.pdf`);
+}
+
+function fR4(v){
+  if(v===null||isNaN(v)) return '–';
+  if(v>=1000) return (v/1000).toFixed(3)+'k';
+  if(v>=100) return v.toFixed(2);
+  if(v>=10) return v.toFixed(3);
+  return v.toFixed(4);
+}
+// Für spez. Widerstand pro Meter: volle Präzision ohne Rundung (bis 8 signifikante Stellen)
+function fRpm(v){
+  if(v===null||isNaN(v)) return '–';
+  // Entferne trailing zeros aber zeige mindestens 5 Nachkommastellen
+  const s=v.toFixed(8).replace(/0+$/,'');
+  const parts=s.split('.');
+  if(!parts[1]||parts[1].length<5) return v.toFixed(5);
+  return s;
+}
+function fL(v){
+  if(v===null||isNaN(v)) return '–';
+  return Math.abs(v)<10?v.toFixed(2):v.toFixed(1);
+}
+
+init();
+</script>
+</body>
+</html>
