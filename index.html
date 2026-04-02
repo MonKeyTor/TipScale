@@ -282,16 +282,55 @@
       </div>
       <div class="field"><label>Meldeader (Adertyp)</label>
         <select class="fld" id="wire-type" onchange="onWireType()">
-          <option value="nicr">Brandes Fühlerader · NiCr 80/20 · 0,189 mm² · 5,820 Ω/m</option>
-          <option value="curet">Brandes Rückführader · Cu · 0,490 mm² · 0,03517 Ω/m</option>
-          <option value="cu15" selected>Nordic · Cu blank · 1,5 mm² · 0,01149 Ω/m</option>
+          <option value="nicr">Brandes Fühlerader · NiCr 80/20 · 0,189 mm²</option>
+          <option value="curet">Brandes Rückführader · Cu · 0,490 mm²</option>
+          <option value="cu15" selected>Nordic · Cu blank · 1,5 mm²</option>
         </select>
+      </div>
+      <!-- ρ-Quelle — direkt unter Adertyp, über Temperatur -->
+      <div id="rho-panel-1" style="display:block;margin-top:6px;background:#0F1923;border-radius:8px;border:1px solid var(--border);overflow:hidden">
+        <div onclick="toggleRho(1)" style="display:flex;justify-content:space-between;align-items:center;
+             padding:8px 11px;cursor:pointer;user-select:none">
+          <div>
+            <div style="font-size:11px;font-weight:600;color:#C0C8D8;text-transform:uppercase;letter-spacing:.05em"
+                 id="rho-title-1">ρ-Quelle wählen · Cu 1,5 mm²</div>
+            <div id="rho-active-1" style="font-size:11px;color:#C8A45A;margin-top:2px"></div>
+          </div>
+          <span id="rho-arr-1" style="font-size:11px;color:var(--text2);flex-shrink:0;margin-left:8px">▶</span>
+        </div>
+        <div id="rho-body-1" style="display:none;border-top:1px solid var(--border)">
+          <div style="font-size:11px;color:var(--text2);padding:8px 11px 4px;line-height:1.5">
+            Wähle den ρ-Wert passend zur Drahtqualität. Beeinflusst direkt die Positionsberechnung.
+          </div>
+          <div id="rho-opts-1"></div>
+        </div>
       </div>
       <div class="field">
         <label>Betriebstemperatur<span class="beta-tag">Beta</span></label>
+        <!-- Temp-Foldout -->
+        <div style="margin-bottom:6px;background:#0F1923;border-radius:8px;border:1px solid var(--border);overflow:hidden">
+          <div onclick="toggleTemp(1)" style="display:flex;justify-content:space-between;align-items:center;
+               padding:8px 11px;cursor:pointer;user-select:none">
+            <div>
+              <div style="font-size:11px;font-weight:600;color:#C0C8D8;text-transform:uppercase;letter-spacing:.05em">Vorauswahl</div>
+              <div id="temp-active-1" style="font-size:11px;color:#C8A45A;margin-top:2px"></div>
+            </div>
+            <span id="temp-arr-1" style="font-size:11px;color:var(--text2);flex-shrink:0;margin-left:8px">▶</span>
+          </div>
+          <div id="temp-body-1" style="display:none;border-top:1px solid var(--border)">
+            <div onclick="selectTemp(1,45,'Vorlauf allgemein · 45 °C (DS 2)')" style="padding:9px 11px;cursor:pointer;border-bottom:1px solid var(--border)">
+              <div style="font-size:12px;font-weight:600;color:#C0C8D8">Vorlauf allgemein · DS 2</div>
+              <div style="font-size:11px;color:var(--text2);margin-top:2px">45 °C — typischer Vorlauf Niedrigtemperaturnetz</div>
+            </div>
+            <div onclick="selectTemp(1,30,'Rücklauf allgemein · 30 °C (DS 2)')" style="padding:9px 11px;cursor:pointer">
+              <div style="font-size:12px;font-weight:600;color:#C0C8D8">Rücklauf allgemein · DS 2</div>
+              <div style="font-size:11px;color:var(--text2);margin-top:2px">30 °C — typischer Rücklauf Niedrigtemperaturnetz</div>
+            </div>
+          </div>
+        </div>
         <div class="fld-row">
           <input class="fld" type="number" id="temp-op" min="0" max="200" step="1"
-                 placeholder="20 °C (Referenz)" oninput="onWireType()">
+                 placeholder="20 °C (Referenz)" oninput="onTempManual(1)">
           <span class="fld-unit">°C</span>
         </div>
         <div style="font-size:11px;color:var(--text2);margin-top:3px" id="temp-info"></div>
@@ -341,16 +380,55 @@
         </div>
         <div class="field" style="margin-top:0"><label>Meldeader (Adertyp)</label>
           <select class="fld" id="wire-type2" onchange="onWireType2()">
-            <option value="nicr">Brandes Fühlerader · NiCr 80/20 · 0,189 mm² · 5,820 Ω/m</option>
-            <option value="curet">Brandes Rückführader · Cu · 0,490 mm² · 0,03517 Ω/m</option>
-            <option value="cu15" selected>Nordic · Cu blank · 1,5 mm² · 0,01149 Ω/m</option>
+            <option value="nicr">Brandes Fühlerader · NiCr 80/20 · 0,189 mm²</option>
+            <option value="curet">Brandes Rückführader · Cu · 0,490 mm²</option>
+            <option value="cu15" selected>Nordic · Cu blank · 1,5 mm²</option>
           </select>
+        </div>
+        <!-- ρ-Quelle Abschnitt 2 -->
+        <div id="rho-panel-2" style="display:block;margin-top:6px;background:#0F1923;border-radius:8px;border:1px solid var(--border);overflow:hidden">
+          <div onclick="toggleRho(2)" style="display:flex;justify-content:space-between;align-items:center;
+               padding:8px 11px;cursor:pointer;user-select:none">
+            <div>
+              <div style="font-size:11px;font-weight:600;color:#C0C8D8;text-transform:uppercase;letter-spacing:.05em"
+                   id="rho-title-2">ρ-Quelle wählen · Cu 1,5 mm²</div>
+              <div id="rho-active-2" style="font-size:11px;color:#C8A45A;margin-top:2px"></div>
+            </div>
+            <span id="rho-arr-2" style="font-size:11px;color:var(--text2);flex-shrink:0;margin-left:8px">▶</span>
+          </div>
+          <div id="rho-body-2" style="display:none;border-top:1px solid var(--border)">
+            <div style="font-size:11px;color:var(--text2);padding:8px 11px 4px;line-height:1.5">
+              Wähle den ρ-Wert passend zur Drahtqualität. Beeinflusst direkt die Positionsberechnung.
+            </div>
+            <div id="rho-opts-2"></div>
+          </div>
         </div>
         <div class="field">
           <label>Betriebstemperatur<span class="beta-tag">Beta</span></label>
+          <!-- Temp-Foldout Abschnitt 2 -->
+          <div style="margin-bottom:6px;background:#0F1923;border-radius:8px;border:1px solid var(--border);overflow:hidden">
+            <div onclick="toggleTemp(2)" style="display:flex;justify-content:space-between;align-items:center;
+                 padding:8px 11px;cursor:pointer;user-select:none">
+              <div>
+                <div style="font-size:11px;font-weight:600;color:#C0C8D8;text-transform:uppercase;letter-spacing:.05em">Vorauswahl</div>
+                <div id="temp-active-2" style="font-size:11px;color:#C8A45A;margin-top:2px"></div>
+              </div>
+              <span id="temp-arr-2" style="font-size:11px;color:var(--text2);flex-shrink:0;margin-left:8px">▶</span>
+            </div>
+            <div id="temp-body-2" style="display:none;border-top:1px solid var(--border)">
+              <div onclick="selectTemp(2,45,'Vorlauf allgemein · 45 °C (DS 2)')" style="padding:9px 11px;cursor:pointer;border-bottom:1px solid var(--border)">
+                <div style="font-size:12px;font-weight:600;color:#C0C8D8">Vorlauf allgemein · DS 2</div>
+                <div style="font-size:11px;color:var(--text2);margin-top:2px">45 °C — typischer Vorlauf Niedrigtemperaturnetz</div>
+              </div>
+              <div onclick="selectTemp(2,30,'Rücklauf allgemein · 30 °C (DS 2)')" style="padding:9px 11px;cursor:pointer">
+                <div style="font-size:12px;font-weight:600;color:#C0C8D8">Rücklauf allgemein · DS 2</div>
+                <div style="font-size:11px;color:var(--text2);margin-top:2px">30 °C — typischer Rücklauf Niedrigtemperaturnetz</div>
+              </div>
+            </div>
+          </div>
           <div class="fld-row">
             <input class="fld" type="number" id="temp-op2" min="0" max="200" step="1"
-                   placeholder="20 °C (Referenz)" oninput="onWireType2()">
+                   placeholder="20 °C (Referenz)" oninput="onTempManual(2)">
             <span class="fld-unit">°C</span>
           </div>
           <div style="font-size:11px;color:var(--text2);margin-top:3px" id="temp-info2"></div>
@@ -639,6 +717,137 @@ const RHO_CU=0.01724;
 const WIRE_R20={nicr:5.820,curet:0.03517,cu15:0.01149};
 const WIRE_ALPHA={nicr:0.00017,curet:0.00393,cu15:0.00393};
 const WIRE_NAME={nicr:'Brandes Fühlerader NiCr 80/20',curet:'Brandes Rückführader Cu 0,490 mm²',cu15:'Nordic Cu blank 1,5 mm²'};
+
+// ρ-Quellen je Adertyp
+const RHO_SOURCES={
+  cu15:[
+    {id:'iec_nom',  rho:0.01724, r:0.01149, label:'IEC 60228 · Nominalwert',
+     desc:'ρ = 0,01724 Ω·mm²/m · Berechnungsnominalwert für Cu-Leiter nach IEC-Norm. Standardwert.'},
+    {id:'pure_cu',  rho:0.01708, r:0.01139, label:'Reinkupfer theoretisch',
+     desc:'ρ = 0,01708 Ω·mm²/m · Theoretischer Wert für 100 % reines Kupfer bei 20 °C. In der Praxis nicht erreichbar.'},
+    {id:'praxis',   rho:0.01750, r:0.01167, label:'Praxiswert Leitungsdraht',
+     desc:'ρ = 0,01750 Ω·mm²/m · Typischer Mittelwert für handelsüblichen Cu-Leitungsdraht inkl. Legierungsanteile.'},
+    {id:'iec_max',  rho:0.01777, r:0.01185, label:'IEC 60228 · Max. Grenzwert',
+     desc:'ρ = 0,01777 Ω·mm²/m · Maximaler zulässiger Widerstand für Klasse-1-Leiter 1,5 mm² nach IEC 60228. Konservativster Wert.'},
+  ],
+  curet:[
+    {id:'iec_nom',  rho:0.01724, r:0.03517, label:'IEC 60228 · Nominalwert',
+     desc:'ρ = 0,01724 Ω·mm²/m · Nominalwert Cu nach IEC. r = ρ/0,490 mm² = 0,03517 Ω/m.'},
+    {id:'pure_cu',  rho:0.01708, r:0.03486, label:'Reinkupfer theoretisch',
+     desc:'ρ = 0,01708 Ω·mm²/m · Theoretischer Reinwert. r = 0,03486 Ω/m.'},
+    {id:'praxis',   rho:0.01750, r:0.03571, label:'Praxiswert Leitungsdraht',
+     desc:'ρ = 0,01750 Ω·mm²/m · Praxistypischer Mittelwert. r = 0,03571 Ω/m.'},
+    {id:'iec_max',  rho:0.01777, r:0.03626, label:'IEC 60228 · Max. Grenzwert',
+     desc:'ρ = 0,01777 Ω·mm²/m · Maximaler IEC-Grenzwert. r = 0,03626 Ω/m.'},
+  ],
+  nicr:[
+    {id:'nicr_nom', rho:1.100, r:5.820, label:'Herstellerangabe Brandes · Nennwert',
+     desc:'ρ = 1,100 Ω·mm²/m · Offizieller Nennwert laut Brandes-Systemdokumentation. Standardwert.'},
+    {id:'nicr_iec', rho:1.090, r:5.767, label:'IEC/DIN NiCr80 · Nominalwert',
+     desc:'ρ = 1,090 Ω·mm²/m · Normwert für NiCr 80/20-Widerstandslegierung nach IEC/DIN. Etwas tiefer als Brandes-Nennwert.'},
+    {id:'nicr_praxis', rho:1.120, r:5.926, label:'Praxiswert · Alterung / Oxidation',
+     desc:'ρ = 1,120 Ω·mm²/m · Erfahrungswert für gealterte oder leicht oxidierte NiCr-Adern. Konservativster Ansatz für ältere Leitungen.'},
+  ],
+};
+
+const RHO_TITLE={cu15:'Cu 1,5 mm²', curet:'Cu 0,490 mm² (Rückführader)', nicr:'NiCr 80/20 · 0,189 mm²'};
+
+// Aktiv gewählte ρ-Quelle je Abschnitt
+let rhoSel={1:{cu15:'iec_nom',curet:'iec_nom',nicr:'nicr_nom'},
+            2:{cu15:'iec_nom',curet:'iec_nom',nicr:'nicr_nom'}};
+
+function getRhoR(abschnitt, wireType){
+  const sources=RHO_SOURCES[wireType]||[];
+  const selId=rhoSel[abschnitt][wireType];
+  const src=sources.find(s=>s.id===selId)||sources[0];
+  return src?src.r:WIRE_R20[wireType];
+}
+
+function toggleRho(n){
+  const body=document.getElementById('rho-body-'+n);
+  const arr=document.getElementById('rho-arr-'+n);
+  const open=body.style.display==='none';
+  body.style.display=open?'block':'none';
+  arr.textContent=open?'▼':'▶';
+  if(open) renderRhoOpts(n);
+}
+
+function renderRhoOpts(n){
+  const wt=document.getElementById('wire-type'+(n===1?'':'2')).value;
+  const sources=RHO_SOURCES[wt]||[];
+  const selId=rhoSel[n][wt];
+  const el=document.getElementById('rho-opts-'+n);
+  el.innerHTML=sources.map(s=>{
+    const active=selId===s.id;
+    return `<div onclick="selectRho(${n},'${s.id}')" style="
+      padding:10px 11px;cursor:pointer;border-bottom:1px solid var(--border);
+      background:${active?'rgba(200,164,90,0.12)':'transparent'}">
+      <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:3px">
+        <span style="font-size:12px;font-weight:600;color:${active?'#C8A45A':'#C0C8D8'}">${s.label}</span>
+        <span style="font-size:12px;font-weight:700;color:${active?'#C8A45A':'#E8F4FF'};font-variant-numeric:tabular-nums">${s.r.toFixed(5)} Ω/m</span>
+      </div>
+      <div style="font-size:11px;color:var(--text2);line-height:1.4">${s.desc}</div>
+      ${active?'<div style="font-size:10px;color:#C8A45A;margin-top:3px;font-weight:600">✓ AKTIV</div>':''}
+    </div>`;
+  }).join('');
+}
+
+function selectRho(n,id){
+  const wt=document.getElementById('wire-type'+(n===1?'':'2')).value;
+  rhoSel[n][wt]=id;
+  const src=(RHO_SOURCES[wt]||[]).find(s=>s.id===id);
+  if(src) WIRE_R20[wt]=src.r;
+  renderRhoOpts(n);
+  updateRhoActiveDisplay(n);
+  if(n===1) onWireType(); else onWireType2();
+}
+
+function updateRhoActiveDisplay(n){
+  const wt=document.getElementById('wire-type'+(n===1?'':'2')).value;
+  const sources=RHO_SOURCES[wt]||[];
+  const selId=rhoSel[n][wt];
+  const src=sources.find(s=>s.id===selId)||sources[0];
+  const el=document.getElementById('rho-active-'+n);
+  if(el&&src) el.textContent=src.label+' · '+src.r.toFixed(5)+' Ω/m';
+}
+
+function toggleTemp(n){
+  const body=document.getElementById('temp-body-'+n);
+  const arr=document.getElementById('temp-arr-'+n);
+  const open=body.style.display==='none';
+  body.style.display=open?'block':'none';
+  arr.textContent=open?'▼':'▶';
+}
+
+function selectTemp(n, val, label){
+  const inp=document.getElementById('temp-op'+(n===1?'':'2'));
+  inp.value=val;
+  document.getElementById('temp-active-'+n).textContent=label;
+  // close foldout
+  document.getElementById('temp-body-'+n).style.display='none';
+  document.getElementById('temp-arr-'+n).textContent='▶';
+  if(n===1) onWireType(); else onWireType2();
+}
+
+function onTempManual(n){
+  // clear preset label when user types manually
+  const el=document.getElementById('temp-active-'+n);
+  if(el) el.textContent='';
+  if(n===1) onWireType(); else onWireType2();
+}
+function updateRhoPanel(n, wt){
+  const panel=document.getElementById('rho-panel-'+n);
+  const title=document.getElementById('rho-title-'+n);
+  if(RHO_SOURCES[wt]){
+    panel.style.display='block';
+    title.textContent='ρ-Quelle wählen · '+(RHO_TITLE[wt]||wt);
+    const src=(RHO_SOURCES[wt]||[]).find(s=>s.id===rhoSel[n][wt]);
+    if(src) WIRE_R20[wt]=src.r;
+    updateRhoActiveDisplay(n);
+  } else {
+    panel.style.display='none';
+  }
+}
 const SEG=70,MAX_AUX=5;
 let auxIdx=0,auxCount=0,segOpen=false,activeTab='calc';
 
@@ -683,8 +892,9 @@ function getRpm(){
 }
 function onWireType(){
   const t=document.getElementById('wire-type').value;
+  updateRhoPanel(1,t);
   const r=getRpm(),r20=WIRE_R20[t];
-  document.getElementById('r-per-m-lbl').textContent=fR4(r)+' Ω/m';
+  document.getElementById('r-per-m-lbl').textContent=fRpm(r)+' Ω/m';
   const T=parseFloat(document.getElementById('temp-op').value);
   const ti=document.getElementById('temp-info');
   if(!isNaN(T)&&T!==20){
@@ -717,8 +927,17 @@ function getSec2R(){
 }
 function onWireType2(){
   const t=document.getElementById('wire-type2').value;
+  updateRhoPanel(2,t);
   const r=getRpm2(),r20=WIRE_R20[t];
-  document.getElementById('r-per-m-lbl2').textContent=fR4(r)+' Ω/m';
+  document.getElementById('r-per-m-lbl2').textContent=fRpm(r)+' Ω/m';
+  const panel=document.getElementById('rho-panel-2');
+  if(t==='cu15'){
+    panel.style.display='block';
+    const src=(RHO_SOURCES.cu15||[]).find(s=>s.id===rhoSel[2].cu15);
+    if(src) WIRE_R20.cu15=src.r;
+  } else {
+    panel.style.display='none';
+  }
   const T=parseFloat(document.getElementById('temp-op2').value);
   const ti=document.getElementById('temp-info2');
   if(!isNaN(T)&&T!==20){
@@ -1359,6 +1578,15 @@ function fR4(v){
   if(v>=100) return v.toFixed(2);
   if(v>=10) return v.toFixed(3);
   return v.toFixed(4);
+}
+// Für spez. Widerstand pro Meter: volle Präzision ohne Rundung (bis 8 signifikante Stellen)
+function fRpm(v){
+  if(v===null||isNaN(v)) return '–';
+  // Entferne trailing zeros aber zeige mindestens 5 Nachkommastellen
+  const s=v.toFixed(8).replace(/0+$/,'');
+  const parts=s.split('.');
+  if(!parts[1]||parts[1].length<5) return v.toFixed(5);
+  return s;
 }
 function fL(v){
   if(v===null||isNaN(v)) return '–';
