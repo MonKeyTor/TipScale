@@ -5,7 +5,13 @@
   <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0">
   <meta name="theme-color" content="#0F1923">
   <title>TipScale</title>
-  <script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf/2.5.1/jspdf.umd.min.js"></script>
+  <script>
+window.onerror=function(msg,src,line,col,err){
+  if(line===0) return true; // Cross-origin errors from external scripts — suppress
+  console.error('ERROR:',msg,'line',line,err&&err.stack);
+  return false;
+};
+</script>
   <style>
     :root{
       --bg:#0F1923;--card:#1A2433;--navy:#1B3D5E;--navy2:#3A7FBF;
@@ -22,11 +28,11 @@
     input[type=number]{-moz-appearance:textfield;appearance:textfield}
     .app{max-width:520px;margin:0 auto;padding:14px 10px 60px}
 
-    .hdr{display:flex;align-items:center;gap:12px;background:var(--navy);border-radius:var(--radius);
-         padding:14px 16px;margin-bottom:10px;color:#fff}
-    .hdr-icon{font-size:26px;line-height:1}
-    .hdr h1{font-size:15px;font-weight:700;letter-spacing:.02em}
-    .hdr p{font-size:11px;opacity:.55;margin-top:1px}
+    .hdr{display:flex;align-items:center;gap:14px;background:#1E3A3F;border-radius:var(--radius);
+         padding:8px 16px;margin-bottom:10px;color:#fff;overflow:visible;position:relative}
+    .hdr-icon{flex-shrink:0;width:72px;height:72px;margin:-10px 0 -18px;display:flex;align-items:center;justify-content:center}
+    .hdr h1{font-size:18px;font-weight:800;letter-spacing:-.3px;color:#E8D5A0}
+    .hdr p{font-size:11px;color:rgba(255,255,255,.45);margin-top:2px}
 
     .card{background:var(--card);border:1px solid var(--border);border-radius:var(--radius);margin-bottom:8px;overflow:hidden}
     .card-hdr{display:flex;align-items:center;justify-content:space-between;padding:13px 15px;
@@ -87,6 +93,10 @@
     .seg-inp{padding:7px 3px;border:1px solid var(--border);border-radius:5px;font-size:13px;
              text-align:center;background:#FAFAC0;color:#1A2433;width:100%;font-family:inherit;outline:none}
     .seg-inp:focus{border-color:var(--navy2)}
+    .geo-ds-btn{padding:7px 4px;border:1.5px solid var(--border);border-radius:7px;
+                background:#1E2D3E;color:var(--text2);font-size:12px;font-weight:600;
+                cursor:pointer;font-family:inherit;transition:all .15s;text-align:center}
+    .geo-ds-btn.active{background:rgba(200,164,90,.15);border-color:#C8A45A;color:#C8A45A}
     .seg-useBtn{width:100%;padding:8px;background:var(--navy);color:#fff;border:none;border-radius:6px;
                 cursor:pointer;font-size:13px;font-weight:500;font-family:inherit;margin-top:4px}
 
@@ -107,7 +117,7 @@
                       text-transform:uppercase;letter-spacing:.05em;color:var(--text2);margin-bottom:5px}
     .tdot{width:11px;height:11px;border-radius:50%;display:inline-block;flex-shrink:0}
     .tdot.r{background:var(--red)} .tdot.b{background:var(--blue-t)}
-    .term-inp{width:100%;padding:12px;border:2px solid var(--border);border-radius:7px;font-size:20px;
+    .term-inp{width:100%;padding:9px;border:2px solid var(--border);border-radius:7px;font-size:16px;
               font-weight:500;text-align:center;color:#1A2433;background:#FAFAC0;font-family:inherit;
               outline:none;transition:border-color .15s}
     .term-field.tf-r .term-inp:focus{border-color:var(--red)}
@@ -210,12 +220,12 @@
     .ds-sep{height:1px;background:rgba(255,255,255,.08);margin:4px 0 6px}
 
     /* detail rows */
-    .det-row{display:flex;align-items:center;gap:6px;padding:5px 0;
+    .det-row{display:flex;align-items:center;gap:6px;padding:4px 0;
              border-bottom:1px solid rgba(255,255,255,.06)}
     .det-row:last-child{border-bottom:none}
     .det-chk{width:16px;height:16px;cursor:pointer;accent-color:#C8A45A;flex-shrink:0}
     .det-fall{font-size:10px;font-weight:700;text-transform:uppercase;
-              letter-spacing:.04em;color:rgba(255,255,255,.5);width:52px;flex-shrink:0}
+              letter-spacing:.04em;color:rgba(255,255,255,.5);white-space:nowrap;flex-shrink:0}
     .det-val{font-size:14px;font-weight:600;color:#fff;font-variant-numeric:tabular-nums;
              width:68px;flex-shrink:0}
     .det-val.disabled{color:rgba(255,255,255,.25)}
@@ -246,9 +256,30 @@
 <div class="app">
 
   <div class="hdr">
-    <div class="hdr-icon">⚡</div>
-    <div><h1>TipScale</h1>
-    <p>Nässe-Ortung · Widerstands-Referenz-Messverfahren · LUWA · Fernwärme</p></div>
+    <div class="hdr-icon">
+      <svg width="72" height="72" viewBox="0 0 432 432" xmlns="http://www.w3.org/2000/svg">
+        <circle cx="216" cy="181" r="134" fill="none" stroke="#2D5C63" stroke-width="18"/>
+        <circle cx="216" cy="181" r="94" fill="#4A6B5A"/>
+        <path d="M216 87 A94 94 0 0 0 122 181 L140 181 A76 76 0 0 1 216 105 Z" fill="#8B6B3A" opacity="0.85"/>
+        <circle cx="216" cy="181" r="64" fill="#1E3A3F"/>
+        <circle cx="216" cy="181" r="64" fill="none" stroke="#3A7A84" stroke-width="3"/>
+        <path d="M248 89 A92 92 0 0 1 308 251" stroke="#C8A45A" stroke-width="4" fill="none" stroke-linecap="round"/>
+        <circle cx="248" cy="89" r="6" fill="#C8A45A"/>
+        <path d="M124 147 A92 92 0 0 0 216 273" stroke="#5FB8C4" stroke-width="4" fill="none" stroke-linecap="round"/>
+        <circle cx="216" cy="273" r="6" fill="#5FB8C4"/>
+        <ellipse cx="148" cy="175" rx="10" ry="13" fill="#5FB8C4" opacity="0.9"/>
+        <path d="M108 330 A116 44 0 0 1 324 330" stroke="#2D5C63" stroke-width="6" fill="none"/>
+        <path d="M108 330 A116 44 0 0 1 236 308" stroke="#C8A45A" stroke-width="6" fill="none" stroke-linecap="round"/>
+        <line x1="216" y1="330" x2="234" y2="310" stroke="#C8A45A" stroke-width="4" stroke-linecap="round"/>
+        <circle cx="216" cy="330" r="8" fill="#C8A45A"/>
+        <rect x="96" y="320" width="16" height="13" rx="2" fill="#C0392B"/>
+        <rect x="320" y="320" width="16" height="13" rx="2" fill="#1A6FA8"/>
+      </svg>
+    </div>
+    <div>
+      <h1>TipScale</h1>
+      <p>Nässe-Ortung · Widerstands-Referenz-Messverfahren · LUWA · Fernwärme</p>
+    </div>
   </div>
 
   <!-- S0 Projekt -->
@@ -275,184 +306,21 @@
       <span class="toggle-arr open" id="arr-s1">▼</span>
     </div>
     <div class="card-body open" id="s1">
-      <!-- Abschnitt 1 -->
-      <div style="font-size:10px;font-weight:700;text-transform:uppercase;letter-spacing:.06em;
-                  color:#8A9BB0;padding:8px 0 4px;border-bottom:1px solid var(--border);margin-bottom:4px">
-        Abschnitt 1 · Meldeader mit Nässebefall
-      </div>
-      <div class="field"><label>Meldeader (Adertyp)</label>
-        <select class="fld" id="wire-type" onchange="onWireType()">
-          <option value="nicr">Brandes Fühlerader · NiCr 80/20 · 0,189 mm²</option>
-          <option value="curet">Brandes Rückführader · Cu · 0,490 mm²</option>
-          <option value="cu15" selected>Nordic · Cu blank · 1,5 mm²</option>
-        </select>
-      </div>
-      <!-- ρ-Quelle — direkt unter Adertyp, über Temperatur -->
-      <div id="rho-panel-1" style="display:block;margin-top:6px;background:#0F1923;border-radius:8px;border:1px solid var(--border);overflow:hidden">
-        <div onclick="toggleRho(1)" style="display:flex;justify-content:space-between;align-items:center;
-             padding:8px 11px;cursor:pointer;user-select:none">
-          <div>
-            <div style="font-size:11px;font-weight:600;color:#C0C8D8;text-transform:uppercase;letter-spacing:.05em"
-                 id="rho-title-1">ρ-Quelle wählen · Cu 1,5 mm²</div>
-            <div id="rho-active-1" style="font-size:11px;color:#C8A45A;margin-top:2px"></div>
-          </div>
-          <span id="rho-arr-1" style="font-size:11px;color:var(--text2);flex-shrink:0;margin-left:8px">▶</span>
-        </div>
-        <div id="rho-body-1" style="display:none;border-top:1px solid var(--border)">
-          <div style="font-size:11px;color:var(--text2);padding:8px 11px 4px;line-height:1.5">
-            Wähle den ρ-Wert passend zur Drahtqualität. Beeinflusst direkt die Positionsberechnung.
-          </div>
-          <div id="rho-opts-1"></div>
-        </div>
-      </div>
-      <div class="field">
-        <label>Betriebstemperatur<span class="beta-tag">Beta</span></label>
-        <!-- Temp-Foldout -->
-        <div style="margin-bottom:6px;background:#0F1923;border-radius:8px;border:1px solid var(--border);overflow:hidden">
-          <div onclick="toggleTemp(1)" style="display:flex;justify-content:space-between;align-items:center;
-               padding:8px 11px;cursor:pointer;user-select:none">
-            <div>
-              <div style="font-size:11px;font-weight:600;color:#C0C8D8;text-transform:uppercase;letter-spacing:.05em">Vorauswahl</div>
-              <div id="temp-active-1" style="font-size:11px;color:#C8A45A;margin-top:2px"></div>
-            </div>
-            <span id="temp-arr-1" style="font-size:11px;color:var(--text2);flex-shrink:0;margin-left:8px">▶</span>
-          </div>
-          <div id="temp-body-1" style="display:none;border-top:1px solid var(--border)">
-            <div onclick="selectTemp(1,45,'Vorlauf allgemein · 45 °C (DS 2)')" style="padding:9px 11px;cursor:pointer;border-bottom:1px solid var(--border)">
-              <div style="font-size:12px;font-weight:600;color:#C0C8D8">Vorlauf allgemein · DS 2</div>
-              <div style="font-size:11px;color:var(--text2);margin-top:2px">45 °C — typischer Vorlauf Niedrigtemperaturnetz</div>
-            </div>
-            <div onclick="selectTemp(1,30,'Rücklauf allgemein · 30 °C (DS 2)')" style="padding:9px 11px;cursor:pointer">
-              <div style="font-size:12px;font-weight:600;color:#C0C8D8">Rücklauf allgemein · DS 2</div>
-              <div style="font-size:11px;color:var(--text2);margin-top:2px">30 °C — typischer Rücklauf Niedrigtemperaturnetz</div>
-            </div>
-          </div>
-        </div>
-        <div class="fld-row">
-          <input class="fld" type="number" id="temp-op" min="0" max="200" step="1"
-                 placeholder="20 °C (Referenz)" oninput="onTempManual(1)">
-          <span class="fld-unit">°C</span>
-        </div>
-        <div style="font-size:11px;color:var(--text2);margin-top:3px" id="temp-info"></div>
-      </div>
-      <div class="info-row">
-        <span class="lbl">Leiterwiderstand Abschnitt 1 (temperaturkorrigiert)</span>
-        <span class="val" id="r-per-m-lbl">0,01149 Ω/m</span>
-      </div>
-      <div class="field"><label>Gesamtlänge Leitungsabschnitt</label>
-        <div class="fld-row">
-          <input class="fld" type="number" id="len-total" min="0" step="0.01" placeholder="Länge in m" oninput="onLen1()">
-          <span class="fld-unit">m</span>
-        </div>
-      </div>
-      <button class="seg-btn" onclick="toggleSeg()">
-        <span id="seg-arr">▶</span> Aus Teilabschnitten (max. 70)
-      </button>
-      <div class="seg-panel" id="seg-panel">
-        <div style="font-size:11px;color:var(--text2);margin-bottom:7px">Längen in m · Reihenfolge wie im Plan</div>
-        <div class="seg-grid" id="seg-grid"></div>
-        <div class="info-row"><span class="lbl">Summe</span><span class="val" id="seg-sum">0,00 m</span></div>
-        <div style="display:grid;grid-template-columns:1fr 1fr;gap:7px;margin-top:4px">
-          <button class="seg-useBtn" onclick="useSeg()">↑ Gesamtlänge übernehmen</button>
-          <button class="seg-useBtn" onclick="clearSeg()" style="background:#7A2020">✕ Leeren</button>
-        </div>
-      </div>
-      <div class="info-row"><span class="lbl">Widerstand Abschnitt 1 gesamt</span><span class="val" id="r-main-lbl">–</span></div>
 
-      <!-- Abschnitt 2 Toggle -->
-      <div style="margin-top:14px">
-        <label style="display:flex;align-items:center;gap:10px;cursor:pointer;user-select:none">
-          <input type="checkbox" id="sec2-active" onchange="toggleSec2()" style="width:18px;height:18px;cursor:pointer">
-          <span style="font-size:13.5px;font-weight:600;color:#fff">
-            2. Leitungsabschnitt verwenden (trockene Rückführader)
-          </span>
-        </label>
-        <div style="font-size:11px;color:var(--text2);margin-top:3px;margin-left:28px">
-          Trockene Rückführader ersetzt HFL · unabhängige Temperatur möglich
-        </div>
-      </div>
+      <!-- Info Topologie -->
+      <p style="font-size:12px;color:var(--text2);margin-top:8px;margin-bottom:10px;line-height:1.5">
+        MP-A → <b style="color:var(--red)">Abs. 1–3</b> (Nässebefall) → MP-B →
+        <b style="color:var(--blue-t)">Abs. 4–6</b> (trockene Rückführung) → MP-A.
+        Leere Abschnitte werden übersprungen.
+      </p>
 
-      <!-- Abschnitt 2 Panel -->
-      <div id="sec2-panel" style="display:none;margin-top:10px;background:var(--bg);border-radius:8px;padding:11px;border:1.5px solid var(--border)">
-        <div style="font-size:10px;font-weight:700;text-transform:uppercase;letter-spacing:.06em;
-                    color:var(--navy);margin-bottom:8px">
-          Abschnitt 2 · Trockene Rückführader
-        </div>
-        <div class="field" style="margin-top:0"><label>Meldeader (Adertyp)</label>
-          <select class="fld" id="wire-type2" onchange="onWireType2()">
-            <option value="nicr">Brandes Fühlerader · NiCr 80/20 · 0,189 mm²</option>
-            <option value="curet">Brandes Rückführader · Cu · 0,490 mm²</option>
-            <option value="cu15" selected>Nordic · Cu blank · 1,5 mm²</option>
-          </select>
-        </div>
-        <!-- ρ-Quelle Abschnitt 2 -->
-        <div id="rho-panel-2" style="display:block;margin-top:6px;background:#0F1923;border-radius:8px;border:1px solid var(--border);overflow:hidden">
-          <div onclick="toggleRho(2)" style="display:flex;justify-content:space-between;align-items:center;
-               padding:8px 11px;cursor:pointer;user-select:none">
-            <div>
-              <div style="font-size:11px;font-weight:600;color:#C0C8D8;text-transform:uppercase;letter-spacing:.05em"
-                   id="rho-title-2">ρ-Quelle wählen · Cu 1,5 mm²</div>
-              <div id="rho-active-2" style="font-size:11px;color:#C8A45A;margin-top:2px"></div>
-            </div>
-            <span id="rho-arr-2" style="font-size:11px;color:var(--text2);flex-shrink:0;margin-left:8px">▶</span>
-          </div>
-          <div id="rho-body-2" style="display:none;border-top:1px solid var(--border)">
-            <div style="font-size:11px;color:var(--text2);padding:8px 11px 4px;line-height:1.5">
-              Wähle den ρ-Wert passend zur Drahtqualität. Beeinflusst direkt die Positionsberechnung.
-            </div>
-            <div id="rho-opts-2"></div>
-          </div>
-        </div>
-        <div class="field">
-          <label>Betriebstemperatur<span class="beta-tag">Beta</span></label>
-          <!-- Temp-Foldout Abschnitt 2 -->
-          <div style="margin-bottom:6px;background:#0F1923;border-radius:8px;border:1px solid var(--border);overflow:hidden">
-            <div onclick="toggleTemp(2)" style="display:flex;justify-content:space-between;align-items:center;
-                 padding:8px 11px;cursor:pointer;user-select:none">
-              <div>
-                <div style="font-size:11px;font-weight:600;color:#C0C8D8;text-transform:uppercase;letter-spacing:.05em">Vorauswahl</div>
-                <div id="temp-active-2" style="font-size:11px;color:#C8A45A;margin-top:2px"></div>
-              </div>
-              <span id="temp-arr-2" style="font-size:11px;color:var(--text2);flex-shrink:0;margin-left:8px">▶</span>
-            </div>
-            <div id="temp-body-2" style="display:none;border-top:1px solid var(--border)">
-              <div onclick="selectTemp(2,45,'Vorlauf allgemein · 45 °C (DS 2)')" style="padding:9px 11px;cursor:pointer;border-bottom:1px solid var(--border)">
-                <div style="font-size:12px;font-weight:600;color:#C0C8D8">Vorlauf allgemein · DS 2</div>
-                <div style="font-size:11px;color:var(--text2);margin-top:2px">45 °C — typischer Vorlauf Niedrigtemperaturnetz</div>
-              </div>
-              <div onclick="selectTemp(2,30,'Rücklauf allgemein · 30 °C (DS 2)')" style="padding:9px 11px;cursor:pointer">
-                <div style="font-size:12px;font-weight:600;color:#C0C8D8">Rücklauf allgemein · DS 2</div>
-                <div style="font-size:11px;color:var(--text2);margin-top:2px">30 °C — typischer Rücklauf Niedrigtemperaturnetz</div>
-              </div>
-            </div>
-          </div>
-          <div class="fld-row">
-            <input class="fld" type="number" id="temp-op2" min="0" max="200" step="1"
-                   placeholder="20 °C (Referenz)" oninput="onTempManual(2)">
-            <span class="fld-unit">°C</span>
-          </div>
-          <div style="font-size:11px;color:var(--text2);margin-top:3px" id="temp-info2"></div>
-        </div>
-        <div class="info-row" style="margin-top:6px">
-          <span class="lbl">Leiterwiderstand Abschnitt 2 (temperaturkorrigiert)</span>
-          <span class="val" id="r-per-m-lbl2">0,01149 Ω/m</span>
-        </div>
-        <div class="field">
-          <label>Länge Abschnitt 2</label>
-          <div class="fld-row">
-            <input class="fld" type="number" id="len-total2" min="0" step="0.01"
-                   placeholder="Wie Abschnitt 1 wenn leer" oninput="calc()">
-            <span class="fld-unit">m</span>
-          </div>
-          <div style="font-size:11px;color:var(--text2);margin-top:3px">
-            Leer lassen = gleiche Länge wie Abschnitt 1 (VL = RL)
-          </div>
-        </div>
-        <div class="info-row"><span class="lbl">Widerstand Abschnitt 2 gesamt</span><span class="val" id="r-main-lbl2">–</span></div>
-      </div>
+      <!-- Abschnitte 1-6 werden per JS generiert -->
+      <div id="sec-list"></div>
+
     </div>
   </div>
 
+  <!-- S2 HFL -->
   <!-- S2 HFL -->
   <div class="card">
     <div class="card-hdr" onclick="toggleCard('s2')">
@@ -552,23 +420,19 @@
            font-size:800px;font-weight:900;color:rgba(192,57,43,0.10);line-height:1;
            font-family:'Helvetica Neue',Arial,sans-serif;user-select:none;z-index:0">1</div>
       <div style="position:relative;z-index:1">
-        <p style="font-size:12px;color:var(--text2);margin-top:8px;line-height:1.4">
-          Brücken-Drehknopfstellung ablesen.
-          <b style="color:var(--red)">MKL rot</b> = Richtung Meldeader,
-          <b style="color:var(--blue-t)">MKL blau</b> = über HFL. Summe ≈ 100 %.
-        </p>
-        <div class="side-lbl">Messung am Messpunkt A</div>
+        <p style="font-size:12px;color:var(--text2);margin-top:8px;line-height:1.4"><b style="color:var(--red)">MKL rot</b> = Richtung Meldeader, <b style="color:var(--blue-t)">MKL blau</b> = über HFL. Summe ≈ 100 %.</p>
+        <div class="side-lbl">Messpunkt A</div>
 
         <!-- Schleife 1 Kette -->
         <div id="chain-a-s1" class="chain-display" style="margin-bottom:6px"></div>
         <!-- Eingaben S1 + S2 nebeneinander -->
         <div class="term-pair" style="margin-bottom:6px">
           <div class="term-field tf-r">
-            <label><span class="tdot r"></span> Schleife 1 · MKL rot → Meldeader</label>
+            <label><span class="tdot r"></span> MKL rot → Meldeader</label>
             <input class="term-inp" type="number" id="pRA" min="0" max="100" step="0.01" inputmode="decimal" placeholder="%" oninput="calc()">
           </div>
           <div class="term-field tf-b">
-            <label><span class="tdot b"></span> Schleife 2 · MKL rot → HFL</label>
+            <label><span class="tdot b"></span> MKL rot → HFL</label>
             <input class="term-inp" type="number" id="pBA" min="0" max="100" step="0.01" inputmode="decimal" placeholder="%" oninput="calc()">
           </div>
         </div>
@@ -576,28 +440,24 @@
         <div id="chain-a-s2" class="chain-display" style="margin-bottom:4px"></div>
         <div class="sum-chk" id="sum-a"></div>
 
-        <div class="side-lbl" style="margin-top:18px">Messung am Messpunkt B (optional)</div>
+        <div class="side-lbl" style="margin-top:18px">Messpunkt B (optional)</div>
 
         <!-- Schleife 3 Kette -->
         <div id="chain-b-s3" class="chain-display" style="margin-bottom:6px"></div>
         <!-- Eingaben S3 + S4 nebeneinander -->
         <div class="term-pair" style="margin-bottom:6px">
           <div class="term-field tf-r">
-            <label><span class="tdot r"></span> Schleife 3 · MKL rot → Meldeader</label>
+            <label><span class="tdot r"></span> MKL rot → Meldeader</label>
             <input class="term-inp" type="number" id="pRB" min="0" max="100" step="0.01" inputmode="decimal" placeholder="%" oninput="calc()">
           </div>
           <div class="term-field tf-b">
-            <label><span class="tdot b"></span> Schleife 4 · MKL rot → HFL</label>
+            <label><span class="tdot b"></span> MKL rot → HFL</label>
             <input class="term-inp" type="number" id="pBB" min="0" max="100" step="0.01" inputmode="decimal" placeholder="%" oninput="calc()">
           </div>
         </div>
         <!-- Schleife 4 Kette -->
         <div id="chain-b-s4" class="chain-display" style="margin-bottom:4px"></div>
         <div class="sum-chk" id="sum-b"></div>
-        <p style="font-size:11px;color:var(--text2);margin-top:12px;line-height:1.5">
-          <b>Schleife 1 ≈ Schleife 4</b> · MP-A-Seite — sollten übereinstimmen.<br>
-          <b>Schleife 2 ≈ Schleife 3</b> · MP-B-Seite — sollten übereinstimmen.
-        </p>
       </div>
     </div>
   </div>
@@ -617,23 +477,19 @@
            font-size:800px;font-weight:900;color:rgba(26,111,168,0.10);line-height:1;
            font-family:'Helvetica Neue',Arial,sans-serif;user-select:none;z-index:0">2</div>
       <div style="position:relative;z-index:1">
-        <p style="font-size:12px;color:var(--text2);margin-top:8px;line-height:1.4">
-          Brücken-Drehknopfstellung ablesen.
-          <b style="color:var(--red)">MKL rot</b> = Richtung Meldeader,
-          <b style="color:var(--blue-t)">MKL blau</b> = über HFL. Summe ≈ 100 %.
-        </p>
-        <div class="side-lbl">Messung am Messpunkt A</div>
+        <p style="font-size:12px;color:var(--text2);margin-top:8px;line-height:1.4"><b style="color:var(--red)">MKL rot</b> = Richtung Meldeader, <b style="color:var(--blue-t)">MKL blau</b> = über HFL. Summe ≈ 100 %.</p>
+        <div class="side-lbl">Messpunkt A</div>
 
         <!-- Schleife 1 Kette -->
         <div id="chain-a2-s1" class="chain-display" style="margin-bottom:6px"></div>
         <!-- Eingaben S1 + S2 nebeneinander -->
         <div class="term-pair" style="margin-bottom:6px">
           <div class="term-field tf-r">
-            <label><span class="tdot r"></span> Schleife 1 · MKL rot → Meldeader</label>
+            <label><span class="tdot r"></span> MKL rot → Meldeader</label>
             <input class="term-inp" type="number" id="pRA2" min="0" max="100" step="0.01" inputmode="decimal" placeholder="%" oninput="calc()">
           </div>
           <div class="term-field tf-b">
-            <label><span class="tdot b"></span> Schleife 2 · MKL rot → HFL</label>
+            <label><span class="tdot b"></span> MKL rot → HFL</label>
             <input class="term-inp" type="number" id="pBA2" min="0" max="100" step="0.01" inputmode="decimal" placeholder="%" oninput="calc()">
           </div>
         </div>
@@ -641,28 +497,24 @@
         <div id="chain-a2-s2" class="chain-display" style="margin-bottom:4px"></div>
         <div class="sum-chk" id="sum-a2"></div>
 
-        <div class="side-lbl" style="margin-top:18px">Messung am Messpunkt B (optional)</div>
+        <div class="side-lbl" style="margin-top:18px">Messpunkt B (optional)</div>
 
         <!-- Schleife 3 Kette -->
         <div id="chain-b2-s3" class="chain-display" style="margin-bottom:6px"></div>
         <!-- Eingaben S3 + S4 nebeneinander -->
         <div class="term-pair" style="margin-bottom:6px">
           <div class="term-field tf-r">
-            <label><span class="tdot r"></span> Schleife 3 · MKL rot → Meldeader</label>
+            <label><span class="tdot r"></span> MKL rot → Meldeader</label>
             <input class="term-inp" type="number" id="pRB2" min="0" max="100" step="0.01" inputmode="decimal" placeholder="%" oninput="calc()">
           </div>
           <div class="term-field tf-b">
-            <label><span class="tdot b"></span> Schleife 4 · MKL rot → HFL</label>
+            <label><span class="tdot b"></span> MKL rot → HFL</label>
             <input class="term-inp" type="number" id="pBB2" min="0" max="100" step="0.01" inputmode="decimal" placeholder="%" oninput="calc()">
           </div>
         </div>
         <!-- Schleife 4 Kette -->
         <div id="chain-b2-s4" class="chain-display" style="margin-bottom:4px"></div>
         <div class="sum-chk" id="sum-b2"></div>
-        <p style="font-size:11px;color:var(--text2);margin-top:12px;line-height:1.5">
-          <b>Schleife 1 ≈ Schleife 4</b> · MP-A-Seite — sollten übereinstimmen.<br>
-          <b>Schleife 2 ≈ Schleife 3</b> · MP-B-Seite — sollten übereinstimmen.
-        </p>
       </div>
     </div>
   </div>
@@ -713,7 +565,206 @@
 
 </div>
 <script>
-const RHO_CU=0.01724;
+// ═══ 6 LEITUNGSABSCHNITTE ════════════════════════════════════════════════
+// Abschnitte 1-3: Meldeader mit potenziellem Nässebefall (Hinweg MP-A→MP-B)
+// Abschnitte 4-6: Trockene Rückführ-Meldeader (Rückweg MP-B→MP-A)
+// Alternativer Rückweg: HFL (ersetzt Abs. 4-6)
+const SEC_DEF=[
+  {n:1,label:'Abschnitt 1 · Meldeader mit potenziellem Nässebefall', color:'#C0392B', type:'fwd'},
+  {n:2,label:'Abschnitt 2 · Meldeader mit potenziellem Nässebefall', color:'#C0392B', type:'fwd'},
+  {n:3,label:'Abschnitt 3 · Meldeader mit potenziellem Nässebefall', color:'#C0392B', type:'fwd'},
+  {n:4,label:'Abschnitt 4 · Trockene Rückführ-Meldeader',            color:'#1A6FA8', type:'ret'},
+  {n:5,label:'Abschnitt 5 · Trockene Rückführ-Meldeader',            color:'#1A6FA8', type:'ret'},
+  {n:6,label:'Abschnitt 6 · Trockene Rückführ-Meldeader',            color:'#1A6FA8', type:'ret'},
+];
+
+// Per-Abschnitt Zustand (Adertyp, r20, temp)
+const secState={}; // n → {wireType, rhoId, temp}
+for(let i=1;i<=6;i++) secState[i]={wireType:'cu15',rhoId:'praxis',temp:NaN};
+
+const DN_OPTIONS=[20,25,32,40,50,65,80,100,125,150,200,250,300];
+
+function dnSelect(id,cb){
+  return `<select class="fld" id="${id}" onchange="${cb}" oninput="${cb}">
+    ${DN_OPTIONS.map(d=>`<option value="${d}"${d===100?' selected':''}>DN ${d}</option>`).join('')}
+  </select>`;
+}
+
+function buildSections(){
+  const el=document.getElementById('sec-list');
+  if(!el) return;
+  let html='';
+
+  SEC_DEF.forEach(def=>{
+    const n=def.n;
+    const isRet=def.type==='ret';
+    const colStyle=`color:${def.color}`;
+    const hdrBg=def.type==='fwd'
+      ? 'background:linear-gradient(90deg,rgba(192,57,43,0.18) 0%,#0F1923 100%)'
+      : 'background:linear-gradient(90deg,rgba(26,111,168,0.18) 0%,#0F1923 100%)';
+    html+=`
+    <div style="margin-bottom:6px;border:1px solid var(--border);border-radius:9px;overflow:hidden">
+      <!-- Abschnitt Header -->
+      <div onclick="toggleSec(${n})" style="display:flex;align-items:center;justify-content:space-between;
+           padding:10px 14px;cursor:pointer;user-select:none;${hdrBg}">
+        <div>
+          <div style="font-size:10px;font-weight:700;text-transform:uppercase;letter-spacing:.06em;${colStyle}">
+            ${def.label}
+          </div>
+          <div id="sec-summary-${n}" style="font-size:11px;color:var(--text2);margin-top:2px"></div>
+          <div id="sec-summary-tmed-${n}" style="font-size:11px;color:#8BC4A8;margin-top:1px"></div>
+        </div>
+        <span id="sec-arr-${n}" style="font-size:11px;color:var(--text2);flex-shrink:0;margin-left:8px">▶</span>
+      </div>
+      <!-- Abschnitt Body -->
+      <div id="sec-body-${n}" style="display:none;padding:12px 14px;background:var(--card)">
+
+        <!-- Adertyp -->
+        <div class="field" style="margin-top:0">
+          <label>Adertyp</label>
+          <select class="fld" id="s${n}-wire" onchange="onSecWire(${n})">
+            <option value="nicr">Brandes Fühlerader · NiCr 80/20 · 0,189 mm²</option>
+            <option value="curet">Brandes Rückführader · Cu · 0,490 mm²</option>
+            <option value="cu15" selected>Nordic · Cu blank · 1,5 mm²</option>
+          </select>
+        </div>
+
+        <!-- ρ-Quelle -->
+        <div id="rho-panel-s${n}" style="margin-top:6px;background:#0F1923;border-radius:8px;border:1px solid var(--border);overflow:hidden">
+          <div onclick="toggleRhoS(${n})" style="display:flex;justify-content:space-between;align-items:center;padding:8px 11px;cursor:pointer;user-select:none">
+            <div>
+              <div style="font-size:11px;font-weight:600;color:#C0C8D8;text-transform:uppercase;letter-spacing:.05em" id="rho-title-s${n}">ρ-Quelle wählen</div>
+              <div id="rho-active-s${n}" style="font-size:11px;color:#C8A45A;margin-top:2px"></div>
+            </div>
+            <span id="rho-arr-s${n}" style="font-size:11px;color:var(--text2);flex-shrink:0;margin-left:8px">▶</span>
+          </div>
+          <div id="rho-body-s${n}" style="display:none;border-top:1px solid var(--border)">
+            <div id="rho-opts-s${n}"></div>
+          </div>
+        </div>
+
+        <!-- Meldeader-Temperatur -->
+        <div class="field">
+          <label>Meldeader-Temperatur<span class="beta-tag">Beta</span></label>
+          <div class="fld-row" style="margin-bottom:6px">
+            <input class="fld" type="number" id="s${n}-temp" min="0" max="200" step="1"
+                   placeholder="20 °C (Referenz)" oninput="onSecTemp(${n})">
+            <span class="fld-unit">°C</span>
+          </div>
+          <div id="s${n}-temp-active" style="font-size:11px;color:#C8A45A;margin-bottom:4px"></div>
+
+          <!-- Pauschale Vorauswahl -->
+          <div style="background:#0F1923;border-radius:8px;border:1px solid var(--border);overflow:hidden;margin-bottom:6px;
+                      outline:2px solid rgba(46,139,87,0.35);outline-offset:-1px">
+            <div onclick="toggleGeoS(${n})" style="display:flex;justify-content:space-between;align-items:center;padding:8px 11px;cursor:pointer;user-select:none;background:rgba(30,80,50,0.45);border-radius:7px 7px 0 0">
+              <div>
+                <div style="font-size:11px;font-weight:600;color:#C0C8D8;text-transform:uppercase;letter-spacing:.05em">Temperatur-Kompensation: Geometrie &amp; Milieu</div>
+                <div id="geo-active-s${n}" style="font-size:11px;color:#C8A45A;margin-top:2px"></div>
+              </div>
+              <span id="geo-arr-s${n}" style="font-size:11px;color:var(--text2);flex-shrink:0;margin-left:8px">▶</span>
+            </div>
+            <div id="geo-body-s${n}" style="display:none;border-top:1px solid var(--border);padding:10px 11px">
+              <!-- Pauschale -->
+              <div class="field" style="margin-top:0">
+                <label>Pauschale Meldeader-Temperatur</label>
+                <div style="display:grid;grid-template-columns:1fr 1fr 1fr;gap:6px">
+                  <button class="geo-ds-btn active" id="geo-s${n}-med-none" onclick="setGeoMedS(${n},'none',null)">Keine</button>
+                  <button class="geo-ds-btn" id="geo-s${n}-med-vl" onclick="setGeoMedS(${n},'vl',45)">45 °C · VL</button>
+                  <button class="geo-ds-btn" id="geo-s${n}-med-rl" onclick="setGeoMedS(${n},'rl',30)">30 °C · RL</button>
+                </div>
+              </div>
+              <!-- Geometrie -->
+              <div id="geo-detail-s${n}" style="opacity:1;pointer-events:auto;transition:opacity .2s;background:rgba(20,60,35,0.3);border-radius:0 0 7px 7px;padding:0 11px 10px">
+                <div style="height:1px;background:rgba(255,255,255,.08);margin:10px 0"></div>
+                <div class="field" style="margin-top:0">
+                  <label>Temperatur Mediumrohr</label>
+                  <div class="fld-row">
+                    <input class="fld" type="number" id="geo-s${n}-tmed" min="0" max="200" step="1"
+                           placeholder="z. B. 90°C" oninput="calcGeoS(${n})">
+                    <span class="fld-unit">°C</span>
+                  </div>
+                </div>
+                <div class="field">
+                  <label>DN</label>${dnSelect(`geo-s${n}-dn`,`calcGeoS(${n})`)}
+                </div>
+                <div class="field">
+                  <label>Dämmstärke</label>
+                  <div style="display:grid;grid-template-columns:1fr 1fr 1fr;gap:6px">
+                    <button class="geo-ds-btn" id="geo-s${n}-ds-1" onclick="setGeoDSS(${n},1)">DS 1</button>
+                    <button class="geo-ds-btn active" id="geo-s${n}-ds-2" onclick="setGeoDSS(${n},2)">DS 2</button>
+                    <button class="geo-ds-btn" id="geo-s${n}-ds-3" onclick="setGeoDSS(${n},3)">DS 3</button>
+                  </div>
+                </div>
+                <div class="field">
+                  <label>Jahreszeit · Bodentemperatur (1m)</label>
+                  <div style="display:grid;grid-template-columns:1fr 1fr;gap:6px">
+                    <button class="geo-ds-btn" id="geo-s${n}-sz-w" onclick="setGeoSeasonS(${n},'winter',5)">Winter · 5 °C</button>
+                    <button class="geo-ds-btn active" id="geo-s${n}-sz-f" onclick="setGeoSeasonS(${n},'frühling',10)">Frühling · 10 °C</button>
+                    <button class="geo-ds-btn" id="geo-s${n}-sz-s" onclick="setGeoSeasonS(${n},'sommer',15)">Sommer · 15 °C</button>
+                    <button class="geo-ds-btn" id="geo-s${n}-sz-h" onclick="setGeoSeasonS(${n},'herbst',10)">Herbst · 10 °C</button>
+                  </div>
+                  <input type="hidden" id="geo-s${n}-tboden" value="10">
+                </div>
+                <div class="info-row" style="margin-top:6px">
+                  <span class="lbl">r₁ / r_Ader / r₂</span>
+                  <span class="val" style="font-size:11px;font-family:monospace" id="geo-s${n}-radii">–</span>
+                </div>
+                <div class="info-row">
+                  <span class="lbl">T_Ader (berechnet)</span>
+                  <span class="val" id="geo-s${n}-tader">–</span>
+                </div>
+              </div>
+            </div>
+          </div>
+        </div>
+
+        <!-- Leiterwiderstand -->
+        <div class="info-row">
+          <span class="lbl">Leiterwiderstand (korrigiert)</span>
+          <span class="val" id="s${n}-rpm">–</span>
+        </div>
+
+        <!-- Länge -->
+        <div class="field">
+          <label>Länge</label>
+          <div class="fld-row">
+            <input class="fld" type="number" id="s${n}-len" min="0" step="0.01" placeholder="Länge in m" oninput="onSecLen(${n})">
+            <span class="fld-unit">m</span>
+          </div>
+        </div>
+
+        <!-- Widerstand -->
+        <div class="info-row">
+          <span class="lbl">Widerstand Abschnitt ${n}</span>
+          <span class="val" id="s${n}-R">–</span>
+        </div>
+
+      </div>
+    </div>`;
+  });
+
+  // HFL-Alternative für Rückweg
+  html+=`
+    <div style="margin-top:8px;padding:8px 12px;background:#0F1923;border-radius:8px;border:1px solid var(--border)">
+      <label style="display:flex;align-items:center;gap:10px;cursor:pointer;user-select:none">
+        <input type="checkbox" id="use-hfl-return" onchange="onHflReturnToggle()" style="width:18px;height:18px;cursor:pointer;accent-color:#C8A45A">
+        <span style="font-size:13px;font-weight:600;color:#C8A45A">HFL als Rückführung (ersetzt Abschnitte 4–6)</span>
+      </label>
+      <div style="font-size:11px;color:var(--text2);margin-top:3px;margin-left:28px">
+        Wenn aktiv: Abschnitte 4–6 werden ignoriert, der Widerstand aus der HFL-Rubrik wird verwendet.
+      </div>
+    </div>`;
+
+  el.innerHTML=html;
+
+  // Init per section
+  for(let i=1;i<=6;i++){
+    onSecWire(i);
+    updateSecRpm(i);
+  }
+}
+
+const RHO_CU=0.01724; // Ω·mm²/m — spez. Widerstand Kupfer bei 20°C nach IEC 60228
 const WIRE_R20={nicr:5.820,curet:0.03517,cu15:0.01149};
 const WIRE_ALPHA={nicr:0.00017,curet:0.00393,cu15:0.00393};
 const WIRE_NAME={nicr:'Brandes Fühlerader NiCr 80/20',curet:'Brandes Rückführader Cu 0,490 mm²',cu15:'Nordic Cu blank 1,5 mm²'};
@@ -721,30 +772,30 @@ const WIRE_NAME={nicr:'Brandes Fühlerader NiCr 80/20',curet:'Brandes Rückführ
 // ρ-Quellen je Adertyp
 const RHO_SOURCES={
   cu15:[
-    {id:'iec_nom',  rho:0.01724, r:0.01149, label:'IEC 60228 · Nominalwert',
-     desc:'ρ = 0,01724 Ω·mm²/m · Berechnungsnominalwert für Cu-Leiter nach IEC-Norm. Standardwert.'},
     {id:'pure_cu',  rho:0.01708, r:0.01139, label:'Reinkupfer theoretisch',
      desc:'ρ = 0,01708 Ω·mm²/m · Theoretischer Wert für 100 % reines Kupfer bei 20 °C. In der Praxis nicht erreichbar.'},
+    {id:'iec_nom',  rho:0.01724, r:0.01149, label:'IEC 60228 · Nominalwert',
+     desc:'ρ = 0,01724 Ω·mm²/m · Berechnungsnominalwert für Cu-Leiter nach IEC-Norm. Standardwert.'},
     {id:'praxis',   rho:0.01750, r:0.01167, label:'Praxiswert Leitungsdraht',
      desc:'ρ = 0,01750 Ω·mm²/m · Typischer Mittelwert für handelsüblichen Cu-Leitungsdraht inkl. Legierungsanteile.'},
     {id:'iec_max',  rho:0.01777, r:0.01185, label:'IEC 60228 · Max. Grenzwert',
      desc:'ρ = 0,01777 Ω·mm²/m · Maximaler zulässiger Widerstand für Klasse-1-Leiter 1,5 mm² nach IEC 60228. Konservativster Wert.'},
   ],
   curet:[
-    {id:'iec_nom',  rho:0.01724, r:0.03517, label:'IEC 60228 · Nominalwert',
-     desc:'ρ = 0,01724 Ω·mm²/m · Nominalwert Cu nach IEC. r = ρ/0,490 mm² = 0,03517 Ω/m.'},
     {id:'pure_cu',  rho:0.01708, r:0.03486, label:'Reinkupfer theoretisch',
      desc:'ρ = 0,01708 Ω·mm²/m · Theoretischer Reinwert. r = 0,03486 Ω/m.'},
+    {id:'iec_nom',  rho:0.01724, r:0.03517, label:'IEC 60228 · Nominalwert',
+     desc:'ρ = 0,01724 Ω·mm²/m · Nominalwert Cu nach IEC. r = ρ/0,490 mm² = 0,03517 Ω/m.'},
     {id:'praxis',   rho:0.01750, r:0.03571, label:'Praxiswert Leitungsdraht',
      desc:'ρ = 0,01750 Ω·mm²/m · Praxistypischer Mittelwert. r = 0,03571 Ω/m.'},
     {id:'iec_max',  rho:0.01777, r:0.03626, label:'IEC 60228 · Max. Grenzwert',
      desc:'ρ = 0,01777 Ω·mm²/m · Maximaler IEC-Grenzwert. r = 0,03626 Ω/m.'},
   ],
   nicr:[
-    {id:'nicr_nom', rho:1.100, r:5.820, label:'Herstellerangabe Brandes · Nennwert',
-     desc:'ρ = 1,100 Ω·mm²/m · Offizieller Nennwert laut Brandes-Systemdokumentation. Standardwert.'},
     {id:'nicr_iec', rho:1.090, r:5.767, label:'IEC/DIN NiCr80 · Nominalwert',
      desc:'ρ = 1,090 Ω·mm²/m · Normwert für NiCr 80/20-Widerstandslegierung nach IEC/DIN. Etwas tiefer als Brandes-Nennwert.'},
+    {id:'nicr_nom', rho:1.100, r:5.820, label:'Herstellerangabe Brandes · Nennwert',
+     desc:'ρ = 1,100 Ω·mm²/m · Offizieller Nennwert laut Brandes-Systemdokumentation. Standardwert.'},
     {id:'nicr_praxis', rho:1.120, r:5.926, label:'Praxiswert · Alterung / Oxidation',
      desc:'ρ = 1,120 Ω·mm²/m · Erfahrungswert für gealterte oder leicht oxidierte NiCr-Adern. Konservativster Ansatz für ältere Leitungen.'},
   ],
@@ -752,9 +803,241 @@ const RHO_SOURCES={
 
 const RHO_TITLE={cu15:'Cu 1,5 mm²', curet:'Cu 0,490 mm² (Rückführader)', nicr:'NiCr 80/20 · 0,189 mm²'};
 
-// Aktiv gewählte ρ-Quelle je Abschnitt
-let rhoSel={1:{cu15:'iec_nom',curet:'iec_nom',nicr:'nicr_nom'},
-            2:{cu15:'iec_nom',curet:'iec_nom',nicr:'nicr_nom'}};
+// ═══ ROHRGEOMETRIE ════════════════════════════════════════════════════
+// [dn, d_stahl_mm, wand_mm, [kmr_ds1,δ_ds1], [kmr_ds2,δ_ds2], [kmr_ds3,δ_ds3]]
+// d_stahl = Stahlrohr-Aussendurchmesser, kmr = KMR-Aussendurchmesser
+// Mantelrohr-Wandstärke pauschal 4 mm
+const MANTEL_WAND=4;
+// Quelle: loop-break PIPE_TABLE (ODS-Normdaten)
+// [dn, d_stahl_mm, wand_mm, [kmr_ds1,δ_ds1], [kmr_ds2,δ_ds2], [kmr_ds3,δ_ds3]]
+const PIPE_GEO=[
+  [20,  26.9, 2.65, [90,15],   [110,19],  [125,23]  ],
+  [25,  33.7, 2.6,  [90,15],   [110,17.5],[125,21.5] ],
+  [32,  42.4, 2.6,  [110,15.5],[125,19],  [140,23]   ],
+  [40,  48.3, 2.6,  [110,15],  [125,17.5],[140,21.5] ],
+  [50,  60.3, 2.9,  [125,15],  [140,18.5],[160,23.5] ],
+  [65,  76.1, 2.9,  [140,15],  [160,19.5],[180,24.5] ],
+  [80,  88.9, 3.2,  [160,16.5],[180,21.5],[200,26]   ],
+  [100,114.3, 3.6,  [200,20],  [225,26],  [250,32]   ],
+  [125,139.7, 3.6,  [225,19.5],[250,25.5],[280,33]   ],
+  [150,168.3, 4.0,  [250,18.5],[280,25.5],[315,34]   ],
+  [200,219.1, 4.5,  [315,21.5],[355,31],  [400,42]   ],
+  [250,273.0, 5.0,  [400,28.5],[450,41],  [500,53.5] ],
+  [300,323.9, 5.6,  [450,28.5],[500,40.5],[560,55.5] ],
+];
+
+let geoDSactive=2;
+let geoSeasonActive='frühling';
+
+let geoMedActive='none'; // 'none' | 'vl' | 'rl'
+
+function setGeoMed(mode, temp){
+  geoMedActive=mode;
+  ['none','vl','rl'].forEach(m=>{
+    document.getElementById('geo-med-'+m).classList.toggle('active',m===mode);
+  });
+  const detail=document.getElementById('geo-detail');
+  if(mode==='none'){
+    // Keine → Feld leeren, Geometrie-Bereich aktiv
+    document.getElementById('temp-op').value='';
+    document.getElementById('temp-active-1').textContent='';
+    document.getElementById('temp-info').textContent='';
+    document.getElementById('geo-active').textContent='';
+    detail.style.opacity='1';
+    detail.style.pointerEvents='auto';
+    onWireType();
+  } else {
+    // VL/RL → Feld setzen, Geometrie-Bereich ausgrauen
+    document.getElementById('temp-op').value=temp;
+    document.getElementById('temp-active-1').textContent=
+      (mode==='vl'?'Pauschale Meldeader-Temperatur Vorlauf · 45 °C':'Pauschale Meldeader-Temperatur Rücklauf · 30 °C');
+    document.getElementById('geo-active').textContent=
+      (mode==='vl'?'45 °C · Vorlauf (pauschal)':'30 °C · Rücklauf (pauschal)');
+    detail.style.opacity='.35';
+    detail.style.pointerEvents='none';
+    onWireType();
+  }
+}
+
+function toggleGeo(){
+  const body=document.getElementById('geo-body');
+  const arr=document.getElementById('geo-arr');
+  const open=body.style.display==='none';
+  body.style.display=open?'block':'none';
+  arr.textContent=open?'▼':'▶';
+  if(open) calcGeoTemp();
+}
+
+function setGeoDS(ds){
+  geoDSactive=ds;
+  [1,2,3].forEach(d=>{
+    document.getElementById('geo-ds-'+d).classList.toggle('active',d===ds);
+  });
+  calcGeoTemp();
+}
+
+function setGeoSeason(name,temp){
+  geoSeasonActive=name;
+  document.getElementById('geo-tboden').value=temp;
+  const ids={winter:'w',frühling:'f',sommer:'s',herbst:'h'};
+  Object.entries(ids).forEach(([k,v])=>{
+    document.getElementById('geo-sz-'+v).classList.toggle('active',k===name);
+  });
+  calcGeoTemp();
+}
+
+function calcGeoTemp(){
+  const dn=parseInt(document.getElementById('geo-dn').value);
+  const tb=parseFloat(document.getElementById('geo-tboden').value);
+  const tm=parseFloat(document.getElementById('geo-tmedium').value);
+
+  // Beide Temperaturen müssen bekannt sein
+  const tbOK=!isNaN(tb);
+  const tmOK=!isNaN(tm);
+  if(!tbOK||!tmOK){
+    document.getElementById('geo-tader').textContent='–';
+    document.getElementById('geo-radii').textContent='–';
+    if(!tmOK) document.getElementById('geo-tader').textContent='Temperatur Mediumrohr eingeben';
+    return;
+  }
+
+  const row=PIPE_GEO.find(r=>r[0]===dn);
+  if(!row){document.getElementById('geo-tader').textContent='DN unbekannt';return;}
+
+  const d_stahl=row[1];                   // Stahlrohr-Aussen-∅ mm
+  const dsIdx=geoDSactive-1;              // 0=DS1, 1=DS2, 2=DS3
+  const kmr_aussen=row[3+dsIdx][0];       // KMR-Aussen-∅ mm
+  const delta=row[3+dsIdx][1];            // δ = Abstand Adermitten → Stahlrohr-Aussenfläche mm
+
+  const r1=d_stahl/2;                     // r₁ = Stahlrohr-Aussenfläche (innere Randbedingung: T_medium)
+  const r2=(kmr_aussen-2*MANTEL_WAND)/2;  // r₂ = Mantelrohr-Innenfläche (äussere RB: T_boden)
+  const r_ader=r1+delta;                  // Position Meldeader (Abstand δ vom Stahlrohr)
+
+  // Konsistenzprüfung Geometrie
+  if(r2<=r1||r_ader>=r2||r_ader<=r1){
+    document.getElementById('geo-tader').textContent='Geometriefehler (δ ausserhalb PUR)';
+    document.getElementById('geo-radii').textContent=
+      `r₁=${r1.toFixed(1)} r_Ad=${r_ader.toFixed(1)} r₂=${r2.toFixed(1)} mm`;
+    return;
+  }
+
+  // Zylindrische stationäre Wärmeleitung:
+  // Temperaturprofil im PUR-Schaum zwischen r₁ (T_medium) und r₂ (T_boden):
+  // T(r) = T_medium + (T_boden - T_medium) · ln(r/r₁) / ln(r₂/r₁)
+  // Einsetzen von r = r_ader:
+  const t_ader = tm + (tb - tm) * Math.log(r_ader/r1) / Math.log(r2/r1);
+
+  document.getElementById('geo-radii').textContent=
+    `r₁=${r1.toFixed(1)} / r_Ad=${r_ader.toFixed(1)} / r₂=${r2.toFixed(1)} mm  |  δ=${delta} mm`;
+  document.getElementById('geo-tader').textContent=t_ader.toFixed(2)+' °C';
+  document.getElementById('geo-active').textContent=
+    `DN${dn} · DS${geoDSactive} · ${geoSeasonActive} · T_Ader = ${t_ader.toFixed(1)} °C`;
+  return t_ader;
+}
+
+function applyGeoTemp(){
+  const t=calcGeoTemp();
+  if(t===undefined||isNaN(t)) return;
+  document.getElementById('temp-op').value=t.toFixed(1);
+  document.getElementById('temp-active-1').textContent=
+    `DN${document.getElementById('geo-dn').value} · DS${geoDSactive} · ${t.toFixed(1)} °C (geometrisch)`;
+  document.getElementById('geo-body').style.display='none';
+  document.getElementById('geo-arr').textContent='▶';
+  onWireType();
+}
+
+// ═══ GEO TEMPERATUR ABSCHNITT 2 ══════════════════════════════════
+let geoDSactive2=2;
+let geoSeasonActive2='frühling';
+let geoMedActive2='none';
+
+function setGeoMed2(mode,temp){
+  geoMedActive2=mode;
+  ['none','vl','rl'].forEach(m=>{
+    document.getElementById('geo2-med-'+m).classList.toggle('active',m===mode);
+  });
+  const detail=document.getElementById('geo2-detail');
+  if(mode==='none'){
+    document.getElementById('temp-op2').value='';
+    document.getElementById('temp-active-2').textContent='';
+    document.getElementById('temp-info2').textContent='';
+    document.getElementById('geo2-active').textContent='';
+    detail.style.opacity='1'; detail.style.pointerEvents='auto';
+    onWireType2();
+  } else {
+    document.getElementById('temp-op2').value=temp;
+    document.getElementById('temp-active-2').textContent=
+      (mode==='vl'?'Pauschale Meldeader-Temperatur Vorlauf · 45 °C':'Pauschale Meldeader-Temperatur Rücklauf · 30 °C');
+    document.getElementById('geo2-active').textContent=
+      (mode==='vl'?'45 °C · Vorlauf (pauschal)':'30 °C · Rücklauf (pauschal)');
+    detail.style.opacity='.35'; detail.style.pointerEvents='none';
+    onWireType2();
+  }
+}
+function toggleGeo2(){
+  const body=document.getElementById('geo2-body');
+  const arr=document.getElementById('geo2-arr');
+  const open=body.style.display==='none';
+  body.style.display=open?'block':'none';
+  arr.textContent=open?'▼':'▶';
+  if(open) calcGeoTemp2();
+}
+function setGeoDS2(ds){
+  geoDSactive2=ds;
+  [1,2,3].forEach(d=>document.getElementById('geo2-ds-'+d).classList.toggle('active',d===ds));
+  calcGeoTemp2();
+}
+function setGeoSeason2(name,temp){
+  geoSeasonActive2=name;
+  document.getElementById('geo2-tboden').value=temp;
+  const ids={winter:'w',frühling:'f',sommer:'s',herbst:'h'};
+  Object.entries(ids).forEach(([k,v])=>
+    document.getElementById('geo2-sz-'+v).classList.toggle('active',k===name));
+  calcGeoTemp2();
+}
+function calcGeoTemp2(){
+  const dn=parseInt(document.getElementById('geo2-dn').value);
+  const tb=parseFloat(document.getElementById('geo2-tboden').value);
+  const tm=parseFloat(document.getElementById('geo2-tmedium').value);
+  const tbOK=!isNaN(tb), tmOK=!isNaN(tm);
+  if(!tbOK||!tmOK){
+    document.getElementById('geo2-tader').textContent=!tmOK?'Temperatur Mediumrohr eingeben':'–';
+    document.getElementById('geo2-radii').textContent='–'; return;
+  }
+  const row=PIPE_GEO.find(r=>r[0]===dn);
+  if(!row){document.getElementById('geo2-tader').textContent='DN unbekannt';return;}
+  const r1=row[1]/2;
+  const dsIdx=geoDSactive2-1;
+  const r2=(row[3+dsIdx][0]-2*MANTEL_WAND)/2;
+  const delta=row[3+dsIdx][1];
+  const r_ader=r1+delta;
+  if(r2<=r1||r_ader>=r2||r_ader<=r1){
+    document.getElementById('geo2-tader').textContent='Geometriefehler';
+    document.getElementById('geo2-radii').textContent=`r₁=${r1.toFixed(1)} r_Ad=${r_ader.toFixed(1)} r₂=${r2.toFixed(1)} mm`;
+    return;
+  }
+  const t_ader=tm+(tb-tm)*Math.log(r_ader/r1)/Math.log(r2/r1);
+  document.getElementById('geo2-radii').textContent=
+    `r₁=${r1.toFixed(1)} / r_Ad=${r_ader.toFixed(1)} / r₂=${r2.toFixed(1)} mm  |  δ=${delta} mm`;
+  document.getElementById('geo2-tader').textContent=t_ader.toFixed(2)+' °C';
+  document.getElementById('geo2-active').textContent=
+    `DN${dn} · DS${geoDSactive2} · ${geoSeasonActive2} · T_Ader = ${t_ader.toFixed(1)} °C`;
+  return t_ader;
+}
+function applyGeoTemp2(){
+  const t=calcGeoTemp2();
+  if(t===undefined||isNaN(t)) return;
+  document.getElementById('temp-op2').value=t.toFixed(1);
+  document.getElementById('temp-active-2').textContent=
+    `DN${document.getElementById('geo2-dn').value} · DS${geoDSactive2} · ${t.toFixed(1)} °C (geometrisch)`;
+  document.getElementById('geo2-body').style.display='none';
+  document.getElementById('geo2-arr').textContent='▶';
+  onWireType2();
+}
+
+// Vorauswahl: Praxiswert für alle Adertypen
+let rhoSel={1:{cu15:'praxis',curet:'praxis',nicr:'nicr_praxis'},
+            2:{cu15:'praxis',curet:'praxis',nicr:'nicr_praxis'}};
 
 function getRhoR(abschnitt, wireType){
   const sources=RHO_SOURCES[wireType]||[];
@@ -848,6 +1131,341 @@ function updateRhoPanel(n, wt){
     panel.style.display='none';
   }
 }
+// ═══ ABSCHNITT INTERAKTION ════════════════════════════════════════════════
+const geoStateS={}; // n → {ds, season, medMode}
+for(let i=1;i<=6;i++) geoStateS[i]={ds:2,season:'frühling',medMode:'none'};
+
+function toggleSec(n){
+  const body=document.getElementById('sec-body-'+n);
+  const arr=document.getElementById('sec-arr-'+n);
+  const open=body.style.display==='none';
+  body.style.display=open?'block':'none';
+  arr.textContent=open?'▼':'▶';
+}
+
+function toggleRhoS(n){
+  const body=document.getElementById('rho-body-s'+n);
+  const arr=document.getElementById('rho-arr-s'+n);
+  const open=body.style.display==='none';
+  body.style.display=open?'block':'none';
+  arr.textContent=open?'▼':'▶';
+  if(open) renderRhoOptsS(n);
+}
+
+function renderRhoOptsS(n){
+  const wt=document.getElementById('s'+n+'-wire').value;
+  const sources=RHO_SOURCES[wt]||[];
+  const selId=secState[n].rhoId||'praxis';
+  const el=document.getElementById('rho-opts-s'+n);
+  el.innerHTML=sources.map(s=>{
+    const active=selId===s.id;
+    return `<div onclick="selectRhoS(${n},'${s.id}')" style="
+      padding:10px 11px;cursor:pointer;border-bottom:1px solid var(--border);
+      background:${active?'rgba(200,164,90,.12)':'transparent'}">
+      <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:3px">
+        <span style="font-size:12px;font-weight:600;color:${active?'#C8A45A':'#C0C8D8'}">${s.label}</span>
+        <span style="font-size:12px;font-weight:700;color:${active?'#C8A45A':'#E8F4FF'}">${s.r.toFixed(5)} Ω/m</span>
+      </div>
+      <div style="font-size:11px;color:var(--text2);line-height:1.4">${s.desc}</div>
+      ${active?'<div style="font-size:10px;color:#C8A45A;margin-top:3px;font-weight:600">✓ AKTIV</div>':''}
+    </div>`;
+  }).join('');
+}
+
+function selectRhoS(n,id){
+  const wt=document.getElementById('s'+n+'-wire').value;
+  secState[n].rhoId=id;
+  const src=(RHO_SOURCES[wt]||[]).find(s=>s.id===id);
+  if(src){
+    WIRE_R20[wt]=src.r;
+    const el=document.getElementById('rho-active-s'+n);
+    if(el) el.textContent=src.label+' · '+src.r.toFixed(5)+' Ω/m';
+  }
+  renderRhoOptsS(n);
+  updateSecRpm(n);
+  updateSummary(n);
+  calc();
+}
+
+function onSecWire(n){
+  const wt=document.getElementById('s'+n+'-wire').value;
+  secState[n].wireType=wt;
+  const title=document.getElementById('rho-title-s'+n);
+  if(title) title.textContent='ρ-Quelle wählen · '+(RHO_TITLE[wt]||wt);
+  // apply praxis default rho
+  const src=(RHO_SOURCES[wt]||[]).find(s=>s.id==='praxis')||RHO_SOURCES[wt]?.[0];
+  if(src){WIRE_R20[wt]=src.r; secState[n].rhoId=src.id;}
+  const activeEl=document.getElementById('rho-active-s'+n);
+  if(activeEl&&src) activeEl.textContent=src.label+' · '+src.r.toFixed(5)+' Ω/m';
+  updateSecRpm(n);
+  updateSummary(n);
+  calc();
+}
+
+function getSecRpm(n){
+  const wt=(document.getElementById('s'+n+'-wire')||{}).value||'cu15';
+  const T=parseFloat((document.getElementById('s'+n+'-temp')||{}).value);
+  const temp=(!isNaN(T)&&T>=0)?T:20;
+  const r20=WIRE_R20[wt]||0.01149;
+  const alpha=WIRE_ALPHA[wt]||0.00393;
+  return r20*(1+alpha*(temp-20));
+}
+
+function getSecLen(n){
+  const v=parseFloat((document.getElementById('s'+n+'-len')||{}).value);
+  return (!isNaN(v)&&v>0)?v:0;
+}
+
+function getSecR(n){return getSecLen(n)*getSecRpm(n);}
+
+function updateSecRpm(n){
+  const el=document.getElementById('s'+n+'-rpm');
+  if(el) el.textContent=fRpm(getSecRpm(n))+' Ω/m';
+  const relEl=document.getElementById('s'+n+'-R');
+  const R=getSecR(n);
+  if(relEl) relEl.textContent=R>0?fR4(R)+' Ω':'–';
+}
+
+function updateSummary(n){
+  const el=document.getElementById('sec-summary-'+n);
+  if(!el) return;
+  const L=getSecLen(n);
+  const R=getSecR(n);
+  const wt=(document.getElementById('s'+n+'-wire')||{}).value||'cu15';
+  const wname={nicr:'NiCr',curet:'Cu 0,49',cu15:'Cu 1,5'}[wt]||wt;
+  if(L>0) el.textContent=`${fL(L)} m · ${wname} · ${fR4(R)} Ω`;
+  else el.textContent='(nicht verwendet)';
+
+  // Mediumtemperatur-Zeile
+  const tmedEl=document.getElementById('sec-summary-tmed-'+n);
+  if(!tmedEl) return;
+  const tmed=parseFloat((document.getElementById('geo-s'+n+'-tmed')||{}).value);
+  const tader=parseFloat((document.getElementById('s'+n+'-temp')||{}).value);
+  const dn=(document.getElementById('geo-s'+n+'-dn')||{}).value;
+  const ds=(geoStateS[n]&&geoStateS[n].ds)||2;
+  if(!isNaN(tmed)&&!isNaN(tader)&&dn){
+    tmedEl.textContent=`T-Medium ${tmed}°C · DN${dn} DS${ds} → T-Ader ${tader.toFixed(1)}°C`;
+  } else if(!isNaN(tader)){
+    tmedEl.textContent=`T-Ader ${tader.toFixed(1)}°C`;
+  } else {
+    tmedEl.textContent='';
+  }
+}
+
+function onSecTemp(n){
+  secState[n].temp=parseFloat(document.getElementById('s'+n+'-temp').value);
+  updateSecRpm(n);
+  updateSummary(n);
+  calc();
+}
+
+function onSecLen(n){
+  updateSecRpm(n);
+  updateSummary(n);
+  updateBadge1();
+  calc();
+}
+
+function updateBadge1(){
+  const R_fwd=getSecR(1)+getSecR(2)+getSecR(3);
+  const R_ret=useHflReturn()?getAuxR():getSecR(4)+getSecR(5)+getSecR(6);
+  const total=R_fwd+R_ret;
+  const el=document.getElementById('bdg1');
+  if(el) el.textContent=total>0?fR4(total)+' Ω':'–';
+}
+
+function onHflReturnToggle(){
+  const use=useHflReturn();
+  [4,5,6].forEach(n=>{
+    const body=document.getElementById('sec-body-'+n);
+    const arr=document.getElementById('sec-arr-'+n);
+    if(body){body.style.opacity=use?'.35':'1'; body.style.pointerEvents=use?'none':'auto';}
+  });
+  updateBadge1();
+  calc();
+}
+
+function useHflReturn(){
+  const cb=document.getElementById('use-hfl-return');
+  return cb&&cb.checked;
+}
+
+// ── Geo Kompensation für jeden Abschnitt ─────────────────────────────────
+function toggleGeoS(n){
+  const body=document.getElementById('geo-body-s'+n);
+  const arr=document.getElementById('geo-arr-s'+n);
+  const open=body.style.display==='none';
+  body.style.display=open?'block':'none';
+  arr.textContent=open?'▼':'▶';
+  if(open) calcGeoS(n);
+}
+
+function setGeoMedS(n,mode,temp){
+  ['none','vl','rl'].forEach(m=>{
+    const b=document.getElementById(`geo-s${n}-med-${m}`);
+    if(b) b.classList.toggle('active',m===mode);
+  });
+  const detail=document.getElementById('geo-detail-s'+n);
+  if(mode==='none'){
+    document.getElementById('s'+n+'-temp').value='';
+    const a=document.getElementById('s'+n+'-temp-active'); if(a) a.textContent='';
+    const g=document.getElementById('geo-active-s'+n); if(g) g.textContent='';
+    if(detail){detail.style.opacity='1';detail.style.pointerEvents='auto';}
+    onSecTemp(n);
+  } else {
+    document.getElementById('s'+n+'-temp').value=temp;
+    const a=document.getElementById('s'+n+'-temp-active');
+    if(a) a.textContent=(mode==='vl'?'Vorlauf pauschal · 45 °C':'Rücklauf pauschal · 30 °C');
+    const g=document.getElementById('geo-active-s'+n);
+    if(g) g.textContent=(mode==='vl'?'45 °C · VL (pauschal)':'30 °C · RL (pauschal)');
+    if(detail){detail.style.opacity='.35';detail.style.pointerEvents='none';}
+    onSecTemp(n);
+  }
+}
+
+function setGeoDSS(n,ds){
+  geoStateS[n].ds=ds;
+  [1,2,3].forEach(d=>{
+    const b=document.getElementById(`geo-s${n}-ds-${d}`); if(b) b.classList.toggle('active',d===ds);
+  });
+  calcGeoS(n);
+}
+
+function setGeoSeasonS(n,name,temp){
+  geoStateS[n].season=name;
+  document.getElementById('geo-s'+n+'-tboden').value=temp;
+  const ids={winter:'w',frühling:'f',sommer:'s',herbst:'h'};
+  Object.entries(ids).forEach(([k,v])=>{
+    const b=document.getElementById(`geo-s${n}-sz-${v}`); if(b) b.classList.toggle('active',k===name);
+  });
+  calcGeoS(n);
+}
+
+function calcGeoS(n){
+  const dnEl=document.getElementById('geo-s'+n+'-dn');
+  const dn=dnEl?parseInt(dnEl.value,10):100;
+  const tbEl=document.getElementById('geo-s'+n+'-tboden');
+  const tmEl=document.getElementById('geo-s'+n+'-tmed');
+  const tb=tbEl?parseFloat(tbEl.value):NaN;
+  const tm=tmEl?parseFloat(tmEl.value):NaN;
+  if(isNaN(tb)||isNaN(tm)){
+    const t=document.getElementById('geo-s'+n+'-tader');
+    if(t) t.textContent=isNaN(tm)?'Temp. Mediumrohr eingeben':'–';
+    return;
+  }
+  const row=PIPE_GEO.find(r=>r[0]===dn);
+  if(!row){
+    const t=document.getElementById('geo-s'+n+'-tader');
+    if(t) t.textContent='DN '+dn+' nicht in Tabelle';
+    const ri=document.getElementById('geo-s'+n+'-radii');
+    if(ri) ri.textContent='–';
+    return;
+  }
+  const ds=(geoStateS[n]&&geoStateS[n].ds)||2;
+  const dsIdx=ds-1;
+  const r1=row[1]/2;
+  const r2=(row[3+dsIdx][0]-2*MANTEL_WAND)/2;
+  const delta=row[3+dsIdx][1];
+  const r_ader=r1+delta;
+  const ri=document.getElementById('geo-s'+n+'-radii');
+  const ta=document.getElementById('geo-s'+n+'-tader');
+  const ga=document.getElementById('geo-active-s'+n);
+  if(r2<=r1||r_ader>=r2||r_ader<=r1){
+    if(ta) ta.textContent='Geometriefehler';
+    if(ri) ri.textContent=`r₁=${r1.toFixed(1)} r_Ad=${r_ader.toFixed(1)} r₂=${r2.toFixed(1)} mm`;
+    return;
+  }
+  const t_ader=tm+(tb-tm)*Math.log(r_ader/r1)/Math.log(r2/r1);
+  if(ri) ri.textContent=`r₁=${r1.toFixed(1)} / r_Ad=${r_ader.toFixed(1)} / r₂=${r2.toFixed(1)} mm | δ=${delta}mm`;
+  if(ta) ta.textContent=t_ader.toFixed(2)+' °C';
+  const sz=(geoStateS[n]&&geoStateS[n].season)||'–';
+  if(ga) ga.textContent=`DN${dn} · DS${ds} · ${sz} · T_Ader=${t_ader.toFixed(1)}°C`;
+  // Auto-apply direkt ins Meldeader-Temperatur-Feld
+  const tempFld=document.getElementById('s'+n+'-temp');
+  if(tempFld) tempFld.value=t_ader.toFixed(1);
+  const activeEl=document.getElementById('s'+n+'-temp-active');
+  if(activeEl) activeEl.textContent=`DN${dn} · DS${ds} · ${sz} · ${t_ader.toFixed(1)} °C (geo.)`;
+  onSecTemp(n);
+  updateSummary(n);
+  return t_ader;
+}
+
+function applyGeoS(n){
+  const t=calcGeoS(n);
+  if(t===undefined||isNaN(t)) return;
+  document.getElementById('s'+n+'-temp').value=t.toFixed(1);
+  const a=document.getElementById('s'+n+'-temp-active');
+  if(a) a.textContent=`DN${document.getElementById('geo-s'+n+'-dn').value} · DS${geoStateS[n].ds} · ${t.toFixed(1)} °C (geo.)`;
+  const body=document.getElementById('geo-body-s'+n);
+  const arr=document.getElementById('geo-arr-s'+n);
+  if(body) body.style.display='none'; if(arr) arr.textContent='▶';
+  onSecTemp(n);
+}
+
+// ── Neue Gesamtwiderstands-Berechnung ────────────────────────────────────
+function getRgesCalc(){
+  const R_fwd=getSecR(1)+getSecR(2)+getSecR(3);
+  const R_ret=useHflReturn()?getAuxR():getSecR(4)+getSecR(5)+getSecR(6);
+  return getKAR('a')+R_fwd+getKAR('b')+R_ret;
+}
+
+// ── Neue Positionsberechnung: iteriert durch Abschnitte ──────────────────
+// Gibt Abstand in Metern ab MP-A zurück (null = kein Ergebnis)
+function posFromMpA(R_rot_to_nass){
+  // Iteriere Abschnitte 1-3 (Hinweg)
+  let R_acc=0;
+  for(let n=1;n<=3;n++){
+    const R=getSecR(n);
+    if(R<=0) continue;
+    const L=getSecLen(n);
+    const r=getSecRpm(n);
+    const L_prev=[0,0,getSecLen(1),getSecLen(1)+getSecLen(2)][n];
+    if(R_rot_to_nass<=R_acc+R){
+      // Nassstelle in Abschnitt n
+      return L_prev+(R_rot_to_nass-R_acc)/r;
+    }
+    R_acc+=R;
+  }
+  return null; // Nassstelle ausserhalb Hinweg
+}
+
+function getRetR(){
+  return useHflReturn()?getAuxR():getSecR(4)+getSecR(5)+getSecR(6);
+}
+function getTotalLen(){
+  return getSecLen(1)+getSecLen(2)+getSecLen(3);
+}
+
+// ── Override der alten computeXs-Funktion ────────────────────────────────
+function computeXs(pRA,pBA,pRB,pBB,Rt,L,rpm){
+  // Für Rückwärtskompatibilität: nutzt neue iterative Berechnung
+  const Ra=getRetR();
+  const Rka=getKAR('a'),Rkb=getKAR('b');
+  function xi(p,mode){
+    if(isNaN(p)||p<0||p>100) return null;
+    const f=p/100;
+    if(mode==='ra'){
+      const R_rot=f*Rt-Rka;
+      return posFromMpA(R_rot);
+    }
+    if(mode==='ba'){
+      const R_rot=f*Rt-Ra-Rkb;
+      const x=posFromMpA(R_rot);
+      return x!==null?L-x:null;
+    }
+    if(mode==='rb'){
+      const R_rot=f*Rt-Rkb;
+      const x=posFromMpA(R_rot);
+      return x!==null?L-x:null;
+    }
+    if(mode==='bb'){
+      const R_rot=f*Rt-Ra-Rka;
+      return posFromMpA(R_rot);
+    }
+  }
+  return [xi(pRA,'ra'),xi(pBA,'ba'),xi(pRB,'rb'),xi(pBB,'bb')];
+}
+
 const SEG=70,MAX_AUX=5;
 let auxIdx=0,auxCount=0,segOpen=false,activeTab='calc';
 
@@ -863,12 +1481,19 @@ document.addEventListener('input',function(e){
 
 function init(){
   const g=document.getElementById('seg-grid');
-  for(let i=0;i<SEG;i++){
-    const inp=document.createElement('input');
-    inp.type='number';inp.className='seg-inp';inp.min='0';inp.step='0.01';inp.placeholder=i+1;
-    inp.oninput=onSeg;g.appendChild(inp);
+  if(g){
+    for(let i=0;i<SEG;i++){
+      const inp=document.createElement('input');
+      inp.type='number';inp.className='seg-inp';inp.min='0';inp.step='0.01';inp.placeholder=i+1;
+      inp.oninput=onSeg;g.appendChild(inp);
+    }
   }
-  addAux();onWireType();onWireType2();updateChainDisplay();
+  addAux();
+  // onWireType/onWireType2 only if legacy elements still exist
+  if(document.getElementById('wire-type')) onWireType();
+  if(document.getElementById('wire-type2')) onWireType2();
+  updateChainDisplay();
+  buildSections();
 }
 
 function toggleCard(id){
@@ -885,40 +1510,44 @@ function switchTab(t){
 
 // ── Abschnitt 1 ──────────────────────────────────────
 function getRpm(){
-  const t=document.getElementById('wire-type').value;
-  const T=parseFloat(document.getElementById('temp-op').value);
-  const temp=(!isNaN(T)&&T>=0)?T:20;
-  return WIRE_R20[t]*(1+WIRE_ALPHA[t]*(temp-20));
+  // Fallback: reads section 1 new fields
+  return getSecRpm(1);
 }
 function onWireType(){
-  const t=document.getElementById('wire-type').value;
+  const el=document.getElementById('wire-type');
+  if(!el) return;
+  const t=el.value;
   updateRhoPanel(1,t);
   const r=getRpm(),r20=WIRE_R20[t];
-  document.getElementById('r-per-m-lbl').textContent=fRpm(r)+' Ω/m';
-  const T=parseFloat(document.getElementById('temp-op').value);
+  const lbl=document.getElementById('r-per-m-lbl');
+  if(lbl) lbl.textContent=fRpm(r)+' Ω/m';
+  const T=parseFloat((document.getElementById('temp-op')||{}).value);
   const ti=document.getElementById('temp-info');
-  if(!isNaN(T)&&T!==20){
+  if(ti&&!isNaN(T)&&T!==20){
     const c=((r-r20)/r20*100);
     ti.textContent=`Korrektur bei ${T}°C: ${c>=0?'+':''}${c.toFixed(2)}% ggü. 20°C`;
-  } else { ti.textContent=''; }
+  } else if(ti){ ti.textContent=''; }
   updateRMain();calc();
 }
 
-// ── Abschnitt 2 ──────────────────────────────────────
-function isSec2Active(){return document.getElementById('sec2-active').checked;}
+// ── Abschnitt 2 (trockene Rückführader — legacy) ──────────────────────
+function isSec2Active(){
+  const el=document.getElementById('sec2-active');
+  return el&&el.checked;
+}
 function toggleSec2(){
-  document.getElementById('sec2-panel').style.display=isSec2Active()?'block':'none';
+  const p=document.getElementById('sec2-panel');
+  if(p) p.style.display=isSec2Active()?'block':'none';
   updateChainDisplay();updateRgesDisplay();calc();
 }
 function getRpm2(){
-  const t=document.getElementById('wire-type2').value;
-  const T=parseFloat(document.getElementById('temp-op2').value);
+  const t=(document.getElementById('wire-type2')||{}).value||'cu15';
+  const T=parseFloat((document.getElementById('temp-op2')||{}).value);
   const temp=(!isNaN(T)&&T>=0)?T:20;
   return WIRE_R20[t]*(1+WIRE_ALPHA[t]*(temp-20));
 }
 function getLen2(){
-  // Leer = gleiche Länge wie Abschnitt 1
-  const v=parseFloat(document.getElementById('len-total2').value);
+  const v=parseFloat((document.getElementById('len-total2')||{}).value);
   return (!isNaN(v)&&v>0)?v:getLen();
 }
 function getSec2R(){
@@ -926,57 +1555,72 @@ function getSec2R(){
   return getLen2()*getRpm2();
 }
 function onWireType2(){
-  const t=document.getElementById('wire-type2').value;
+  const el=document.getElementById('wire-type2');
+  if(!el) return;
+  const t=el.value;
   updateRhoPanel(2,t);
   const r=getRpm2(),r20=WIRE_R20[t];
-  document.getElementById('r-per-m-lbl2').textContent=fRpm(r)+' Ω/m';
+  const lbl=document.getElementById('r-per-m-lbl2');
+  if(lbl) lbl.textContent=fRpm(r)+' Ω/m';
   const panel=document.getElementById('rho-panel-2');
-  if(t==='cu15'){
-    panel.style.display='block';
-    const src=(RHO_SOURCES.cu15||[]).find(s=>s.id===rhoSel[2].cu15);
-    if(src) WIRE_R20.cu15=src.r;
-  } else {
-    panel.style.display='none';
+  if(panel){
+    if(t==='cu15'){
+      panel.style.display='block';
+      const src=(RHO_SOURCES.cu15||[]).find(s=>s.id===rhoSel[2].cu15);
+      if(src) WIRE_R20.cu15=src.r;
+    } else { panel.style.display='none'; }
   }
-  const T=parseFloat(document.getElementById('temp-op2').value);
+  const T=parseFloat((document.getElementById('temp-op2')||{}).value);
   const ti=document.getElementById('temp-info2');
-  if(!isNaN(T)&&T!==20){
+  if(ti&&!isNaN(T)&&T!==20){
     const c=((r-r20)/r20*100);
     ti.textContent=`Korrektur bei ${T}°C: ${c>=0?'+':''}${c.toFixed(2)}% ggü. 20°C`;
-  } else { ti.textContent=''; }
+  } else if(ti){ ti.textContent=''; }
   updateRMain();calc();
 }
 
-// ── Ra = R_HFL + R_Abschnitt2 (beide können 0 sein) ──
-function getRa(){return getAuxR()+getSec2R();}
+// ── Ra / Len ──────────────────────────────────────────────────────────
+function getRa(){return getRetR();}
+function getLen(){return getTotalLen();}
 
 function toggleSeg(){
+  const panel=document.getElementById('seg-panel');
+  const arr=document.getElementById('seg-arr');
+  if(!panel||!arr) return;
   segOpen=!segOpen;
-  document.getElementById('seg-panel').classList.toggle('open',segOpen);
-  document.getElementById('seg-arr').textContent=segOpen?'▼':'▶';
+  panel.classList.toggle('open',segOpen);
+  arr.textContent=segOpen?'▼':'▶';
 }
 function onSeg(){
-  document.getElementById('seg-sum').textContent=fL(getSegSum())+' m';calc();
+  const el=document.getElementById('seg-sum');
+  if(el) el.textContent=fL(getSegSum())+' m';
+  calc();
 }
 function getSegSum(){
   let s=0;document.querySelectorAll('#seg-grid .seg-inp').forEach(i=>s+=parseFloat(i.value)||0);return s;
 }
-function useSeg(){document.getElementById('len-total').value=getSegSum().toFixed(2);updateRMain();calc();}
-function clearSeg(){
-  document.querySelectorAll('#seg-grid .seg-inp').forEach(i=>i.value='');
-  document.getElementById('seg-sum').textContent='0,00 m';
+function useSeg(){
+  const el=document.getElementById('len-total');
+  if(el){el.value=getSegSum().toFixed(2);updateRMain();}
   calc();
 }
-function getLen(){return parseFloat(document.getElementById('len-total').value)||0;}
+function clearSeg(){
+  document.querySelectorAll('#seg-grid .seg-inp').forEach(i=>i.value='');
+  const el=document.getElementById('seg-sum');
+  if(el) el.textContent='0,00 m';
+  calc();
+}
 function onLen1(){updateRMain();calc();}
 function updateRMain(){
-  const L=getLen(),r=getRpm();
-  document.getElementById('r-main-lbl').textContent=(L>0&&r>0)?fR4(L*r)+' Ω':'–';
-  document.getElementById('bdg1').textContent=L>0?fL(L)+' m':'–';
-  // Abschnitt 2 Anzeige aktualisieren
+  const L=getLen();
+  const r=getSecRpm(1);
+  const lbl=document.getElementById('r-main-lbl');
+  if(lbl) lbl.textContent=(L>0&&r>0)?fR4(L*r)+' Ω':'–';
+  updateBadge1();
   if(isSec2Active()){
     const L2=getLen2(),r2=getRpm2();
-    document.getElementById('r-main-lbl2').textContent=(L2>0&&r2>0)?fR4(L2*r2)+' Ω':'–';
+    const lbl2=document.getElementById('r-main-lbl2');
+    if(lbl2) lbl2.textContent=(L2>0&&r2>0)?fR4(L2*r2)+' Ω':'–';
   }
   updateRgesDisplay();
 }
@@ -1012,7 +1656,7 @@ function calcKA(side){
   const cross=document.getElementById('ka-'+side+'-cross').value;
   document.getElementById('ka-'+side+'-ohm-wrap').style.display=cross==='cust'?'block':'none';
   const R=getKAR(side);
-  document.getElementById('ka-'+side+'-r').textContent=R.toFixed(2)+' Ω';
+  document.getElementById('ka-'+side+'-r').textContent=R.toFixed(4)+' Ω';
   document.getElementById('bdg3').textContent=(getKAR('a')||getKAR('b'))?'aktiv':'optional';
   updateChainDisplay();updateRgesDisplay();calc();
 }
@@ -1023,7 +1667,6 @@ function getKAR(side){
   return (RHO_CU/parseFloat(cross))*(parseFloat(document.getElementById('ka-'+side+'-len').value)||0);
 }
 
-function getRgesCalc(){return getKAR('a')+(getLen()*getRpm())+getKAR('b')+getRa();}
 function updateRgesDisplay(){
   const Rc=getRgesCalc(),Rm=parseFloat(document.getElementById('rges-man').value)||0;
   document.getElementById('rges-calc-lbl').textContent=Rc>0?fR4(Rc)+' Ω':'–';
@@ -1140,128 +1783,24 @@ function getWeights(offsets){
   return raw.map(w=>w/sum); // normiert: Summe=1
 }
 
-function renderDualScale(L, sets, suffix){
-  const el=document.getElementById('dual-scale-'+suffix);
-  const lblB='MP-B  '+fL(L)+' m';
-  const COL=['#E74C3C','#3A8BBF','#27AE60','#D4AC0D'];
-  // P%-rot Werte für Strichlänge: Fall 1 + Fall 3 haben MKL rot direkt (kein HFL-Offset)
-  // Nähe = P%_rot für Fall 1 und Fall 3; für Fall 2 und 4 = (100 - P%_blau) = P%_rot-äquiv.
-  // Einfacher: Strichlänge = Gewicht normiert auf 6..28px
-  const MIN_H=6, MAX_H=28;
-  const weights=getWeights(getOffsets());
-  const maxW=Math.max(...weights);
 
-  let html='<div class="dual-scale">';
-  sets.forEach((s,si)=>{
-    const rowH = MAX_H + 44;
-    const trackTop = MAX_H/2 + 14; // mehr Platz oben für MP-Labels
-    html+=`<div class="ds-label">${s.label}</div>`;
-    html+=`<div class="ds-row" style="height:${rowH}px">`;
-    html+=`<div class="ds-track" style="top:${trackTop}px"></div>`;
 
-    // MP-A / MP-B Labels knapp OBERHALB der Skala
-    html+=`<div class="ds-lbl-a" style="top:${(trackTop-12).toFixed(0)}px">MP-A</div>`;
-    html+=`<div class="ds-lbl-b" style="top:${(trackTop-12).toFixed(0)}px">${fL(L)} m</div>`;
 
-    // 5 Orientierungsmarken: reiner Zahlenwert, kein Nachkomma, keine Einheit
-    for(let t=1;t<=5;t++){
-      const tp=(t/6*100).toFixed(2);
-      const tickVal=Math.round(L*t/6);
-      // Strich: 8px unterhalb Track-Mitte (Abstand vergrössert)
-      html+=`<div style="position:absolute;left:${tp}%;top:${(trackTop+3).toFixed(0)}px;
-        width:1px;height:8px;background:rgba(255,255,255,.18);transform:translateX(-50%)"></div>`;
-      // Zahl: 14px unterhalb Track-Mitte
-      html+=`<div style="position:absolute;left:${tp}%;top:${(trackTop+13).toFixed(0)}px;
-        font-size:8px;color:rgba(255,255,255,.28);transform:translateX(-50%);white-space:nowrap">${tickVal}</div>`;
-    }
 
-    // Striche pro Messwert
-    s.xs.forEach((x,i)=>{
-      if(x===null||!s.enabled[i]) return;
-      const pct=Math.max(0,Math.min(100,x/L*100));
-      const h=MIN_H+(MAX_H-MIN_H)*(weights[i]/maxW);
-      const top=trackTop-h/2;
-      html+=`<div style="position:absolute;left:${pct.toFixed(2)}%;
-        top:${top.toFixed(1)}px;width:3px;height:${h.toFixed(1)}px;
-        background:${COL[i]};border-radius:2px;transform:translateX(-50%);
-        transition:left .3s"></div>`;
-    });
-    // Deaktivierte Striche
-    s.xs.forEach((x,i)=>{
-      if(x===null||s.enabled[i]) return;
-      const pct=Math.max(0,Math.min(100,x/L*100));
-      html+=`<div style="position:absolute;left:${pct.toFixed(2)}%;
-        top:${(trackTop-3).toFixed(1)}px;width:3px;height:6px;
-        background:rgba(255,255,255,.15);border-radius:2px;transform:translateX(-50%);
-        transition:left .3s"></div>`;
-    });
 
-    html+='</div>';
-    if(si<sets.length-1) html+='<div class="ds-sep"></div>';
-  });
-  html+='</div>';
-  el.innerHTML=html;
-}
-
-function renderDetailRows(L, xs, weights, enabled, mean, suffix, maderIdx){
-  const el=document.getElementById('detail-'+suffix+'-'+maderIdx);
-  const COL=['#E74C3C','#3A8BBF','#27AE60','#D4AC0D'];
-  const FALL=['Schleife 1','Schleife 2','Schleife 3','Schleife 4'];
-  const maxW=Math.max(...weights);
-  // Header
-  let html=`<div class="mader-hdr" style="color:rgba(255,255,255,.4)">Meldeader ${maderIdx}</div>`;
-  xs.forEach((x,i)=>{
-    const dis=!enabled[i]||(x===null);
-    const wPct=(weights[i]/maxW*100).toFixed(0);
-    const delta=(!dis&&mean!==null)?Math.abs(x-mean):null;
-    html+=`<div class="det-row">
-      <input type="checkbox" class="det-chk" ${enabled[i]?'checked':''} onchange="toggleMeas(${maderIdx},${i},this.checked,'${suffix}')">
-      <span class="det-fall" style="color:${dis?'rgba(255,255,255,.2)':COL[i]}">${FALL[i]}</span>
-      <span class="det-val${dis?' disabled':''}">${x!==null?fL(x)+' m':'–'}</span>
-      <div class="det-wbar-wrap">
-        <div class="det-wbar" style="width:${dis?0:wPct}%;background:${COL[i]}"></div>
-      </div>
-      <span class="det-wlbl${dis?' disabled':''}">${dis?'–':(weights[i]*100).toFixed(0)+'%'}</span>
-      <span class="det-delta">${delta!==null?'Δ '+fL(delta)+' m':'–'}</span>
-    </div>`;
-  });
-  // Mean strip
-  if(mean!==null){
-    const validW=weights.filter((_,i)=>enabled[i]&&xs[i]!==null);
-    const sw=validW.reduce((a,b)=>a+b,0);
-    const sigma=Math.sqrt(xs.reduce((s,x,i)=>!enabled[i]||x===null?s:s+(x-mean)**2*weights[i],0)/sw);
-    const maxD=Math.max(...xs.map((x,i)=>(!enabled[i]||x===null)?0:Math.abs(x-mean)));
-    html+=`<div class="mean-strip">
-      <div><div class="ms-lbl">⌀ gewichtet · Meldeader ${maderIdx}</div>
-           <div class="ms-val">${fL(mean)} m</div>
-           <div class="ms-sub">${fL(L-mean)} m ab MP-B</div></div>
-      <div class="ms-r"><div class="ms-lbl">σ gewichtet</div>
-           <div class="ms-val" style="font-size:14px">${fL(sigma)} m</div>
-           <div class="ms-sub">max. Δ ${fL(maxD)} m</div></div>
-    </div>`;
-  }
-  el.innerHTML=html;
-}
-
-function computeXs(pRA,pBA,pRB,pBB,Rt,L,rpm){
-  // rpm = spez. Leiterwiderstand der jeweiligen Meldeader (Ω/m)
-  const Ra=getRa(),Rka=getKAR('a'),Rkb=getKAR('b');
-  function xi(p,mode){
-    if(isNaN(p)||p<0||p>100) return null;
-    const f=p/100;
-    if(mode==='ra') return (f*Rt-Rka)/rpm;
-    if(mode==='ba') return L-(f*Rt-Ra-Rkb)/rpm;
-    if(mode==='rb') return L-(f*Rt-Rkb)/rpm;
-    if(mode==='bb') return (f*Rt-Ra-Rka)/rpm;
-  }
-  return [xi(pRA,'ra'),xi(pBA,'ba'),xi(pRB,'rb'),xi(pBB,'bb')];
+// enabled-state pro Meldeader
+let enabled1=[true,true,true,true];
+let enabled2=[true,true,true,true];
+function toggleMeas(maderIdx,i,val,suffix){
+  if(maderIdx===1) enabled1[i]=val; else enabled2[i]=val;
+  calc();
 }
 
 function renderDualScale(L, sets, suffix){
   const el=document.getElementById('dual-scale-'+suffix);
+  if(!el) return;
   const COL=['#E74C3C','#3A8BBF','#27AE60','#D4AC0D'];
   const MIN_H=6, MAX_H=32;
-
   let html='<div class="dual-scale">';
   sets.forEach((s,si)=>{
     const rowH=MAX_H+44;
@@ -1271,7 +1810,6 @@ function renderDualScale(L, sets, suffix){
     html+=`<div class="ds-track" style="top:${trackTop}px"></div>`;
     html+=`<div class="ds-lbl-a" style="top:${trackTop-12}px">MP-A</div>`;
     html+=`<div class="ds-lbl-b" style="top:${trackTop-12}px">${fL(L)} m</div>`;
-    // 5 Orientierungsmarken
     for(let t=1;t<=5;t++){
       const tp=(t/6*100).toFixed(2);
       html+=`<div style="position:absolute;left:${tp}%;top:${trackTop+3}px;
@@ -1279,14 +1817,11 @@ function renderDualScale(L, sets, suffix){
       html+=`<div style="position:absolute;left:${tp}%;top:${trackTop+13}px;
         font-size:8px;color:rgba(255,255,255,.28);transform:translateX(-50%);white-space:nowrap">${Math.round(L*t/6)}</div>`;
     }
-    // Striche: Länge proportional zur Nähe (= 1 - x/L für Schleifen von MP-A, x/L für MP-B-Seite)
-    // Schleife 1+4: messen ab MP-A → Nähe = 1 - x/L (je kleiner x, desto länger Strich)
-    // Schleife 2+3: messen ab MP-B → Nähe = x/L (je grösser x, desto kleiner Distanz zu MP-B)
     const proximity=[
-      x=>x===null?0:Math.max(0,1-x/L),   // S1: ab MP-A
-      x=>x===null?0:Math.max(0,x/L),      // S2: ab MP-B (x gross = nah MP-B)
-      x=>x===null?0:Math.max(0,x/L),      // S3: ab MP-B
-      x=>x===null?0:Math.max(0,1-x/L),   // S4: ab MP-A
+      x=>x===null?0:Math.max(0,1-x/L),
+      x=>x===null?0:Math.max(0,x/L),
+      x=>x===null?0:Math.max(0,x/L),
+      x=>x===null?0:Math.max(0,1-x/L),
     ];
     s.xs.forEach((x,i)=>{
       if(x===null) return;
@@ -1312,7 +1847,6 @@ function renderDetailRows(L, xs, enabled, suffix, maderIdx){
   if(!el) return;
   const COL=['#E74C3C','#3A8BBF','#27AE60','#D4AC0D'];
   const LABS=['Schleife 1','Schleife 2','Schleife 3','Schleife 4'];
-  // Nähe je Schleife (gleiche Logik wie oben)
   const proximity=[
     x=>x===null?0:Math.max(0,1-x/L),
     x=>x===null?0:Math.max(0,x/L),
@@ -1320,7 +1854,6 @@ function renderDetailRows(L, xs, enabled, suffix, maderIdx){
     x=>x===null?0:Math.max(0,1-x/L),
   ];
   const maxProx=Math.max(...xs.map((x,i)=>x!==null&&enabled[i]?proximity[i](x):0),0.001);
-
   let html=`<div class="mader-hdr" style="color:rgba(255,255,255,.4)">Meldeader ${maderIdx}</div>`;
   xs.forEach((x,i)=>{
     const dis=!enabled[i]||x===null;
@@ -1340,18 +1873,10 @@ function renderDetailRows(L, xs, enabled, suffix, maderIdx){
   el.innerHTML=html;
 }
 
-// enabled-state pro Meldeader
-let enabled1=[true,true,true,true];
-let enabled2=[true,true,true,true];
-function toggleMeas(maderIdx,i,val,suffix){
-  if(maderIdx===1) enabled1[i]=val; else enabled2[i]=val;
-  calc();
-}
-
 function renderResults(Rt,suffix){
-  const L=getLen();
-  const rpm1=getRpm();   // Meldeader 1 — Leiterwiderstand der Messader
-  const rpm2=getRpm();   // Meldeader 2 — identische Ader im selben Rohr, gleicher rpm
+  const L=getTotalLen();
+  const rpm1=getSecRpm(1);
+  const rpm2=getSecRpm(1); // Meldeader 2 nutzt vorerst Abschnitt-1-r (symmetrisch)
   if(!L||!rpm1||!Rt) return;
 
   const pRA =parseFloat(document.getElementById('pRA').value);
@@ -1396,7 +1921,7 @@ function renderResults(Rt,suffix){
 
 function calc(){
   updateRMain();updateChainDisplay();updateRgesDisplay();
-  const L=getLen(),r=getRpm();
+  const L=getTotalLen();
   const pRA=parseFloat(document.getElementById('pRA').value);
   const pBA=parseFloat(document.getElementById('pBA').value);
   const pRB=parseFloat(document.getElementById('pRB').value);
@@ -1411,15 +1936,15 @@ function calc(){
 
   const Rc=getRgesCalc();
   const anyVal=[pRA,pBA,pRB,pBB].some(v=>!isNaN(v));
-  if(!L||!r||!Rc||!anyVal){showEmpty();return;}
+  if(!L||!Rc||!anyVal){showEmpty();return;}
 
   const Rm=parseFloat(document.getElementById('rges-man').value)||0;
 
-  // Chips
+  const R_ret=getRetR();
   document.getElementById('chips').innerHTML=
     `<div class="chip">R<sub>ges</sub> = <b>${fR4(Rc)} Ω</b></div>`+
-    (getAuxR()>0?`<div class="chip">R<sub>HFL</sub> = <b>${getAuxR().toFixed(2)} Ω</b></div>`:'')+
-    (isSec2Active()?`<div class="chip">R<sub>Abs.2</sub> = <b>${fR4(getSec2R())} Ω</b></div>`:'')+
+    (getAuxR()>0&&useHflReturn()?`<div class="chip">R<sub>HFL</sub> = <b>${getAuxR().toFixed(2)} Ω</b></div>`:'')+
+    (!useHflReturn()&&R_ret>0?`<div class="chip">R<sub>Rückf.</sub> = <b>${fR4(R_ret)} Ω</b></div>`:'')+
     (getKAR('a')?`<div class="chip">KA-A = <b>${getKAR('a').toFixed(2)} Ω</b></div>`:'')+
     (getKAR('b')?`<div class="chip">KA-B = <b>${getKAR('b').toFixed(2)} Ω</b></div>`:'')+
     `<div class="chip">L = <b>${fL(L)} m</b></div>`;
@@ -1461,6 +1986,14 @@ function buildRuler(rid,lid,L,x1,x2,x3,x4,mean){
 
 // ═══ PDF ═══════════════════════════════════════════════
 function exportPDF(){
+  // Lazy-load jsPDF only when needed
+  if(!window.jspdf){
+    const s=document.createElement('script');
+    s.src='https://cdnjs.cloudflare.com/ajax/libs/jspdf/2.5.1/jspdf.umd.min.js';
+    s.onload=()=>exportPDF();
+    document.head.appendChild(s);
+    return;
+  }
   const{jsPDF}=window.jspdf;
   const doc=new jsPDF({orientation:'portrait',unit:'mm',format:'a4'});
   const W=210,M=18;let y=M;
@@ -1479,14 +2012,21 @@ function exportPDF(){
     dk();doc.setFont('helvetica','bold');doc.text((v||'–')+(u?' '+u:''),M+75,y);ln(6);
   };
 
-  // Header
-  doc.setFillColor(27,61,94);doc.rect(0,0,W,28,'F');
-  doc.setFont('helvetica','bold');doc.setFontSize(16);wh();doc.text('TipScale · Naesse-Ortung',M,14);
-  doc.setFont('helvetica','normal');doc.setFontSize(9);doc.setTextColor(180,200,220);
-  doc.text('Widerstands-Referenz-Messverfahren · LUWA · Fernwaerme',M,20);
+  // Header — icon + text, einheitlich wie App-Kopf
+  const HDR_H=22;
+  doc.setFillColor(30,58,63);doc.rect(0,0,W,HDR_H,'F');
+  const ICON_B64='data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAAFAAAABQCAYAAACOEfKtAAAD40lEQVR4nO2bP2hTQRzHfxEHO6WgXbSDUFyqxbFWHNKhEAJdi4SAQ+mSDIKDS6FDoIuC4GCW0kEIIi4dAiWQoUGEZq9mkW6piwp26hgHvfS43Ls/7/1+917S32dpm9d37+7zvu/u3nsXAIZhGIZhGIZhvMmlXQGVpcrm0PY/J839zNQ79Yq4CLORptDUDowhTiUNkcEPaBPnIgGjDCyCCoxqeJIGU5TpQ5CD6BpJ0cBQx5G5Rlk4QNhG6cql6GtlSM+OWnkXca9rj3vqZ0dwd1n++/DdB+9+kuqkkQn0bYBOnEAVKLCJDCGRRKBPxU3iBFECBSaR1BKvYxamI6rCLuKi2Fm5/L1+DFCqlYcAepEnzf0cZT9IOhJiyRMJlMWp1I///YxKo0u94oA6Cruc6STJc0Gk0QRmIlETaDvLrvIO8qWxPu/NYt+6n0ghgD6JFClEE4ghT4gbdDtj2z5V71jrIAsECCORfBBx5SBfWtaJyzoofaCtTzGl7yBfWnaRt9E4M25X0wdg7w8x+kL0W7k4l0XI5GHPA8nvhW3p85G30TgbS+JG4wxe9Bcj93EZlZOQSh/4df3VLQCAewCng25nwXd/VeKg2wEorMHsuX2kxiZxAk2jmi59Qp5gdWf3NGkdbKgplOuZtB8kv4RlVHkCDImDbgf+5KMvZSqCCpxGWGBCggp80Hr5S/f5UX3beyDJCqSjsPY5XqsBc+vVUZ83yfIAUprGfP/cXZjE2zYd3AcmJBWBs+d9mC+soZY5P6kTadOk1OXtWQjUemA+0krtEsZMYVrpAwgg0JRCDIk2edRXAbrAOPeWcSXG2Q/7DR2KQFs/YkthnCSK5CVJ31Q90p897wP8lyjmiKs7u6PtR/VtALhMXVp9nkrQt3KuDzfn1quR2362Gk51CfVWjmwQ0fU1oaY1NnmYoAp0Oas2iab0uWx3OUmZXZkA4Pa0lyqJoZd1AAQYRJYqm0NdpUVjMV76+KzOwiYz6wNlka6DyNSuDxSoDdgrXsCjirnRpVp5aBN4JVaoCkRD9ooXo89sEgXP2l9GEt4XnzjtE3qhedBV+rJEAHeRvseRoV6ln8r3RGSRW+0ZkmNN1fdEZKLSiCly6r6pZJpKUKdxoi/hXrM8VKWoDVqqbA6TplFXpu1/sPAutLty3zoxLRx/y/Wal/M618FC3merPROZTh8Z6l3I7ecfrfX/8fapc/kkAm/UHgJAvFFWlqiSZNQWIn/ftD939BFI9jQmbmNN+5nk2qC6hPm9cEJIBGJPkLGgSGEmExh1ArJ4YjIpEGBcVhblMQzDMAzDMAzDMAzDMAxztfgL03r8IL9RYxgAAAAASUVORK5CYII=';
+  // Icon grösser als Balken — entkoppelt, übersteht oben und unten
+  const ICON_SZ=28;
+  const ICON_Y=(HDR_H-ICON_SZ)/2+1;
+  try{doc.addImage(ICON_B64,'PNG',M,ICON_Y,ICON_SZ,ICON_SZ);}catch(e){}
+  const TX=M+ICON_SZ+5;
+  doc.setFont('helvetica','bold');doc.setFontSize(14);wh();doc.text('TipScale · Naesse-Ortung',TX,9);
+  doc.setFont('helvetica','normal');doc.setFontSize(8);doc.setTextColor(180,200,220);
+  doc.text('Widerstands-Referenz-Messverfahren · LUWA · Fernwaerme',TX,15);
   const now=new Date();
-  doc.text(now.toLocaleDateString('de-DE'),W-M,20,{align:'right'});
-  y=36;
+  doc.text(now.toLocaleDateString('de-DE'),W-M,15,{align:'right'});
+  y=HDR_H+10;
 
   // Projekt
   sec('PROJEKT & IDENTIFIKATION');
