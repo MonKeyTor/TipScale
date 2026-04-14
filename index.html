@@ -5,13 +5,6 @@
   <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0">
   <meta name="theme-color" content="#0F1923">
   <title>TipScale</title>
-  <script>
-window.onerror=function(msg,src,line,col,err){
-  if(line===0) return true; // Cross-origin errors from external scripts — suppress
-  console.error('ERROR:',msg,'line',line,err&&err.stack);
-  return false;
-};
-</script>
   <style>
     :root{
       --bg:#0F1923;--card:#1A2433;--navy:#1B3D5E;--navy2:#3A7FBF;
@@ -53,6 +46,7 @@ window.onerror=function(msg,src,line,col,err){
     .fld{width:100%;padding:10px 12px;border:1.5px solid var(--border);border-radius:7px;
          font-size:15px;color:#1A2433;background:#FAFAC0;font-family:inherit;outline:none;transition:border-color .15s}
     .fld:focus{border-color:var(--navy2)}
+    .sec-fld{background:#E8E8E0 !important;color:#1A2433 !important}
     .fld-row{display:flex;gap:8px;align-items:center}
     .fld-unit{font-size:13px;color:var(--text2);white-space:nowrap}
     .beta-tag{font-size:9px;padding:1px 5px;background:#FEF3C7;color:#92400E;border-radius:3px;
@@ -64,10 +58,10 @@ window.onerror=function(msg,src,line,col,err){
     .info-row .val{font-size:13.5px;font-weight:600;color:#E8F4FF;font-variant-numeric:tabular-nums}
 
     .rges-box{margin-top:9px;background:#0F1923;border:1.5px solid #1B3D5E;border-radius:8px;padding:10px 13px}
-    .rges-title{font-size:10px;font-weight:700;text-transform:uppercase;letter-spacing:.06em;color:#1A5276;margin-bottom:7px}
+    .rges-title{font-size:10px;font-weight:700;text-transform:uppercase;letter-spacing:.06em;color:#6A7F9A;margin-bottom:7px}
     .rges-row{display:flex;justify-content:space-between;align-items:center;margin-bottom:4px}
     .rges-row .rl{font-size:12px;color:var(--text2)}
-    .rges-row .rv{font-size:13px;font-weight:600;color:var(--navy);font-variant-numeric:tabular-nums}
+    .rges-row .rv{font-size:13px;font-weight:600;color:#8A9BB0;font-variant-numeric:tabular-nums}
     .rges-row .rv.manual{color:var(--red)}
     .rges-diff{font-size:11px;margin-top:5px;padding:4px 8px;border-radius:5px;text-align:center;display:none}
     .rges-diff.ok{background:var(--green-bg);color:var(--green)}
@@ -245,6 +239,12 @@ window.onerror=function(msg,src,line,col,err){
     .mean-strip .ms-r{text-align:right}
     .mader-hdr{font-size:10px;font-weight:700;text-transform:uppercase;letter-spacing:.07em;
                margin-bottom:4px;padding-bottom:3px;border-bottom:1px solid rgba(255,255,255,.1)}
+    .sec-chip{display:inline-flex;align-items:center;justify-content:center;
+              width:20px;height:20px;border-radius:5px;font-size:11px;font-weight:700;
+              cursor:pointer;user-select:none;border:1.5px solid var(--chip-col);
+              color:var(--chip-col);background:transparent;transition:all .15s}
+    .sec-chip:hover{background:rgba(255,255,255,.08)}
+    .sec-chip-off{opacity:.25;border-style:dashed}
              padding:12px;background:var(--navy2);color:#fff;border:none;border-radius:var(--radius);
              cursor:pointer;font-size:14px;font-weight:600;font-family:inherit;margin-top:10px}
     .pdf-btn:hover{background:#1B4F72} .pdf-btn:active{transform:scale(.98)}
@@ -309,8 +309,8 @@ window.onerror=function(msg,src,line,col,err){
 
       <!-- Info Topologie -->
       <p style="font-size:12px;color:var(--text2);margin-top:8px;margin-bottom:10px;line-height:1.5">
-        MP-A → <b style="color:var(--red)">Abs. 1–3</b> (Nässebefall) → MP-B →
-        <b style="color:var(--blue-t)">Abs. 4–6</b> (trockene Rückführung) → MP-A.
+        MP-A → <b style="color:var(--red)">Abs. 1–4</b> (Nässebefall) → MP-B →
+        <b style="color:var(--blue-t)">Abs. 5–8</b> (trockene Rückführung) → MP-A.
         Leere Abschnitte werden übersprungen.
       </p>
 
@@ -420,7 +420,7 @@ window.onerror=function(msg,src,line,col,err){
            font-size:800px;font-weight:900;color:rgba(192,57,43,0.10);line-height:1;
            font-family:'Helvetica Neue',Arial,sans-serif;user-select:none;z-index:0">1</div>
       <div style="position:relative;z-index:1">
-        <p style="font-size:12px;color:var(--text2);margin-top:8px;line-height:1.4"><b style="color:var(--red)">MKL rot</b> = Richtung Meldeader, <b style="color:var(--blue-t)">MKL blau</b> = über HFL. Summe ≈ 100 %.</p>
+        <p style="font-size:12px;color:var(--text2);margin-top:8px;line-height:1.4"><b style="color:var(--red)">MKL rot</b> = Richtung Meldeader, <b style="color:var(--blue-t)">MKL blau</b> = über Rückführ-/HFL. Summe ≈ 100 %.</p>
         <div class="side-lbl">Messpunkt A</div>
 
         <!-- Schleife 1 Kette -->
@@ -432,7 +432,7 @@ window.onerror=function(msg,src,line,col,err){
             <input class="term-inp" type="number" id="pRA" min="0" max="100" step="0.01" inputmode="decimal" placeholder="%" oninput="calc()">
           </div>
           <div class="term-field tf-b">
-            <label><span class="tdot b"></span> MKL rot → HFL</label>
+            <label><span class="tdot r"></span> MKL rot → Rückführ-/HFL</label>
             <input class="term-inp" type="number" id="pBA" min="0" max="100" step="0.01" inputmode="decimal" placeholder="%" oninput="calc()">
           </div>
         </div>
@@ -451,7 +451,7 @@ window.onerror=function(msg,src,line,col,err){
             <input class="term-inp" type="number" id="pRB" min="0" max="100" step="0.01" inputmode="decimal" placeholder="%" oninput="calc()">
           </div>
           <div class="term-field tf-b">
-            <label><span class="tdot b"></span> MKL rot → HFL</label>
+            <label><span class="tdot r"></span> MKL rot → Rückführ-/HFL</label>
             <input class="term-inp" type="number" id="pBB" min="0" max="100" step="0.01" inputmode="decimal" placeholder="%" oninput="calc()">
           </div>
         </div>
@@ -477,7 +477,7 @@ window.onerror=function(msg,src,line,col,err){
            font-size:800px;font-weight:900;color:rgba(26,111,168,0.10);line-height:1;
            font-family:'Helvetica Neue',Arial,sans-serif;user-select:none;z-index:0">2</div>
       <div style="position:relative;z-index:1">
-        <p style="font-size:12px;color:var(--text2);margin-top:8px;line-height:1.4"><b style="color:var(--red)">MKL rot</b> = Richtung Meldeader, <b style="color:var(--blue-t)">MKL blau</b> = über HFL. Summe ≈ 100 %.</p>
+        <p style="font-size:12px;color:var(--text2);margin-top:8px;line-height:1.4"><b style="color:var(--red)">MKL rot</b> = Richtung Meldeader, <b style="color:var(--blue-t)">MKL blau</b> = über Rückführ-/HFL. Summe ≈ 100 %.</p>
         <div class="side-lbl">Messpunkt A</div>
 
         <!-- Schleife 1 Kette -->
@@ -489,7 +489,7 @@ window.onerror=function(msg,src,line,col,err){
             <input class="term-inp" type="number" id="pRA2" min="0" max="100" step="0.01" inputmode="decimal" placeholder="%" oninput="calc()">
           </div>
           <div class="term-field tf-b">
-            <label><span class="tdot b"></span> MKL rot → HFL</label>
+            <label><span class="tdot r"></span> MKL rot → Rückführ-/HFL</label>
             <input class="term-inp" type="number" id="pBA2" min="0" max="100" step="0.01" inputmode="decimal" placeholder="%" oninput="calc()">
           </div>
         </div>
@@ -508,7 +508,7 @@ window.onerror=function(msg,src,line,col,err){
             <input class="term-inp" type="number" id="pRB2" min="0" max="100" step="0.01" inputmode="decimal" placeholder="%" oninput="calc()">
           </div>
           <div class="term-field tf-b">
-            <label><span class="tdot b"></span> MKL rot → HFL</label>
+            <label><span class="tdot r"></span> MKL rot → Rückführ-/HFL</label>
             <input class="term-inp" type="number" id="pBB2" min="0" max="100" step="0.01" inputmode="decimal" placeholder="%" oninput="calc()">
           </div>
         </div>
@@ -569,235 +569,38 @@ window.onerror=function(msg,src,line,col,err){
 // Abschnitte 1-3: Meldeader mit potenziellem Nässebefall (Hinweg MP-A→MP-B)
 // Abschnitte 4-6: Trockene Rückführ-Meldeader (Rückweg MP-B→MP-A)
 // Alternativer Rückweg: HFL (ersetzt Abs. 4-6)
-const SEC_DEF=[
-  {n:1,label:'Abschnitt 1 · Meldeader mit potenziellem Nässebefall', color:'#C0392B', type:'fwd'},
-  {n:2,label:'Abschnitt 2 · Meldeader mit potenziellem Nässebefall', color:'#C0392B', type:'fwd'},
-  {n:3,label:'Abschnitt 3 · Meldeader mit potenziellem Nässebefall', color:'#C0392B', type:'fwd'},
-  {n:4,label:'Abschnitt 4 · Trockene Rückführ-Meldeader',            color:'#1A6FA8', type:'ret'},
-  {n:5,label:'Abschnitt 5 · Trockene Rückführ-Meldeader',            color:'#1A6FA8', type:'ret'},
-  {n:6,label:'Abschnitt 6 · Trockene Rückführ-Meldeader',            color:'#1A6FA8', type:'ret'},
-];
-
-// Per-Abschnitt Zustand (Adertyp, r20, temp)
-const secState={}; // n → {wireType, rhoId, temp}
-for(let i=1;i<=6;i++) secState[i]={wireType:'cu15',rhoId:'praxis',temp:NaN};
-
-const DN_OPTIONS=[20,25,32,40,50,65,80,100,125,150,200,250,300];
-
-function dnSelect(id,cb){
-  return `<select class="fld" id="${id}" onchange="${cb}" oninput="${cb}">
-    ${DN_OPTIONS.map(d=>`<option value="${d}"${d===100?' selected':''}>DN ${d}</option>`).join('')}
-  </select>`;
-}
-
-function buildSections(){
-  const el=document.getElementById('sec-list');
-  if(!el) return;
-  let html='';
-
-  SEC_DEF.forEach(def=>{
-    const n=def.n;
-    const isRet=def.type==='ret';
-    const colStyle=`color:${def.color}`;
-    const hdrBg=def.type==='fwd'
-      ? 'background:linear-gradient(90deg,rgba(192,57,43,0.18) 0%,#0F1923 100%)'
-      : 'background:linear-gradient(90deg,rgba(26,111,168,0.18) 0%,#0F1923 100%)';
-    html+=`
-    <div style="margin-bottom:6px;border:1px solid var(--border);border-radius:9px;overflow:hidden">
-      <!-- Abschnitt Header -->
-      <div onclick="toggleSec(${n})" style="display:flex;align-items:center;justify-content:space-between;
-           padding:10px 14px;cursor:pointer;user-select:none;${hdrBg}">
-        <div>
-          <div style="font-size:10px;font-weight:700;text-transform:uppercase;letter-spacing:.06em;${colStyle}">
-            ${def.label}
-          </div>
-          <div id="sec-summary-${n}" style="font-size:11px;color:var(--text2);margin-top:2px"></div>
-          <div id="sec-summary-tmed-${n}" style="font-size:11px;color:#8BC4A8;margin-top:1px"></div>
-        </div>
-        <span id="sec-arr-${n}" style="font-size:11px;color:var(--text2);flex-shrink:0;margin-left:8px">▶</span>
-      </div>
-      <!-- Abschnitt Body -->
-      <div id="sec-body-${n}" style="display:none;padding:12px 14px;background:var(--card)">
-
-        <!-- Adertyp -->
-        <div class="field" style="margin-top:0">
-          <label>Adertyp</label>
-          <select class="fld" id="s${n}-wire" onchange="onSecWire(${n})">
-            <option value="nicr">Brandes Fühlerader · NiCr 80/20 · 0,189 mm²</option>
-            <option value="curet">Brandes Rückführader · Cu · 0,490 mm²</option>
-            <option value="cu15" selected>Nordic · Cu blank · 1,5 mm²</option>
-          </select>
-        </div>
-
-        <!-- ρ-Quelle -->
-        <div id="rho-panel-s${n}" style="margin-top:6px;background:#0F1923;border-radius:8px;border:1px solid var(--border);overflow:hidden">
-          <div onclick="toggleRhoS(${n})" style="display:flex;justify-content:space-between;align-items:center;padding:8px 11px;cursor:pointer;user-select:none">
-            <div>
-              <div style="font-size:11px;font-weight:600;color:#C0C8D8;text-transform:uppercase;letter-spacing:.05em" id="rho-title-s${n}">ρ-Quelle wählen</div>
-              <div id="rho-active-s${n}" style="font-size:11px;color:#C8A45A;margin-top:2px"></div>
-            </div>
-            <span id="rho-arr-s${n}" style="font-size:11px;color:var(--text2);flex-shrink:0;margin-left:8px">▶</span>
-          </div>
-          <div id="rho-body-s${n}" style="display:none;border-top:1px solid var(--border)">
-            <div id="rho-opts-s${n}"></div>
-          </div>
-        </div>
-
-        <!-- Meldeader-Temperatur -->
-        <div class="field">
-          <label>Meldeader-Temperatur<span class="beta-tag">Beta</span></label>
-          <div class="fld-row" style="margin-bottom:6px">
-            <input class="fld" type="number" id="s${n}-temp" min="0" max="200" step="1"
-                   placeholder="20 °C (Referenz)" oninput="onSecTemp(${n})">
-            <span class="fld-unit">°C</span>
-          </div>
-          <div id="s${n}-temp-active" style="font-size:11px;color:#C8A45A;margin-bottom:4px"></div>
-
-          <!-- Pauschale Vorauswahl -->
-          <div style="background:#0F1923;border-radius:8px;border:1px solid var(--border);overflow:hidden;margin-bottom:6px;
-                      outline:2px solid rgba(46,139,87,0.35);outline-offset:-1px">
-            <div onclick="toggleGeoS(${n})" style="display:flex;justify-content:space-between;align-items:center;padding:8px 11px;cursor:pointer;user-select:none;background:rgba(30,80,50,0.45);border-radius:7px 7px 0 0">
-              <div>
-                <div style="font-size:11px;font-weight:600;color:#C0C8D8;text-transform:uppercase;letter-spacing:.05em">Temperatur-Kompensation: Geometrie &amp; Milieu</div>
-                <div id="geo-active-s${n}" style="font-size:11px;color:#C8A45A;margin-top:2px"></div>
-              </div>
-              <span id="geo-arr-s${n}" style="font-size:11px;color:var(--text2);flex-shrink:0;margin-left:8px">▶</span>
-            </div>
-            <div id="geo-body-s${n}" style="display:none;border-top:1px solid var(--border);padding:10px 11px">
-              <!-- Pauschale -->
-              <div class="field" style="margin-top:0">
-                <label>Pauschale Meldeader-Temperatur</label>
-                <div style="display:grid;grid-template-columns:1fr 1fr 1fr;gap:6px">
-                  <button class="geo-ds-btn active" id="geo-s${n}-med-none" onclick="setGeoMedS(${n},'none',null)">Keine</button>
-                  <button class="geo-ds-btn" id="geo-s${n}-med-vl" onclick="setGeoMedS(${n},'vl',45)">45 °C · VL</button>
-                  <button class="geo-ds-btn" id="geo-s${n}-med-rl" onclick="setGeoMedS(${n},'rl',30)">30 °C · RL</button>
-                </div>
-              </div>
-              <!-- Geometrie -->
-              <div id="geo-detail-s${n}" style="opacity:1;pointer-events:auto;transition:opacity .2s;background:rgba(20,60,35,0.3);border-radius:0 0 7px 7px;padding:0 11px 10px">
-                <div style="height:1px;background:rgba(255,255,255,.08);margin:10px 0"></div>
-                <div class="field" style="margin-top:0">
-                  <label>Temperatur Mediumrohr</label>
-                  <div class="fld-row">
-                    <input class="fld" type="number" id="geo-s${n}-tmed" min="0" max="200" step="1"
-                           placeholder="z. B. 90°C" oninput="calcGeoS(${n})">
-                    <span class="fld-unit">°C</span>
-                  </div>
-                </div>
-                <div class="field">
-                  <label>DN</label>${dnSelect(`geo-s${n}-dn`,`calcGeoS(${n})`)}
-                </div>
-                <div class="field">
-                  <label>Dämmstärke</label>
-                  <div style="display:grid;grid-template-columns:1fr 1fr 1fr;gap:6px">
-                    <button class="geo-ds-btn" id="geo-s${n}-ds-1" onclick="setGeoDSS(${n},1)">DS 1</button>
-                    <button class="geo-ds-btn active" id="geo-s${n}-ds-2" onclick="setGeoDSS(${n},2)">DS 2</button>
-                    <button class="geo-ds-btn" id="geo-s${n}-ds-3" onclick="setGeoDSS(${n},3)">DS 3</button>
-                  </div>
-                </div>
-                <div class="field">
-                  <label>Jahreszeit · Bodentemperatur (1m)</label>
-                  <div style="display:grid;grid-template-columns:1fr 1fr;gap:6px">
-                    <button class="geo-ds-btn" id="geo-s${n}-sz-w" onclick="setGeoSeasonS(${n},'winter',5)">Winter · 5 °C</button>
-                    <button class="geo-ds-btn active" id="geo-s${n}-sz-f" onclick="setGeoSeasonS(${n},'frühling',10)">Frühling · 10 °C</button>
-                    <button class="geo-ds-btn" id="geo-s${n}-sz-s" onclick="setGeoSeasonS(${n},'sommer',15)">Sommer · 15 °C</button>
-                    <button class="geo-ds-btn" id="geo-s${n}-sz-h" onclick="setGeoSeasonS(${n},'herbst',10)">Herbst · 10 °C</button>
-                  </div>
-                  <input type="hidden" id="geo-s${n}-tboden" value="10">
-                </div>
-                <div class="info-row" style="margin-top:6px">
-                  <span class="lbl">r₁ / r_Ader / r₂</span>
-                  <span class="val" style="font-size:11px;font-family:monospace" id="geo-s${n}-radii">–</span>
-                </div>
-                <div class="info-row">
-                  <span class="lbl">T_Ader (berechnet)</span>
-                  <span class="val" id="geo-s${n}-tader">–</span>
-                </div>
-              </div>
-            </div>
-          </div>
-        </div>
-
-        <!-- Leiterwiderstand -->
-        <div class="info-row">
-          <span class="lbl">Leiterwiderstand (korrigiert)</span>
-          <span class="val" id="s${n}-rpm">–</span>
-        </div>
-
-        <!-- Länge -->
-        <div class="field">
-          <label>Länge</label>
-          <div class="fld-row">
-            <input class="fld" type="number" id="s${n}-len" min="0" step="0.01" placeholder="Länge in m" oninput="onSecLen(${n})">
-            <span class="fld-unit">m</span>
-          </div>
-        </div>
-
-        <!-- Widerstand -->
-        <div class="info-row">
-          <span class="lbl">Widerstand Abschnitt ${n}</span>
-          <span class="val" id="s${n}-R">–</span>
-        </div>
-
-      </div>
-    </div>`;
-  });
-
-  // HFL-Alternative für Rückweg
-  html+=`
-    <div style="margin-top:8px;padding:8px 12px;background:#0F1923;border-radius:8px;border:1px solid var(--border)">
-      <label style="display:flex;align-items:center;gap:10px;cursor:pointer;user-select:none">
-        <input type="checkbox" id="use-hfl-return" onchange="onHflReturnToggle()" style="width:18px;height:18px;cursor:pointer;accent-color:#C8A45A">
-        <span style="font-size:13px;font-weight:600;color:#C8A45A">HFL als Rückführung (ersetzt Abschnitte 4–6)</span>
-      </label>
-      <div style="font-size:11px;color:var(--text2);margin-top:3px;margin-left:28px">
-        Wenn aktiv: Abschnitte 4–6 werden ignoriert, der Widerstand aus der HFL-Rubrik wird verwendet.
-      </div>
-    </div>`;
-
-  el.innerHTML=html;
-
-  // Init per section
-  for(let i=1;i<=6;i++){
-    onSecWire(i);
-    updateSecRpm(i);
-  }
-}
-
-const RHO_CU=0.01724; // Ω·mm²/m — spez. Widerstand Kupfer bei 20°C nach IEC 60228
-const WIRE_R20={nicr:5.820,curet:0.03517,cu15:0.01149};
+const RHO_CU=0.01724; //Ohm·mm²/m — spez. Widerstand Kupfer bei 20°C nach IEC 60228
+const WIRE_R20={nicr:5.820,curet:0.03517,cu15:0.01175};
 const WIRE_ALPHA={nicr:0.00017,curet:0.00393,cu15:0.00393};
 const WIRE_NAME={nicr:'Brandes Fühlerader NiCr 80/20',curet:'Brandes Rückführader Cu 0,490 mm²',cu15:'Nordic Cu blank 1,5 mm²'};
 
 // ρ-Quellen je Adertyp
 const RHO_SOURCES={
   cu15:[
-    {id:'pure_cu',  rho:0.01708, r:0.01139, label:'Reinkupfer theoretisch',
-     desc:'ρ = 0,01708 Ω·mm²/m · Theoretischer Wert für 100 % reines Kupfer bei 20 °C. In der Praxis nicht erreichbar.'},
     {id:'iec_nom',  rho:0.01724, r:0.01149, label:'IEC 60228 · Nominalwert',
-     desc:'ρ = 0,01724 Ω·mm²/m · Berechnungsnominalwert für Cu-Leiter nach IEC-Norm. Standardwert.'},
+     desc:'ρ = 0,01724Ohm·mm²/m · Berechnungsnominalwert für Cu-Leiter nach IEC-Norm. Standardwert.'},
     {id:'praxis',   rho:0.01750, r:0.01167, label:'Praxiswert Leitungsdraht',
-     desc:'ρ = 0,01750 Ω·mm²/m · Typischer Mittelwert für handelsüblichen Cu-Leitungsdraht inkl. Legierungsanteile.'},
+     desc:'ρ = 0,01750Ohm·mm²/m · Typischer Mittelwert für handelsüblichen Cu-Leitungsdraht inkl. Legierungsanteile.'},
+    {id:'feldwert', rho:0.01763, r:0.01175, label:'Feldmesswert · 0,01175 Ohm/m',
+     desc:'r = 0,01175 Ohm/m · Empirischer Feldmesswert. Liegt zwischen Praxiswert und IEC-Grenzwert.'},
     {id:'iec_max',  rho:0.01777, r:0.01185, label:'IEC 60228 · Max. Grenzwert',
-     desc:'ρ = 0,01777 Ω·mm²/m · Maximaler zulässiger Widerstand für Klasse-1-Leiter 1,5 mm² nach IEC 60228. Konservativster Wert.'},
+     desc:'ρ = 0,01777Ohm·mm²/m · Maximaler zulässiger Widerstand für Klasse-1-Leiter 1,5 mm² nach IEC 60228. Konservativster Wert.'},
   ],
   curet:[
-    {id:'pure_cu',  rho:0.01708, r:0.03486, label:'Reinkupfer theoretisch',
-     desc:'ρ = 0,01708 Ω·mm²/m · Theoretischer Reinwert. r = 0,03486 Ω/m.'},
     {id:'iec_nom',  rho:0.01724, r:0.03517, label:'IEC 60228 · Nominalwert',
-     desc:'ρ = 0,01724 Ω·mm²/m · Nominalwert Cu nach IEC. r = ρ/0,490 mm² = 0,03517 Ω/m.'},
+     desc:'ρ = 0,01724Ohm·mm²/m · Nominalwert Cu nach IEC. r = ρ/0,490 mm² = 0,03517 Ohm/m.'},
     {id:'praxis',   rho:0.01750, r:0.03571, label:'Praxiswert Leitungsdraht',
-     desc:'ρ = 0,01750 Ω·mm²/m · Praxistypischer Mittelwert. r = 0,03571 Ω/m.'},
+     desc:'ρ = 0,01750Ohm·mm²/m · Praxistypischer Mittelwert. r = 0,03571 Ohm/m.'},
     {id:'iec_max',  rho:0.01777, r:0.03626, label:'IEC 60228 · Max. Grenzwert',
-     desc:'ρ = 0,01777 Ω·mm²/m · Maximaler IEC-Grenzwert. r = 0,03626 Ω/m.'},
+     desc:'ρ = 0,01777Ohm·mm²/m · Maximaler IEC-Grenzwert. r = 0,03626 Ohm/m.'},
   ],
   nicr:[
     {id:'nicr_iec', rho:1.090, r:5.767, label:'IEC/DIN NiCr80 · Nominalwert',
-     desc:'ρ = 1,090 Ω·mm²/m · Normwert für NiCr 80/20-Widerstandslegierung nach IEC/DIN. Etwas tiefer als Brandes-Nennwert.'},
+     desc:'ρ = 1,090Ohm·mm²/m · Normwert für NiCr 80/20-Widerstandslegierung nach IEC/DIN. Etwas tiefer als Brandes-Nennwert.'},
     {id:'nicr_nom', rho:1.100, r:5.820, label:'Herstellerangabe Brandes · Nennwert',
-     desc:'ρ = 1,100 Ω·mm²/m · Offizieller Nennwert laut Brandes-Systemdokumentation. Standardwert.'},
+     desc:'ρ = 1,100Ohm·mm²/m · Offizieller Nennwert laut Brandes-Systemdokumentation. Standardwert.'},
     {id:'nicr_praxis', rho:1.120, r:5.926, label:'Praxiswert · Alterung / Oxidation',
-     desc:'ρ = 1,120 Ω·mm²/m · Erfahrungswert für gealterte oder leicht oxidierte NiCr-Adern. Konservativster Ansatz für ältere Leitungen.'},
+     desc:'ρ = 1,120Ohm·mm²/m · Erfahrungswert für gealterte oder leicht oxidierte NiCr-Adern. Konservativster Ansatz für ältere Leitungen.'},
   ],
 };
 
@@ -1036,8 +839,229 @@ function applyGeoTemp2(){
 }
 
 // Vorauswahl: Praxiswert für alle Adertypen
-let rhoSel={1:{cu15:'praxis',curet:'praxis',nicr:'nicr_praxis'},
-            2:{cu15:'praxis',curet:'praxis',nicr:'nicr_praxis'}};
+let rhoSel={1:{cu15:'feldwert',curet:'praxis',nicr:'nicr_praxis'},
+            2:{cu15:'feldwert',curet:'praxis',nicr:'nicr_praxis'}};
+
+// Abschnitt-Bereiche — zentral definiert für einfache Erweiterung
+const FWD_SECS=[1,2,3,4];   // Fühlerader mit Nässebefall (MP-A → MP-B)
+const RET_SECS=[5,6,7,8];   // Trockene Rückführader (MP-B → MP-A)
+
+const SEC_DEF=[
+  {n:1,label:'Abschnitt 1 · Fühlerader mit Nässebefall', color:'#C0392B', type:'fwd'},
+  {n:2,label:'Abschnitt 2 · Fühlerader mit Nässebefall', color:'#C0392B', type:'fwd'},
+  {n:3,label:'Abschnitt 3 · Fühlerader mit Nässebefall', color:'#C0392B', type:'fwd'},
+  {n:4,label:'Abschnitt 4 · Fühlerader mit Nässebefall', color:'#C0392B', type:'fwd'},
+  {n:5,label:'Abschnitt 5 · Trockene Rückführader',      color:'#1A6FA8', type:'ret'},
+  {n:6,label:'Abschnitt 6 · Trockene Rückführader',      color:'#1A6FA8', type:'ret'},
+  {n:7,label:'Abschnitt 7 · Trockene Rückführader',      color:'#1A6FA8', type:'ret'},
+  {n:8,label:'Abschnitt 8 · Trockene Rückführader',      color:'#1A6FA8', type:'ret'},
+];
+
+// Per-Abschnitt Zustand (Adertyp, r20, temp)
+const secState={}; // n → {wireType, rhoId, temp}
+for(let i=1;i<=8;i++) secState[i]={wireType:'cu15',rhoId:'feldwert',temp:NaN};
+
+const DN_OPTIONS=[20,25,32,40,50,65,80,100,125,150,200,250,300];
+
+function dnSelect(id,cb){
+  return `<select class="fld" id="${id}" onchange="${cb}" oninput="${cb}">
+    ${DN_OPTIONS.map(d=>`<option value="${d}"${d===100?' selected':''}>DN ${d}</option>`).join('')}
+  </select>`;
+}
+
+function buildSections(){
+  const el=document.getElementById('sec-list');
+  if(!el) return;
+  let html='';
+
+  SEC_DEF.forEach(def=>{
+    const n=def.n;
+    const isRet=def.type==='ret';
+    const colStyle=`color:${def.color}`;
+    const hdrBg=def.type==='fwd'
+      ? 'background:linear-gradient(90deg,rgba(192,57,43,0.18) 0%,#0F1923 100%)'
+      : 'background:linear-gradient(90deg,rgba(26,111,168,0.18) 0%,#0F1923 100%)';
+    const cardBorder=def.type==='fwd'
+      ? 'border:1px solid rgba(192,57,43,0.45)'
+      : 'border:1px solid rgba(26,111,168,0.45)';
+    html+=`
+    <div style="margin-bottom:4px;${cardBorder};border-radius:9px;overflow:hidden" id="sec-card-${n}">
+      <!-- Abschnitt Header -->
+      <div id="sec-hdr-${n}" onclick="toggleSec(${n})" style="display:flex;align-items:center;justify-content:space-between;
+           padding:10px 14px;cursor:pointer;user-select:none;${hdrBg}">
+        <div style="display:flex;align-items:baseline;gap:8px;flex-wrap:wrap">
+          <div style="font-size:10px;font-weight:700;text-transform:uppercase;letter-spacing:.06em;${colStyle}">
+            ${def.label}
+          </div>
+          <div id="sec-summary-${n}" style="font-size:11px;color:var(--text2)"></div>
+          <div id="sec-summary-tmed-${n}" style="font-size:11px;color:#8BC4A8"></div>
+        </div>
+        <span id="sec-arr-${n}" style="font-size:11px;color:var(--text2);flex-shrink:0;margin-left:8px">▶</span>
+      </div>
+      <!-- Abschnitt Body -->
+      <div id="sec-body-${n}" style="display:none;padding:12px 14px;background:var(--card)">
+
+        <!-- Adertyp -->
+        <div class="field" style="margin-top:0">
+          <label>Adertyp</label>
+          <select class="fld sec-fld" id="s${n}-wire" onchange="onSecWire(${n})">
+            <option value="nicr">Brandes Fühlerader · NiCr 80/20 · 0,189 mm²</option>
+            <option value="curet">Brandes Rückführader · Cu · 0,490 mm²</option>
+            <option value="cu15" selected>Nordic · Cu blank · 1,5 mm²</option>
+          </select>
+        </div>
+
+        <!-- Leitungslänge + Meldeader-Temperatur nebeneinander -->
+        <div style="display:grid;grid-template-columns:1fr 1fr;gap:8px;margin-top:8px;margin-bottom:4px">
+          <div>
+            <label style="font-size:11px;color:var(--text2);display:block;margin-bottom:3px">Leitungslänge</label>
+            <div class="fld-row" style="margin:0">
+              <input class="fld" type="number" id="s${n}-len" min="0" step="0.01"
+                     placeholder="m" oninput="onSecLen(${n})"
+                     style="padding:7px 8px;font-size:13px">
+              <span class="fld-unit">m</span>
+            </div>
+          </div>
+          <div>
+            <label style="font-size:11px;color:var(--text2);display:block;margin-bottom:3px">Meldeader-Temperatur<span class="beta-tag">Beta</span></label>
+            <div class="fld-row" style="margin:0">
+              <input class="fld sec-fld" type="number" id="s${n}-temp" min="0" max="200" step="1"
+                     placeholder="°C" oninput="onSecTemp(${n})"
+                     style="padding:7px 8px;font-size:13px">
+              <span class="fld-unit">°C</span>
+            </div>
+            <div id="s${n}-temp-active" style="font-size:10px;color:#C8A45A;margin-top:2px"></div>
+          </div>
+        </div>
+
+        <!-- ρ-Quelle -->
+        <div id="rho-panel-s${n}" style="margin-top:6px;background:#0F1923;border-radius:8px;border:1px solid var(--border);overflow:hidden">
+          <div onclick="toggleRhoS(${n})" style="display:flex;justify-content:space-between;align-items:center;padding:8px 11px;cursor:pointer;user-select:none">
+            <div>
+              <div style="font-size:11px;font-weight:600;color:#C0C8D8;text-transform:uppercase;letter-spacing:.05em" id="rho-title-s${n}">ρ-Quelle wählen</div>
+              <div id="rho-active-s${n}" style="font-size:11px;color:#C8A45A;margin-top:2px"></div>
+            </div>
+            <span id="rho-arr-s${n}" style="font-size:11px;color:var(--text2);flex-shrink:0;margin-left:8px">▶</span>
+          </div>
+          <div id="rho-body-s${n}" style="display:none;border-top:1px solid var(--border)">
+            <div id="rho-opts-s${n}"></div>
+          </div>
+        </div>
+
+        <!-- Temperatur-Kompensation Foldout -->
+          <div style="background:#0F1923;border-radius:8px;border:1px solid var(--border);overflow:hidden;margin-top:6px;margin-bottom:6px;
+                      outline:2px solid rgba(46,139,87,0.35);outline-offset:-1px">
+            <div onclick="toggleGeoS(${n})" style="display:flex;justify-content:space-between;align-items:center;padding:8px 11px;cursor:pointer;user-select:none;background:rgba(30,80,50,0.45);border-radius:7px 7px 0 0">
+              <div>
+                <div style="font-size:11px;font-weight:600;color:#C0C8D8;text-transform:uppercase;letter-spacing:.05em">Temperatur-Kompensation: Geometrie &amp; Milieu</div>
+                <div id="geo-active-s${n}" style="font-size:11px;color:#C8A45A;margin-top:2px"></div>
+              </div>
+              <span id="geo-arr-s${n}" style="font-size:11px;color:var(--text2);flex-shrink:0;margin-left:8px">▶</span>
+            </div>
+            <div id="geo-body-s${n}" style="display:none;border-top:1px solid var(--border);padding:10px 11px">
+              <!-- Pauschale -->
+              <div class="field" style="margin-top:0">
+                <label>Pauschale Meldeader-Temperatur</label>
+                <div style="display:grid;grid-template-columns:1fr 1fr 1fr;gap:6px">
+                  <button class="geo-ds-btn active" id="geo-s${n}-med-none" onclick="setGeoMedS(${n},'none',null)">Keine</button>
+                  <button class="geo-ds-btn" id="geo-s${n}-med-vl" onclick="setGeoMedS(${n},'vl',45)">45 °C · VL</button>
+                  <button class="geo-ds-btn" id="geo-s${n}-med-rl" onclick="setGeoMedS(${n},'rl',30)">30 °C · RL</button>
+                </div>
+              </div>
+              <!-- Geometrie -->
+              <div id="geo-detail-s${n}" style="opacity:1;pointer-events:auto;transition:opacity .2s;background:rgba(20,60,35,0.3);border-radius:0 0 7px 7px;padding:0 11px 10px">
+                <div style="height:1px;background:rgba(255,255,255,.08);margin:10px 0"></div>
+
+                <!-- Zeile 1: T-Medium + DN nebeneinander -->
+                <div style="display:grid;grid-template-columns:1fr 1fr;gap:8px;margin-bottom:8px">
+                  <div>
+                    <label style="font-size:11px;color:var(--text2);display:block;margin-bottom:3px">Temperatur Mediumrohr</label>
+                    <div class="fld-row" style="margin:0">
+                      <input class="fld" type="number" id="geo-s${n}-tmed" min="0" max="200" step="1"
+                             placeholder="°C" oninput="calcGeoS(${n})"
+                             style="padding:7px 8px;font-size:13px">
+                      <span class="fld-unit">°C</span>
+                    </div>
+                  </div>
+                  <div>
+                    <label style="font-size:11px;color:var(--text2);display:block;margin-bottom:3px">DN</label>
+                    ${dnSelect(`geo-s${n}-dn`,`calcGeoS(${n})`)}
+                  </div>
+                </div>
+
+                <!-- Zeile 2: Dämmstärke + Bodentemperatur nebeneinander als Selects -->
+                <div style="display:grid;grid-template-columns:1fr 1fr;gap:8px;margin-bottom:8px">
+                  <div>
+                    <label style="font-size:11px;color:var(--text2);display:block;margin-bottom:3px">Dämmstärke</label>
+                    <select class="fld sec-fld" id="geo-s${n}-ds-sel" style="padding:7px 8px;font-size:13px"
+                            onchange="setGeoDSS(${n},parseInt(this.value))">
+                      <option value="1">DS 1</option>
+                      <option value="2" selected>DS 2</option>
+                      <option value="3">DS 3</option>
+                    </select>
+                  </div>
+                  <div>
+                    <label style="font-size:11px;color:var(--text2);display:block;margin-bottom:3px">Bodentemperatur (1m)</label>
+                    <select class="fld sec-fld" id="geo-s${n}-sz-sel" style="padding:7px 8px;font-size:13px"
+                            onchange="setGeoSeasonFromSel(${n},this.value)">
+                      <option value="winter,5">Winter · 5 °C</option>
+                      <option value="frühling,10" selected>Frühling · 10 °C</option>
+                      <option value="sommer,15">Sommer · 15 °C</option>
+                      <option value="herbst,10">Herbst · 10 °C</option>
+                    </select>
+                    <input type="hidden" id="geo-s${n}-tboden" value="10">
+                  </div>
+                </div>
+
+                <!-- Hidden buttons (für JS-Kompatibilität mit setGeoDSS / setGeoSeasonS) -->
+                <div style="display:none">
+                  <button id="geo-s${n}-ds-1"></button>
+                  <button id="geo-s${n}-ds-2"></button>
+                  <button id="geo-s${n}-ds-3"></button>
+                  <button id="geo-s${n}-sz-w"></button>
+                  <button id="geo-s${n}-sz-f"></button>
+                  <button id="geo-s${n}-sz-s"></button>
+                  <button id="geo-s${n}-sz-h"></button>
+                </div>
+
+                <div class="info-row" style="margin-top:4px">
+                  <span class="lbl">r₁ / r_Ader / r₂</span>
+                  <span class="val" style="font-size:11px;font-family:monospace" id="geo-s${n}-radii">–</span>
+                </div>
+                <div class="info-row">
+                  <span class="lbl">T_Ader (berechnet)</span>
+                  <span class="val" id="geo-s${n}-tader">–</span>
+                </div>
+              </div>
+            </div>
+          </div>
+        </div>
+
+      </div>
+    </div>`;
+  });
+
+  // HFL-Alternative für Rückweg
+  html+=`
+    <div style="margin-top:8px;padding:8px 12px;background:#0F1923;border-radius:8px;border:1px solid var(--border)">
+      <label style="display:flex;align-items:center;gap:10px;cursor:pointer;user-select:none">
+        <input type="checkbox" id="use-hfl-return" onchange="onHflReturnToggle()" style="width:18px;height:18px;cursor:pointer;accent-color:#C8A45A">
+        <span style="font-size:13px;font-weight:600;color:#C8A45A">HFL als Rückführung (ersetzt Abschnitte 4–6)</span>
+      </label>
+      <div style="font-size:11px;color:var(--text2);margin-top:3px;margin-left:28px">
+        Wenn aktiv: Abschnitte 4–6 werden ignoriert, der Widerstand aus der HFL-Rubrik wird verwendet.
+      </div>
+    </div>`;
+
+  el.innerHTML=html;
+
+  // Init per section
+  for(let i=1;i<=8;i++){
+    onSecWire(i);
+    updateSecRpm(i);
+  }
+}
+
 
 function getRhoR(abschnitt, wireType){
   const sources=RHO_SOURCES[wireType]||[];
@@ -1067,7 +1091,7 @@ function renderRhoOpts(n){
       background:${active?'rgba(200,164,90,0.12)':'transparent'}">
       <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:3px">
         <span style="font-size:12px;font-weight:600;color:${active?'#C8A45A':'#C0C8D8'}">${s.label}</span>
-        <span style="font-size:12px;font-weight:700;color:${active?'#C8A45A':'#E8F4FF'};font-variant-numeric:tabular-nums">${s.r.toFixed(5)} Ω/m</span>
+        <span style="font-size:12px;font-weight:700;color:${active?'#C8A45A':'#E8F4FF'};font-variant-numeric:tabular-nums">${s.r.toFixed(5)} Ohm/m</span>
       </div>
       <div style="font-size:11px;color:var(--text2);line-height:1.4">${s.desc}</div>
       ${active?'<div style="font-size:10px;color:#C8A45A;margin-top:3px;font-weight:600">✓ AKTIV</div>':''}
@@ -1091,7 +1115,7 @@ function updateRhoActiveDisplay(n){
   const selId=rhoSel[n][wt];
   const src=sources.find(s=>s.id===selId)||sources[0];
   const el=document.getElementById('rho-active-'+n);
-  if(el&&src) el.textContent=src.label+' · '+src.r.toFixed(5)+' Ω/m';
+  if(el&&src) el.textContent=src.label+' · '+src.r.toFixed(5)+' Ohm/m';
 }
 
 function toggleTemp(n){
@@ -1155,7 +1179,7 @@ function toggleRhoS(n){
 function renderRhoOptsS(n){
   const wt=document.getElementById('s'+n+'-wire').value;
   const sources=RHO_SOURCES[wt]||[];
-  const selId=secState[n].rhoId||'praxis';
+  const selId=secState[n].rhoId||'feldwert';
   const el=document.getElementById('rho-opts-s'+n);
   el.innerHTML=sources.map(s=>{
     const active=selId===s.id;
@@ -1164,7 +1188,7 @@ function renderRhoOptsS(n){
       background:${active?'rgba(200,164,90,.12)':'transparent'}">
       <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:3px">
         <span style="font-size:12px;font-weight:600;color:${active?'#C8A45A':'#C0C8D8'}">${s.label}</span>
-        <span style="font-size:12px;font-weight:700;color:${active?'#C8A45A':'#E8F4FF'}">${s.r.toFixed(5)} Ω/m</span>
+        <span style="font-size:12px;font-weight:700;color:${active?'#C8A45A':'#E8F4FF'}">${s.r.toFixed(5)} Ohm/m</span>
       </div>
       <div style="font-size:11px;color:var(--text2);line-height:1.4">${s.desc}</div>
       ${active?'<div style="font-size:10px;color:#C8A45A;margin-top:3px;font-weight:600">✓ AKTIV</div>':''}
@@ -1179,7 +1203,7 @@ function selectRhoS(n,id){
   if(src){
     WIRE_R20[wt]=src.r;
     const el=document.getElementById('rho-active-s'+n);
-    if(el) el.textContent=src.label+' · '+src.r.toFixed(5)+' Ω/m';
+    if(el) el.textContent=src.label+' · '+src.r.toFixed(5)+' Ohm/m';
   }
   renderRhoOptsS(n);
   updateSecRpm(n);
@@ -1193,10 +1217,10 @@ function onSecWire(n){
   const title=document.getElementById('rho-title-s'+n);
   if(title) title.textContent='ρ-Quelle wählen · '+(RHO_TITLE[wt]||wt);
   // apply praxis default rho
-  const src=(RHO_SOURCES[wt]||[]).find(s=>s.id==='praxis')||RHO_SOURCES[wt]?.[0];
+  const src=(RHO_SOURCES[wt]||[]).find(s=>s.id==='feldwert')||(RHO_SOURCES[wt]||[]).find(s=>s.id==='praxis')||RHO_SOURCES[wt]?.[0];
   if(src){WIRE_R20[wt]=src.r; secState[n].rhoId=src.id;}
   const activeEl=document.getElementById('rho-active-s'+n);
-  if(activeEl&&src) activeEl.textContent=src.label+' · '+src.r.toFixed(5)+' Ω/m';
+  if(activeEl&&src) activeEl.textContent=src.label+' · '+src.r.toFixed(5)+' Ohm/m';
   updateSecRpm(n);
   updateSummary(n);
   calc();
@@ -1220,10 +1244,10 @@ function getSecR(n){return getSecLen(n)*getSecRpm(n);}
 
 function updateSecRpm(n){
   const el=document.getElementById('s'+n+'-rpm');
-  if(el) el.textContent=fRpm(getSecRpm(n))+' Ω/m';
+  if(el) el.textContent=fRpm(getSecRpm(n))+' Ohm/m';
   const relEl=document.getElementById('s'+n+'-R');
   const R=getSecR(n);
-  if(relEl) relEl.textContent=R>0?fR4(R)+' Ω':'–';
+if(relEl) relEl.textContent=R>0?fR4(R)+' Ω':'–';
 }
 
 function updateSummary(n){
@@ -1233,11 +1257,25 @@ function updateSummary(n){
   const R=getSecR(n);
   const wt=(document.getElementById('s'+n+'-wire')||{}).value||'cu15';
   const wname={nicr:'NiCr',curet:'Cu 0,49',cu15:'Cu 1,5'}[wt]||wt;
-  if(L>0) el.textContent=`${fL(L)} m · ${wname} · ${fR4(R)} Ω`;
-  else el.textContent='(nicht verwendet)';
-
-  // Mediumtemperatur-Zeile
+  const hdr=document.getElementById('sec-hdr-'+n);
   const tmedEl=document.getElementById('sec-summary-tmed-'+n);
+  const arr=document.getElementById('sec-arr-'+n);
+  const body=document.getElementById('sec-body-'+n);
+
+  if(L<=0){
+    el.textContent='(nicht verwendet)';
+    el.style.color='rgba(255,255,255,0.28)';
+    if(tmedEl) tmedEl.textContent='';
+    if(hdr){hdr.style.padding='5px 14px';hdr.style.cursor='pointer';}
+    if(arr){arr.style.display='';arr.style.opacity='0.25';}
+    return;
+  }
+
+  el.textContent=`${fL(L)} m · ${wname} · ${fR4(R)} Ω`;
+  el.style.color='var(--text2)';
+  if(hdr){hdr.style.padding='10px 14px';hdr.style.cursor='pointer';}
+  if(arr){arr.style.display='';arr.style.opacity='1';}
+
   if(!tmedEl) return;
   const tmed=parseFloat((document.getElementById('geo-s'+n+'-tmed')||{}).value);
   const tader=parseFloat((document.getElementById('s'+n+'-temp')||{}).value);
@@ -1267,16 +1305,14 @@ function onSecLen(n){
 }
 
 function updateBadge1(){
-  const R_fwd=getSecR(1)+getSecR(2)+getSecR(3);
-  const R_ret=useHflReturn()?getAuxR():getSecR(4)+getSecR(5)+getSecR(6);
-  const total=R_fwd+R_ret;
+  const total=getRgesMA(1);
   const el=document.getElementById('bdg1');
   if(el) el.textContent=total>0?fR4(total)+' Ω':'–';
 }
 
 function onHflReturnToggle(){
   const use=useHflReturn();
-  [4,5,6].forEach(n=>{
+  RET_SECS.forEach(n=>{
     const body=document.getElementById('sec-body-'+n);
     const arr=document.getElementById('sec-arr-'+n);
     if(body){body.style.opacity=use?'.35':'1'; body.style.pointerEvents=use?'none':'auto';}
@@ -1323,10 +1359,22 @@ function setGeoMedS(n,mode,temp){
   }
 }
 
+function setGeoSeasonFromSel(n,val){
+  const parts=val.split(',');
+  const name=parts[0];
+  const temp=parseFloat(parts[1]);
+  setGeoSeasonS(n,name,temp);
+}
+
 function setGeoDSS(n,ds){
   geoStateS[n].ds=ds;
+  // Sync select if exists
+  const sel=document.getElementById('geo-s'+n+'-ds-sel');
+  if(sel) sel.value=ds;
+  // Legacy hidden buttons
   [1,2,3].forEach(d=>{
-    const b=document.getElementById(`geo-s${n}-ds-${d}`); if(b) b.classList.toggle('active',d===ds);
+    const b=document.getElementById(`geo-s${n}-ds-${d}`);
+    if(b) b.classList.toggle('active',d===ds);
   });
   calcGeoS(n);
 }
@@ -1334,9 +1382,14 @@ function setGeoDSS(n,ds){
 function setGeoSeasonS(n,name,temp){
   geoStateS[n].season=name;
   document.getElementById('geo-s'+n+'-tboden').value=temp;
+  // Sync new select
+  const sel=document.getElementById('geo-s'+n+'-sz-sel');
+  if(sel) sel.value=name+','+temp;
+  // Legacy hidden buttons
   const ids={winter:'w',frühling:'f',sommer:'s',herbst:'h'};
   Object.entries(ids).forEach(([k,v])=>{
-    const b=document.getElementById(`geo-s${n}-sz-${v}`); if(b) b.classList.toggle('active',k===name);
+    const b=document.getElementById(`geo-s${n}-sz-${v}`);
+    if(b) b.classList.toggle('active',k===name);
   });
   calcGeoS(n);
 }
@@ -1404,9 +1457,8 @@ function applyGeoS(n){
 
 // ── Neue Gesamtwiderstands-Berechnung ────────────────────────────────────
 function getRgesCalc(){
-  const R_fwd=getSecR(1)+getSecR(2)+getSecR(3);
-  const R_ret=useHflReturn()?getAuxR():getSecR(4)+getSecR(5)+getSecR(6);
-  return getKAR('a')+R_fwd+getKAR('b')+R_ret;
+  // Verwendet MA1 als Referenz (beide MA teilen dieselbe Infrastruktur)
+  return getRgesMA(1);
 }
 
 // ── Neue Positionsberechnung: iteriert durch Abschnitte ──────────────────
@@ -1498,6 +1550,7 @@ function init(){
 
 function toggleCard(id){
   const b=document.getElementById(id),a=document.getElementById('arr-'+id);
+  if(!b||!a) return;
   a.classList.toggle('open',b.classList.toggle('open'));
 }
 function switchTab(t){
@@ -1520,7 +1573,7 @@ function onWireType(){
   updateRhoPanel(1,t);
   const r=getRpm(),r20=WIRE_R20[t];
   const lbl=document.getElementById('r-per-m-lbl');
-  if(lbl) lbl.textContent=fRpm(r)+' Ω/m';
+  if(lbl) lbl.textContent=fRpm(r)+' Ohm/m';
   const T=parseFloat((document.getElementById('temp-op')||{}).value);
   const ti=document.getElementById('temp-info');
   if(ti&&!isNaN(T)&&T!==20){
@@ -1561,7 +1614,7 @@ function onWireType2(){
   updateRhoPanel(2,t);
   const r=getRpm2(),r20=WIRE_R20[t];
   const lbl=document.getElementById('r-per-m-lbl2');
-  if(lbl) lbl.textContent=fRpm(r)+' Ω/m';
+  if(lbl) lbl.textContent=fRpm(r)+' Ohm/m';
   const panel=document.getElementById('rho-panel-2');
   if(panel){
     if(t==='cu15'){
@@ -1615,12 +1668,12 @@ function updateRMain(){
   const L=getLen();
   const r=getSecRpm(1);
   const lbl=document.getElementById('r-main-lbl');
-  if(lbl) lbl.textContent=(L>0&&r>0)?fR4(L*r)+' Ω':'–';
+if(lbl) lbl.textContent=(L>0&&r>0)?fR4(L*r)+' Ω':'–';
   updateBadge1();
   if(isSec2Active()){
     const L2=getLen2(),r2=getRpm2();
     const lbl2=document.getElementById('r-main-lbl2');
-    if(lbl2) lbl2.textContent=(L2>0&&r2>0)?fR4(L2*r2)+' Ω':'–';
+if(lbl2) lbl2.textContent=(L2>0&&r2>0)?fR4(L2*r2)+' Ω':'–';
   }
   updateRgesDisplay();
 }
@@ -1669,10 +1722,10 @@ function getKAR(side){
 
 function updateRgesDisplay(){
   const Rc=getRgesCalc(),Rm=parseFloat(document.getElementById('rges-man').value)||0;
-  document.getElementById('rges-calc-lbl').textContent=Rc>0?fR4(Rc)+' Ω':'–';
-  document.getElementById('bdg4').textContent=Rc>0?fR4(Rc)+' Ω':'–';
+document.getElementById('rges-calc-lbl').textContent=Rc>0?fR4(Rc)+' Ω':'–';
+document.getElementById('bdg4').textContent=Rc>0?fR4(Rc)+' Ω':'–';
   if(Rm>0){
-    document.getElementById('rges-man-lbl').textContent=fR4(Rm)+' Ω';
+document.getElementById('rges-man-lbl').textContent=fR4(Rm)+' Ω';
     const diff=Math.abs(Rc-Rm),pct=Rc>0?(diff/Rc*100):0;
     const el=document.getElementById('rges-diff');el.style.display='block';
     if(pct<=2){el.className='rges-diff ok';el.textContent=`Δ ${fR4(diff)} Ω (${pct.toFixed(1)}%) – konsistent`;}
@@ -1740,11 +1793,11 @@ function updateChainDisplay(){
 
   // Schleife 1: MKL rot → Meldeader (MP-A)
   const c1=row('Schleife 1',f1);
-  // Schleife 2: MKL rot → HFL (MP-A)
+  // Schleife 2: MKL rot → Rückführ-/HFL (MP-A)
   const c2=row('Schleife 2',f2);
   // Schleife 3: MKL rot → Meldeader (MP-B)
   const c3=row('Schleife 3',f3);
-  // Schleife 4: MKL rot → HFL (MP-B)
+  // Schleife 4: MKL rot → Rückführ-/HFL (MP-B)
   const c4=row('Schleife 4',f4);
 
   // Meldeader 1
@@ -1787,6 +1840,184 @@ function getWeights(offsets){
 
 
 
+
+// ── Abschnitt-Aktivierung per Meldeader ──────────────────────────────────
+// secActive[ma][n] = true/false  (ma=1|2, n=1..6)
+const secActive={
+  1:[true,true,true,true,true,true,true,true],   // MA1: alle Abschnitte aktiv
+  2:[true,true,true,true,true,true,true,true],   // MA2: alle Abschnitte aktiv
+};
+
+function toggleSecActive(ma,n,val){
+  secActive[ma][n-1]=val;
+  calc();
+}
+
+// R_ges für eine spezifische Meldeader (nur aktive Abschnitte)
+// Gesamtlänge Hinweg für eine Meldeader
+function getTotalLenMA(ma){
+  return FWD_SECS.reduce((s,n)=>s+(secActive[ma][n-1]?getSecLen(n):0),0);
+}
+
+// ── Bit-Maske Schleifentyp ───────────────────────────────────────────────
+// Liest den aktuellen Topologie-Typ aus den Eingabefeldern:
+// Rka = KA-Ax Widerstand (0 wenn kein KA-A)
+// Rkb = KA-Bx Widerstand (0 wenn kein KA-B)
+// useHflReturn() = HFL aktiv (true) oder Rückführader (false)
+//
+// Bit-Maske: [KA-Ax][KA-Bx][Rückf.][HFL]
+// Fall 1: 0010 — nur Rückführader
+// Fall 2: 0110 — KA-Bx + Rückführader
+// Fall 3: 1110 — KA-Ax + KA-Bx + Rückführader
+// Fall 4: 1010 — KA-Ax + Rückführader
+// Fall 5: 0001 — nur HFL
+// Fall 6: 1001 — KA-Ax + HFL
+// Fall 7: 1101 — KA-Ax + KA-Bx + HFL
+// Fall 8: 0101 — KA-Bx + HFL
+// Fall 9: xx11 — UNMÖGLICH (Eingabemaske verhindert)
+//
+// R_ges Regeln:
+// KA-Ax: immer 2× (Hin- UND Rückweg durch KA-A)
+// KA-Bx: 2× bei Rückführader (Fälle 1-4), 1× bei HFL (Fälle 5-8)
+//         Grund: HFL liegt direkt an MP-B, kein zweiter KA-B-Durchgang auf Rückweg
+//
+// Positionsformeln (Subtraktionsterme für posFromMpAMA):
+// S1 (MP-A → Fühlerader):  − Rka
+// S2 (MP-A → Rückf./HFL):  − Ra − Rkb_total − 2×Rka   (Rkb_total = 2×Rkb oder 1×Rkb)
+// S3 (MP-B → Fühlerader):  − Rkb
+// S4 (MP-B → Rückf./HFL):  − Ra − 2×Rka               (Rkb bereits in Ra bei HFL)
+
+// ── Topologie-Hilfsfunktionen ─────────────────────────────────────────────
+
+// Rückführader-Widerstand (Abs. 4-6, MA-spezifisch)
+function getRetRMA(ma){
+  return RET_SECS.reduce((s,n)=>s+(secActive[ma][n-1]?getSecR(n):0),0);
+}
+
+// posFromMpAMA: iteriert Abs. 1-3 vorwärts (MP-A → MP-B)
+// Gibt Länge x in Metern ab MP-A zurück die dem Widerstand R entspricht
+// Gibt null zurück wenn R negativ oder ausserhalb der Abschnitte
+function posFromMpAMA(R_rot, ma){
+  if(R_rot<0) return null;
+  let R_acc=0, L_acc=0;
+  for(const n of FWD_SECS){
+    if(!secActive[ma][n-1]) continue;
+    const R=getSecR(n);
+    if(R<=0) continue;
+    const r=getSecRpm(n);
+    const L=getSecLen(n);
+    if(R_rot<=R_acc+R){
+      return L_acc+(R_rot-R_acc)/r;
+    }
+    R_acc+=R;
+    L_acc+=L;
+  }
+  return null;
+}
+
+// ── R_ges je Topologie-Fall ───────────────────────────────────────────────
+// Bit-Maske [KA-Ax][KA-Bx][Rückf.][HFL]:
+// Fall 1: 0010 → R_fwd + R_ret
+// Fall 2: 0110 → R_fwd + 2·Rkb + R_ret
+// Fall 3: 1110 → 2·Rka + R_fwd + 2·Rkb + R_ret
+// Fall 4: 1010 → 2·Rka + R_fwd + R_ret
+// Fall 5: 0001 → R_fwd + R_HFL
+// Fall 6: 0101 → R_fwd + Rkb + R_HFL
+// Fall 7: 1101 → Rka + R_fwd + Rkb + R_HFL
+// Fall 8: 1001 → Rka + R_fwd + R_HFL
+
+function getRgesMA(ma){
+  const Rka=getKAR('a');
+  const Rkb=getKAR('b');
+  const hfl=useHflReturn();
+  const R_fwd=FWD_SECS.reduce((s,n)=>s+(secActive[ma][n-1]?getSecR(n):0),0);
+
+  if(hfl){
+    // Fälle 5-8: KA-Ax einmal, KA-Bx einmal
+    return Rka + R_fwd + Rkb + getAuxR();
+  } else {
+    // Fälle 1-4: KA-Ax zweimal, KA-Bx zweimal
+    return 2*Rka + R_fwd + 2*Rkb + getRetRMA(ma);
+  }
+}
+
+// ── Positionsformeln je Fall und Schleife ─────────────────────────────────
+// pA(R) = posFromMpAMA(R, ma) — Länge in Metern ab MP-A auf Fühlerader
+//
+// S1: MKL Rot bei MP-A → Fühlerader
+// S2: MKL Rot bei MP-A → Rückführ-/HFL
+// S3: MKL Rot bei MP-B → Fühlerader
+// S4: MKL Rot bei MP-B → Rückführ-/HFL
+//
+// Fall | R_ges              | S1              | S2                          | S3              | S4
+//  1   | Rf+Rr              | pA(f·Rt)        | L-pA(f·Rt-Rr)               | L-pA(f·Rt)      | pA(f·Rt-Rr)
+//  2   | Rf+2b+Rr           | pA(f·Rt)        | L-pA(f·Rt-Rr-2b)            | L-pA(f·Rt-b)    | pA(f·Rt-b-Rr)
+//  3   | 2a+Rf+2b+Rr        | pA(f·Rt-a)      | L-pA(f·Rt-a-Rr-2b)          | L-pA(f·Rt-b)    | pA(f·Rt-2a-b-Rr)
+//  4   | 2a+Rf+Rr           | pA(f·Rt-a)      | L-pA(f·Rt-a-Rr)             | L-pA(f·Rt)      | pA(f·Rt-2a-Rr)
+//  5   | Rf+Rh              | pA(f·Rt)        | L-pA(f·Rt-Rh)               | L-pA(f·Rt)      | pA(f·Rt-Rh)
+//  6   | Rf+b+Rh            | pA(f·Rt)        | L-pA(f·Rt-Rh-b)             | L-pA(f·Rt-b)    | pA(f·Rt-Rh)
+//  7   | a+Rf+b+Rh          | pA(f·Rt-a)      | L-pA(f·Rt-Rh-b)             | L-pA(f·Rt-b)    | pA(f·Rt-Rh-a)
+//  8   | a+Rf+Rh            | pA(f·Rt-a)      | L-pA(f·Rt-Rh)               | L-pA(f·Rt)      | pA(f·Rt-Rh-a)
+// a=Rka, b=Rkb, Rf=R_fwd, Rr=R_ret, Rh=R_HFL
+
+function computeXsMA(pRA,pBA,pRB,pBB,Rt,L,ma){
+  const Rka=getKAR('a');
+  const Rkb=getKAR('b');
+  const hfl=useHflReturn();
+  const Ra=hfl?getAuxR():getRetRMA(ma);
+  const pA=(R)=>posFromMpAMA(R,ma);
+
+  function xi(p,mode){
+    if(isNaN(p)||p<0||p>100) return null;
+    const f=p/100;
+    let x;
+
+    if(hfl){
+      // ── HFL-Fälle (5, 6, 7, 8) ──────────────────────────────────────
+      if(mode==='ra'){
+        // S1: pA(f·Rt − Rka)
+        return pA(f*Rt - Rka);
+      }
+      if(mode==='ba'){
+        // S2: L − pA(f·Rt − R_HFL − Rkb)
+        x=pA(f*Rt - Ra - Rkb);
+        return x!==null?L-x:null;
+      }
+      if(mode==='rb'){
+        // S3: L − pA(f·Rt − Rkb)
+        x=pA(f*Rt - Rkb);
+        return x!==null?L-x:null;
+      }
+      if(mode==='bb'){
+        // S4: pA(f·Rt − R_HFL − Rka)
+        return pA(f*Rt - Ra - Rka);
+      }
+
+    } else {
+      // ── Rückführader-Fälle (1, 2, 3, 4) ─────────────────────────────
+      if(mode==='ra'){
+        // S1: pA(f·Rt − Rka)
+        return pA(f*Rt - Rka);
+      }
+      if(mode==='ba'){
+        // S2: L − pA(f·Rt − Rka − R_ret − 2·Rkb)
+        // Rka nur wenn KA-Ax vorhanden (KA-AR liegt zwischen MP-A und Rückführader)
+        x=pA(f*Rt - Rka - Ra - 2*Rkb);
+        return x!==null?L-x:null;
+      }
+      if(mode==='rb'){
+        // S3: L − pA(f·Rt − Rkb)
+        x=pA(f*Rt - Rkb);
+        return x!==null?L-x:null;
+      }
+      if(mode==='bb'){
+        // S4: pA(f·Rt − 2·Rka − Rkb − R_ret)
+        return pA(f*Rt - 2*Rka - Rkb - Ra);
+      }
+    }
+  }
+  return [xi(pRA,'ra'),xi(pBA,'ba'),xi(pRB,'rb'),xi(pBB,'bb')];
+}
 
 // enabled-state pro Meldeader
 let enabled1=[true,true,true,true];
@@ -1854,7 +2085,22 @@ function renderDetailRows(L, xs, enabled, suffix, maderIdx){
     x=>x===null?0:Math.max(0,1-x/L),
   ];
   const maxProx=Math.max(...xs.map((x,i)=>x!==null&&enabled[i]?proximity[i](x):0),0.001);
-  let html=`<div class="mader-hdr" style="color:rgba(255,255,255,.4)">Meldeader ${maderIdx}</div>`;
+
+  // Abschnitt-Chips: 1-3 rot, 4-6 blau
+  const chipColors={1:'#C0392B',2:'#C0392B',3:'#C0392B',4:'#C0392B',5:'#1A6FA8',6:'#1A6FA8',7:'#1A6FA8',8:'#1A6FA8'};
+  let chips='';
+  for(let n=1;n<=8;n++){
+    const act=secActive[maderIdx][n-1];
+    const col=chipColors[n];
+    chips+=`<span data-ma="${maderIdx}" data-sec="${n}"
+      class="sec-chip${act?'':' sec-chip-off'}"
+      style="--chip-col:${col}">${n}</span>`;
+  }
+
+  let html=`<div class="mader-hdr" style="display:flex;align-items:center;justify-content:space-between;color:rgba(255,255,255,.4)">
+    <span>Meldeader ${maderIdx}</span>
+    <span class="sec-chips-${maderIdx}" style="display:flex;gap:3px;align-items:center">${chips}</span>
+  </div>`;
   xs.forEach((x,i)=>{
     const dis=!enabled[i]||x===null;
     const prox=dis?0:proximity[i](x);
@@ -1871,13 +2117,22 @@ function renderDetailRows(L, xs, enabled, suffix, maderIdx){
     </div>`;
   });
   el.innerHTML=html;
+  el.querySelectorAll('.sec-chip').forEach(chip=>{
+    chip.addEventListener('click',function(){
+      const ma=parseInt(this.dataset.ma);
+      const sec=parseInt(this.dataset.sec);
+      secActive[ma][sec-1]=!secActive[ma][sec-1];
+      this.classList.toggle('sec-chip-off',!secActive[ma][sec-1]);
+      calc();
+    });
+  });
 }
 
 function renderResults(Rt,suffix){
-  const L=getTotalLen();
-  const rpm1=getSecRpm(1);
-  const rpm2=getSecRpm(1); // Meldeader 2 nutzt vorerst Abschnitt-1-r (symmetrisch)
-  if(!L||!rpm1||!Rt) return;
+  const L1=getTotalLenMA(1);
+  const L2=getTotalLenMA(2);
+  const L=Math.max(L1,L2);
+  if(!L||!Rt) return;
 
   const pRA =parseFloat(document.getElementById('pRA').value);
   const pBA =parseFloat(document.getElementById('pBA').value);
@@ -1888,23 +2143,22 @@ function renderResults(Rt,suffix){
   const pRB2=parseFloat(document.getElementById('pRB2').value);
   const pBB2=parseFloat(document.getElementById('pBB2').value);
 
-  // Meldeader 1: rpm1; Meldeader 2: rpm2 (korrekt getrennt)
-  const xs1=computeXs(pRA,pBA,pRB,pBB,Rt,L,rpm1);
-  const xs2=computeXs(pRA2,pBA2,pRB2,pBB2,Rt,L,rpm2);
+  const Rc1=getRgesMA(1);
+  const Rc2=getRgesMA(2);
+  const xs1=computeXsMA(pRA,pBA,pRB,pBB,Rc1,L1,1);
+  const xs2=computeXsMA(pRA2,pBA2,pRB2,pBB2,Rc2,L2,2);
 
   const sets=[
     {xs:xs1,enabled:enabled1,label:'Meldeader 1',color:'#C0392B'},
     {xs:xs2,enabled:enabled2,label:'Meldeader 2',color:'#1A6FA8'},
   ];
-
   renderDualScale(L,sets,suffix);
-  renderDetailRows(L,xs1,enabled1,suffix,1);
-  renderDetailRows(L,xs2,enabled2,suffix,2);
+  renderDetailRows(L1,xs1,enabled1,suffix,1);
+  renderDetailRows(L2,xs2,enabled2,suffix,2);
 
-  // Konsistenz: alle gültigen Werte von Meldeader 1
   const ce=document.getElementById('cons-'+suffix);
   const re=document.getElementById('rec-'+suffix);
-  const valid1=xs1.filter((x,i)=>x!==null&&enabled1[i]&&x>=-0.5&&x<=L+0.5);
+  const valid1=xs1.filter((x,i)=>x!==null&&enabled1[i]&&x>=-0.5&&x<=L1+0.5);
   if(!valid1.length){ce.className='cons warn';ce.innerHTML='◑ Messwerte Meldeader 1 eingeben.';re.style.display='none';return;}
   const mean1=valid1.reduce((a,b)=>a+b,0)/valid1.length;
   const maxD=Math.max(...valid1.map(x=>Math.abs(x-mean1)));
@@ -1914,14 +2168,16 @@ function renderResults(Rt,suffix){
   else{
     cls='bad';icon='✗';msg=`<b>Sondierungsgraben empfohlen</b> · max. Δ ${fL(maxD)} m.`;
     re.style.display='block';
-    re.innerHTML=`<b>📍 Grabenmittelpunkt:</b> ${fL(mean1)} m ab MP-A · ${fL(L-mean1)} m ab MP-B`;
+    re.innerHTML=`<b>📍 Grabenmittelpunkt:</b> ${fL(mean1)} m ab MP-A · ${fL(L1-mean1)} m ab MP-B`;
   }
   ce.className='cons '+cls;ce.innerHTML=`<span class="ci">${icon}</span>${msg}`;
 }
 
 function calc(){
   updateRMain();updateChainDisplay();updateRgesDisplay();
-  const L=getTotalLen();
+  const L1=getTotalLenMA(1);
+  const L2=getTotalLenMA(2);
+  const L=Math.max(L1,L2);
   const pRA=parseFloat(document.getElementById('pRA').value);
   const pBA=parseFloat(document.getElementById('pBA').value);
   const pRB=parseFloat(document.getElementById('pRB').value);
@@ -1934,20 +2190,22 @@ function calc(){
   checkSum('sum-a',pRA,pBA);checkSum('sum-b',pRB,pBB);
   checkSum('sum-a2',pRA2,pBA2);checkSum('sum-b2',pRB2,pBB2);
 
-  const Rc=getRgesCalc();
-  const anyVal=[pRA,pBA,pRB,pBB].some(v=>!isNaN(v));
-  if(!L||!Rc||!anyVal){showEmpty();return;}
+  const Rc1=getRgesMA(1);
+  const Rc2=getRgesMA(2);
+  const Rc=getRgesCalc(); // für R_ges-Anzeige
+  const anyVal=[pRA,pBA,pRB,pBB,pRA2,pBA2,pRB2,pBB2].some(v=>!isNaN(v));
+  if(!L||!anyVal){showEmpty();return;}
 
   const Rm=parseFloat(document.getElementById('rges-man').value)||0;
 
   const R_ret=getRetR();
   document.getElementById('chips').innerHTML=
-    `<div class="chip">R<sub>ges</sub> = <b>${fR4(Rc)} Ω</b></div>`+
-    (getAuxR()>0&&useHflReturn()?`<div class="chip">R<sub>HFL</sub> = <b>${getAuxR().toFixed(2)} Ω</b></div>`:'')+
-    (!useHflReturn()&&R_ret>0?`<div class="chip">R<sub>Rückf.</sub> = <b>${fR4(R_ret)} Ω</b></div>`:'')+
-    (getKAR('a')?`<div class="chip">KA-A = <b>${getKAR('a').toFixed(2)} Ω</b></div>`:'')+
-    (getKAR('b')?`<div class="chip">KA-B = <b>${getKAR('b').toFixed(2)} Ω</b></div>`:'')+
-    `<div class="chip">L = <b>${fL(L)} m</b></div>`;
+    `<div class="chip">R<sub>ges</sub> MA1 = <b>${fR4(Rc1)} Ω</b></div>`+
+    `<div class="chip">R<sub>ges</sub> MA2 = <b>${fR4(Rc2)} Ω</b></div>`+
+    (getKAR('a')?`<div class="chip">KA-A = <b>${getKAR('a').toFixed(4)} Ω</b></div>`:'')+
+    (getKAR('b')?`<div class="chip">KA-B = <b>${getKAR('b').toFixed(4)} Ω</b></div>`:'')+
+    `<div class="chip">L1 = <b>${fL(L1)} m</b></div>`+
+    (L2!==L1?`<div class="chip">L2 = <b>${fL(L2)} m</b></div>`:'');
 
   document.getElementById('no-res').style.display='none';
   document.getElementById('res-content').style.display='block';
@@ -2001,39 +2259,47 @@ function exportPDF(){
   const dk=()=>doc.setTextColor(28,43,58);
   const gr=()=>doc.setTextColor(90,104,128);
   const wh=()=>doc.setTextColor(255,255,255);
-  const ln=(h=6)=>{y+=h;};
-  const hl=()=>{doc.setDrawColor(216,220,229);doc.setLineWidth(0.3);doc.line(M,y,W-M,y);ln(4);};
-  const sec=(t)=>{
-    ln(3);doc.setFillColor(27,61,94);doc.rect(M,y,W-2*M,7,'F');
-    doc.setFont('helvetica','bold');doc.setFontSize(9);wh();doc.text(t,M+3,y+5);ln(10);dk();
-  };
-  const rw=(l,v,u='')=>{
-    gr();doc.setFont('helvetica','normal');doc.setFontSize(9);doc.text(l,M,y);
-    dk();doc.setFont('helvetica','bold');doc.text((v||'–')+(u?' '+u:''),M+75,y);ln(6);
-  };
-
-  // Header — icon + text, einheitlich wie App-Kopf
+  // Header constants — defined before drawHeader()
   const HDR_H=22;
-  doc.setFillColor(30,58,63);doc.rect(0,0,W,HDR_H,'F');
-  const ICON_B64='data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAAFAAAABQCAYAAACOEfKtAAAD40lEQVR4nO2bP2hTQRzHfxEHO6WgXbSDUFyqxbFWHNKhEAJdi4SAQ+mSDIKDS6FDoIuC4GCW0kEIIi4dAiWQoUGEZq9mkW6piwp26hgHvfS43Ls/7/1+917S32dpm9d37+7zvu/u3nsXAIZhGIZhGIZhvMmlXQGVpcrm0PY/J839zNQ79Yq4CLORptDUDowhTiUNkcEPaBPnIgGjDCyCCoxqeJIGU5TpQ5CD6BpJ0cBQx5G5Rlk4QNhG6cql6GtlSM+OWnkXca9rj3vqZ0dwd1n++/DdB+9+kuqkkQn0bYBOnEAVKLCJDCGRRKBPxU3iBFECBSaR1BKvYxamI6rCLuKi2Fm5/L1+DFCqlYcAepEnzf0cZT9IOhJiyRMJlMWp1I///YxKo0u94oA6Cruc6STJc0Gk0QRmIlETaDvLrvIO8qWxPu/NYt+6n0ghgD6JFClEE4ghT4gbdDtj2z5V71jrIAsECCORfBBx5SBfWtaJyzoofaCtTzGl7yBfWnaRt9E4M25X0wdg7w8x+kL0W7k4l0XI5GHPA8nvhW3p85G30TgbS+JG4wxe9Bcj93EZlZOQSh/4df3VLQCAewCng25nwXd/VeKg2wEorMHsuX2kxiZxAk2jmi59Qp5gdWf3NGkdbKgplOuZtB8kv4RlVHkCDImDbgf+5KMvZSqCCpxGWGBCggp80Hr5S/f5UX3beyDJCqSjsPY5XqsBc+vVUZ83yfIAUprGfP/cXZjE2zYd3AcmJBWBs+d9mC+soZY5P6kTadOk1OXtWQjUemA+0krtEsZMYVrpAwgg0JRCDIk2edRXAbrAOPeWcSXG2Q/7DR2KQFs/YkthnCSK5CVJ31Q90p897wP8lyjmiKs7u6PtR/VtALhMXVp9nkrQt3KuDzfn1quR2362Gk51CfVWjmwQ0fU1oaY1NnmYoAp0Oas2iab0uWx3OUmZXZkA4Pa0lyqJoZd1AAQYRJYqm0NdpUVjMV76+KzOwiYz6wNlka6DyNSuDxSoDdgrXsCjirnRpVp5aBN4JVaoCkRD9ooXo89sEgXP2l9GEt4XnzjtE3qhedBV+rJEAHeRvseRoV6ln8r3RGSRW+0ZkmNN1fdEZKLSiCly6r6pZJpKUKdxoi/hXrM8VKWoDVqqbA6TplFXpu1/sPAutLty3zoxLRx/y/Wal/M618FC3merPROZTh8Z6l3I7ecfrfX/8fapc/kkAm/UHgJAvFFWlqiSZNQWIn/ftD939BFI9jQmbmNN+5nk2qC6hPm9cEJIBGJPkLGgSGEmExh1ArJ4YjIpEGBcVhblMQzDMAzDMAzDMAzDMAxztfgL03r8IL9RYxgAAAAASUVORK5CYII=';
-  // Icon grösser als Balken — entkoppelt, übersteht oben und unten
+  const ICON_B64='data:image/jpeg;base64,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QavbYC3jOu7cRJ8+fbJ5x9DWdRWfM9zoVKCVrG7/AGloeqfJqdj9lkPJng7t1JIx3x3DdfxqnqOiz2SfaYZFubU4xPGRjPTBAJxzx6dO/FZ1XtL1WfT38stvtpG/fRFQwZeh4PfH9M07p7k8jhrD7ijRXVv4Eub5zc6TdWwtn5USO2R34IByOeD/APrMN34B1iztZruW5sykEbSMFdskKMnHy+1dkctxc4e0jTbjvc53mWFUuRzSfY5qiiiuE7gooooAKKKKACiiigAooooAKKKKAPRfCfizw/pnh+1sb7UPLnj37l8pzjLsRyAR0IrTn+KMWhRNqvg/XfI1eDH2eT7KWxuO1+JEK/cLdR+teT0V4M+HcJUruvNttu7TtZ63ta236H6BHxIzaGWLKowpqCp+zvaXNbl5b357c1tb2tfoWtU1O91rU7vWNTn868v55Lm4k2hd8jsWZsKABkknAAFVaKK91JRVlsfn7bk7sKKKKYBRRRQAV9cfsr/E/wAP33he0+Gdy32TV9N897dZHG29jaR5WMZ/vruOU67RuGRuCfI9FeXm+V083wzw9R21un2fp132O/Lcwnltf20Ffo13X6H29+0N8T/D/gvwZqHhu5b7Tq/iCwntLe0jcBo45EaNp5DztQZOO7MMDgMy/ENFFZ5Lk9PJqDpQlzNu7e1/l0LzTMp5nVVSSslol/wQooor2DzQooooAKKKKAO58I+K9NstKNtq9/skSTEa+UxxGFUD7o9j71oat4v8O3OlXltBqO6SW3kRF8mQZYqQBytebUV7dHPsTRoLDxjGyVtnf8zxquR4erXddt3vfpb8gooorxD2QooooAKKKKACiiigAooooAKKKKACiiigAooooAKKKKACiiigAooooAKKKKACiiigAooooAKKKKACiiigAooooAKKKKACiiigAooooAKKKKACiiigAooooAKKKKACiiigAooooAKKKKACiiigAooooAKKKKACiiigAooooAKKKKACiiigAooooAKKKKACiiigAooooAKKKKACiiigAooooAKKKKACiiigAooooAKKKKACiiigAooooAKKKKACiiigAooooAKKKKAP/9k='
   const ICON_SZ=28;
   const ICON_Y=(HDR_H-ICON_SZ)/2+1;
-  try{doc.addImage(ICON_B64,'PNG',M,ICON_Y,ICON_SZ,ICON_SZ);}catch(e){}
   const TX=M+ICON_SZ+5;
-  doc.setFont('helvetica','bold');doc.setFontSize(14);wh();doc.text('TipScale · Naesse-Ortung',TX,9);
-  doc.setFont('helvetica','normal');doc.setFontSize(8);doc.setTextColor(180,200,220);
-  doc.text('Widerstands-Referenz-Messverfahren · LUWA · Fernwaerme',TX,15);
   const now=new Date();
-  doc.text(now.toLocaleDateString('de-DE'),W-M,15,{align:'right'});
+
+  const BOTTOM=275;
+  const ln=(h=6)=>{y+=h; if(y>BOTTOM){doc.addPage();drawHeader();y=HDR_H+10;}};
+  const hl=()=>{doc.setDrawColor(216,220,229);doc.setLineWidth(0.3);doc.line(M,y,W-M,y);y+=4;};
+  const drawHeader=()=>{
+    doc.setFillColor(30,58,63);doc.rect(0,0,W,HDR_H,'F');
+    try{doc.addImage(ICON_B64,'JPEG',M,ICON_Y,ICON_SZ,ICON_SZ);}catch(e){}
+    doc.setFont('helvetica','bold');doc.setFontSize(14);wh();doc.text('TipScale \xb7 Naesse-Ortung',TX,9);
+    doc.setFont('helvetica','normal');doc.setFontSize(8);doc.setTextColor(180,200,220);
+    doc.text('Widerstands-Referenz-Messverfahren \xb7 LUWA \xb7 Fernwaerme',TX,15);
+    doc.text(now.toLocaleDateString('de-DE'),W-M,15,{align:'right'});
+    dk();
+  };
+  const sec=(t)=>{
+    if(y>BOTTOM-15){doc.addPage();drawHeader();y=HDR_H+10;}
+    y+=3;doc.setFillColor(27,61,94);doc.rect(M,y,W-2*M,7,'F');
+    doc.setFont('helvetica','bold');doc.setFontSize(9);wh();doc.text(t,M+3,y+5);y+=10;dk();
+  };
+  const rw=(l,v,u='')=>{
+    if(y>BOTTOM){doc.addPage();drawHeader();y=HDR_H+10;}
+    gr();doc.setFont('helvetica','normal');doc.setFontSize(9);doc.text(l,M,y);
+    dk();doc.setFont('helvetica','bold');doc.text((v||'\x96')+(u?' '+u:''),M+75,y);y+=6;
+  };
+
+  // Draw first page header
+  drawHeader();
   y=HDR_H+10;
 
-  // Projekt
+  // ── 1. PROJEKT & IDENTIFIKATION ─────────────────────────────────────────
   sec('PROJEKT & IDENTIFIKATION');
   rw('Kunde / Projekt',document.getElementById('proj-name').value||'–');
   rw('Leitungs-ID / Messabschnitt',document.getElementById('proj-lid').value||'–');
 
-  // Topologie-Skizze
+  // ── 2. TOPOLOGIE DER MESSSCHLEIFE ───────────────────────────────────────
   sec('TOPOLOGIE DER MESSSCHLEIFE');
   const rkaA=getKAR('a'),rkaB=getKAR('b'),Ra=getAuxR();
   const hasKAA=rkaA>0,hasKAB=rkaB>0,hasHFL=Ra>0;
@@ -2045,7 +2311,6 @@ function exportPDF(){
     doc.setFont('helvetica','bold');doc.setFontSize(6.5);
     doc.setTextColor(...(active?[255,255,255]:[160,170,185]));
     doc.text(txt,x+nw/2,yy+nh/2+0.5,{align:'center',baseline:'middle'});
-    // Inaktive Nodes: 2 diagonale Kreuze
     if(!active){
       doc.setDrawColor(140,150,160);doc.setLineWidth(0.4);
       doc.line(x+1,yy+1,x+nw-1,yy+nh-1);
@@ -2058,121 +2323,215 @@ function exportPDF(){
   }
 
   const sy=y,sx=M;
-  const nw=24; // node width — single source of truth
+  const nw=24;
   const tNodes=[
-    {x:sx,       t:'MP-A',  a:true,   c:[27,61,94]},
-    {x:sx+32,    t:'KA-A',  a:hasKAA, c:[192,57,43]},
-    {x:sx+66,    t:'Meld.', a:true,   c:[26,95,168]},
-    {x:sx+102,   t:'KA-B',  a:hasKAB, c:[26,95,168]},
-    {x:sx+136,   t:'MP-B',  a:true,   c:[27,61,94]},
+    {x:sx,     t:'MP-A', a:true,   c:[27,61,94]},
+    {x:sx+32,  t:'KA-A', a:hasKAA, c:[192,57,43]},
+    {x:sx+66,  t:'Meld.', a:true,  c:[26,95,168]},
+    {x:sx+102, t:'KA-B', a:hasKAB, c:[26,95,168]},
+    {x:sx+136, t:'MP-B', a:true,   c:[27,61,94]},
   ];
   tNodes.forEach((n,i)=>{
     tn(n.x,sy,n.t,n.a,n.c);
     if(i<tNodes.length-1) tl(n.x+nw,sy+4,tNodes[i+1].x,sy+4,n.a&&tNodes[i+1].a);
   });
-
-  // Nassmarker: kleiner roter Kreis zwischen Nodes 2 und 3 (auf Verbindungslinie)
-  const nassX = sx+66 + nw/2; // Mitte von Meld.-Node
-  doc.setFillColor(192,57,43);
-  doc.circle(nassX, sy+4, 2.5, 'F');
-  doc.setDrawColor(255,255,255);doc.setLineWidth(0.5);
-  doc.circle(nassX, sy+4, 2.5, 'S');
-
-  // HFL-Bogen: symmetrisch — beide Streben an der Mitte der Endnodes
   const hy=sy+19;
-  const hflLeft  = sx + nw/2;           // Mitte MP-A
-  const hflRight = sx+136 + nw/2;       // Mitte MP-B
-  const hflNodeW = 24, hflNodeH = 8;
-  const hflNodeX = (hflLeft+hflRight)/2 - hflNodeW/2; // HFL-Node zentriert
-  tl(hflLeft, sy+8, hflLeft, hy, hasHFL);             // linke Strebe
-  tl(hflLeft, hy, hflRight, hy, hasHFL);              // Querbalken
-  tl(hflRight, hy, hflRight, sy+8, hasHFL);           // rechte Strebe
-  tn(hflNodeX, hy-4, 'HFL', hasHFL,[26,118,78]);
-  // Legende
+  const hflLeft=sx+nw/2,hflRight=sx+136+nw/2;
+  const hflNodeX=(hflLeft+hflRight)/2-nw/2;
+  tl(hflLeft,sy+8,hflLeft,hy,hasHFL);
+  tl(hflLeft,hy,hflRight,hy,hasHFL);
+  tl(hflRight,hy,hflRight,sy+8,hasHFL);
+  tn(hflNodeX,hy-4,'HFL',hasHFL,[26,118,78]);
   ln(24);
   doc.setFontSize(7);
   doc.setFillColor(27,61,94);doc.rect(M,y,4,4,'F');doc.setTextColor(27,61,94);doc.text('Aktiver Teilnehmer',M+6,y+3);
   doc.setFillColor(220,225,232);doc.rect(M+58,y,4,4,'F');doc.setTextColor(160,170,185);doc.text('Inaktiv / nicht konfiguriert',M+64,y+3);
   ln(8);hl();
 
-  // Leitungsabschnitt
-  sec('LEITUNGSABSCHNITT & MELDEADER');
-  const wt=document.getElementById('wire-type').value;
-  rw('Abschnitt 1 · Meldeader',WIRE_NAME[wt]);
-  const T=parseFloat(document.getElementById('temp-op').value);
-  rw('Betriebstemperatur Abs. 1',isNaN(T)?'20 (Referenz)':T.toFixed(0),'°C');
-  rw('Leiterwiderstand Abs. 1 (korr.)',fR4(getRpm()),'Ω/m');
-  rw('Gesamtlänge',fL(getLen()),'m');
-  rw('Widerstand Abschnitt 1',fR4(getLen()*getRpm()),'Ω');
-  if(isSec2Active()){
-    const wt2=document.getElementById('wire-type2').value;
-    const T2=parseFloat(document.getElementById('temp-op2').value);
-    rw('Abschnitt 2 · Meldeader (RL)',WIRE_NAME[wt2]);
-    rw('Betriebstemperatur Abs. 2',isNaN(T2)?'20 (Referenz)':T2.toFixed(0),'°C');
-    rw('Leiterwiderstand Abs. 2 (korr.)',fR4(getRpm2()),'Ω/m');
-    rw('Länge Abschnitt 2',fL(getLen2()),'m');
-    rw('Widerstand Abschnitt 2',fR4(getSec2R()),'Ω');
+  // ── 3. LEITUNGSABSCHNITTE ───────────────────────────────────────────────
+  const SEC_LABELS_PDF=[
+    'Abs. 1  Fühlerader mit Nässebefall',
+    'Abs. 2  Fühlerader mit Nässebefall',
+    'Abs. 3  Fühlerader mit Nässebefall',
+    'Abs. 4  Fühlerader mit Nässebefall',
+    'Abs. 5  Trockene Rückführader',
+    'Abs. 6  Trockene Rückführader',
+    'Abs. 7  Trockene Rückführader',
+    'Abs. 8  Trockene Rückführader',
+  ];
+  const activeSecsPDF=[];
+  for(let sn=1;sn<=8;sn++){
+    if(getSecLen(sn)>0) activeSecsPDF.push(sn);
   }
-
-  // HFL & KA
-  sec('HILFSLEITUNGEN & KABELAUSFÜHRUNGEN');
-  rw('Widerstand HFL total',getAuxR().toFixed(2),'Ω');
-  if(isSec2Active()) rw('Widerstand Abschnitt 2 Rückführung',fR4(getSec2R()),'Ω');
-  rw('Widerstand Rückführung total',fR4(getRa()),'Ω');
-  rw('Widerstand KA-A',getKAR('a').toFixed(2),'Ω');
-  rw('Widerstand KA-B',getKAR('b').toFixed(2),'Ω');
-  rw('Widerstand ges. (berechnet)',fR4(getRgesCalc()),'Ω');
-  const Rm=parseFloat(document.getElementById('rges-man').value)||0;
-  if(Rm>0) rw('Widerstand ges. (manuell)',fR4(Rm),'Ω');
-
-  // Messwerte
-  sec('MESSWERTE — Brückenabgleich (%)');
-  const pRA=parseFloat(document.getElementById('pRA').value);
-  const pBA=parseFloat(document.getElementById('pBA').value);
-  const pRB=parseFloat(document.getElementById('pRB').value);
-  const pBB=parseFloat(document.getElementById('pBB').value);
-  rw('Fall 1 · MP-A · MKL rot → Meldeader',isNaN(pRA)?'–':pRA.toFixed(2),'%');
-  rw('Fall 2 · MP-A · MKL rot → HFL',isNaN(pBA)?'–':pBA.toFixed(2),'%');
-  rw('Fall 3 · MP-B · MKL rot → Meldeader',isNaN(pRB)?'–':pRB.toFixed(2),'%');
-  rw('Fall 4 · MP-B · MKL rot → HFL',isNaN(pBB)?'–':pBB.toFixed(2),'%');
-
-  // Ergebnisfunktion
-  function writeRes(Rt,label){
-    sec('ERGEBNIS — '+label.toUpperCase());
-    const L=getLen(),r=getRpm(),Ra=getRa(),Rka=getKAR('a'),Rkb=getKAR('b');
-    function xi(p,mode){
-      if(isNaN(p)||p<0||p>100) return null;const f=p/100;
-      if(mode==='ra') return (f*Rt-Rka)/r;
-      if(mode==='ba') return L-(f*Rt-Ra-Rkb)/r;
-      if(mode==='rb') return L-(f*Rt-Rkb)/r;
-      if(mode==='bb') return (f*Rt-Ra-Rka)/r;
+  if(activeSecsPDF.length>0){
+    sec('LEITUNGSABSCHNITTE');
+    for(const sn of activeSecsPDF){
+      const wtEl=document.getElementById('s'+sn+'-wire');
+      const wt_sn=wtEl?wtEl.value:'cu15';
+      const T_sn=parseFloat((document.getElementById('s'+sn+'-temp')||{}).value);
+      const tmed_sn=parseFloat((document.getElementById('geo-s'+sn+'-tmed')||{}).value);
+      const dnEl=document.getElementById('geo-s'+sn+'-dn');
+      const dn_sn=dnEl?dnEl.value:'–';
+      const ds_sn=(geoStateS[sn]&&geoStateS[sn].ds)||2;
+      const rpm_sn=getSecRpm(sn);
+      const L_sn=getSecLen(sn);
+      // Sub-header for section
+      y+=2;
+      doc.setFont('helvetica','bold');doc.setFontSize(8.5);
+      doc.setTextColor(60,90,130);
+      doc.text(SEC_LABELS_PDF[sn-1],M,y);y+=6;dk();
+      rw('  Adertyp',WIRE_NAME[wt_sn]||wt_sn);
+      rw('  DN / Dammstärke','DN'+dn_sn+' / DS'+ds_sn);
+      if(!isNaN(tmed_sn)) rw('  Temperatur Mediumrohr',tmed_sn.toFixed(0),'°C');
+      if(!isNaN(T_sn))    rw('  Temperatur Meldeader',T_sn.toFixed(1),'°C');
+      rw('  Leitungslänge',fL(L_sn),'m');
+      rw('  Gesamtwiderstand Abschnitt',fR4(getSecR(sn)),'Ohm');
+      y+=2;
     }
-    const xs=[xi(pRA,'ra'),xi(pBA,'ba'),xi(pRB,'rb'),xi(pBB,'bb')];
-    const valid=xs.filter(x=>x!==null&&x>=-0.5&&x<=L+0.5);
-    if(!valid.length){rw('Ergebnis','Keine gültigen Werte');return;}
-    const mean=valid.reduce((a,b)=>a+b,0)/valid.length;
-    const maxD=Math.max(...valid.map(x=>Math.abs(x-mean)));
-    xs.forEach((x,i)=>rw(`x${i+1} (Fall ${i+1})`,x!==null?fL(x):'–','m ab MP-A'));
-    rw('⌀ Nassposition ab MP-A',fL(mean),'m');
-    rw('Nassposition ab MP-B',fL(L-mean),'m');
-    rw('max. Δ zwischen Messungen',fL(maxD),'m');
-    let diag=maxD<5?'Nassstelle (< 5 m)':maxD<=10?'Nasszone (5–10 m)':'Sondierungsgraben empfohlen (> 10 m)';
-    rw('Diagnose',diag);
-    if(maxD>10) rw('Empf. Grabenmittelpunkt',fL(mean)+' m / '+fL(L-mean)+' m ab MP-B');
   }
 
-  writeRes(getRgesCalc(),'Widerstand ges. berechnet');
-  if(Rm>0) writeRes(Rm,'Widerstand ges. manuell');
+  // ── 4. HFL & KABELAUSFÜHRUNGEN ──────────────────────────────────────────
+  sec('HILFSLEITUNGEN (HFL) & KABELAUSFÜHRUNGEN (KA)');
+  if(useHflReturn()){
+    rw('Rückführung via','HFL');
+    // List individual HFL entries
+    let hflIdx=0;
+    document.querySelectorAll('#aux-list .aux-row').forEach(row=>{
+      const nameEl=row.querySelector('input[type="text"]');
+      const valEl=row.querySelector('input[type="number"]');
+      const name=(nameEl&&nameEl.value)||('HFL '+(++hflIdx));
+      const val=parseFloat(valEl&&valEl.value)||0;
+      if(val>0) rw('  '+name,'R = '+val.toFixed(2),'Ohm');
+    });
+    rw('  HFL Gesamtwiderstand',getAuxR().toFixed(4),'Ohm');
+  } else {
+    rw('Rückführung via','Abschnitte 4-6');
+  }
+  if(rkaA>0) rw('KA-A',getKAR('a').toFixed(4),'Ohm');
+  if(rkaB>0) rw('KA-B',getKAR('b').toFixed(4),'Ohm');
 
-  // Footer
+  // ── 5. MESSWERTE — getrennt nach Meldeader ──────────────────────────────
+  const SCHLEIFEN=['Schleife 1  MP-A  MKL rot -> Meldeader',
+                   'Schleife 2  MP-A  MKL rot -> HFL/Rückf.',
+                   'Schleife 3  MP-B  MKL rot -> Meldeader',
+                   'Schleife 4  MP-B  MKL rot -> HFL/Rückf.'];
+  const pVals1=[
+    parseFloat(document.getElementById('pRA').value),
+    parseFloat(document.getElementById('pBA').value),
+    parseFloat(document.getElementById('pRB').value),
+    parseFloat(document.getElementById('pBB').value),
+  ];
+  const pVals2=[
+    parseFloat(document.getElementById('pRA2').value),
+    parseFloat(document.getElementById('pBA2').value),
+    parseFloat(document.getElementById('pRB2').value),
+    parseFloat(document.getElementById('pBB2').value),
+  ];
+
+  // Helper: is measurement enabled via tag-chip?
+  const isEn1=(i)=>enabled1[i];
+  const isEn2=(i)=>enabled2[i];
+  // Helper: is section active for this MA?
+  const isSecAct=(ma,n)=>secActive[ma][n-1];
+
+  // MA1: nur ausgeben wenn min. 1 aktivierter Messwert vorhanden
+  const hasMA1=pVals1.some((p,i)=>isEn1(i)&&!isNaN(p));
+  if(hasMA1){
+    sec('MESSWERTE — MELDEADER 1');
+    rw('Widerstand ges. Meldeader 1',fR4(getRgesMA(1)),'Ohm');
+    const actSecs1=FWD_SECS.filter(n=>isSecAct(1,n)&&getSecLen(n)>0);
+    const actRet1=RET_SECS.filter(n=>isSecAct(1,n)&&getSecLen(n)>0);
+    rw('Nasse Fuehlerader (Abschnitte)',actSecs1.length?actSecs1.join(', '):'–');
+    rw('Trockene Rueckfuehrader (Abschnitte)',useHflReturn()?'HFL':(actRet1.length?actRet1.join(', '):'–'));
+    y+=2;
+    pVals1.forEach((p,i)=>{
+      if(!isEn1(i)||isNaN(p)) return;
+      rw('  '+SCHLEIFEN[i],p.toFixed(2),'%');
+    });
+  }
+
+  // MA2: nur ausgeben wenn min. 1 aktivierter Messwert vorhanden
+  const hasMA2=pVals2.some((p,i)=>isEn2(i)&&!isNaN(p));
+  if(hasMA2){
+    sec('MESSWERTE — MELDEADER 2');
+    rw('Widerstand ges. Meldeader 2',fR4(getRgesMA(2)),'Ohm');
+    const actSecs2=FWD_SECS.filter(n=>isSecAct(2,n)&&getSecLen(n)>0);
+    const actRet2=RET_SECS.filter(n=>isSecAct(2,n)&&getSecLen(n)>0);
+    rw('Nasse Fuehlerader (Abschnitte)',actSecs2.length?actSecs2.join(', '):'–');
+    rw('Trockene Rueckfuehrader (Abschnitte)',useHflReturn()?'HFL':(actRet2.length?actRet2.join(', '):'–'));
+    y+=2;
+    pVals2.forEach((p,i)=>{
+      if(!isEn2(i)||isNaN(p)) return;
+      rw('  '+SCHLEIFEN[i],p.toFixed(2),'%');
+    });
+  }
+
+  // ── 5+6. ERGEBNIS — zusammengeführt, ohne Urteil ─────────────────────
+  sec('ERGEBNIS — FEHLERORTUNG');
+  const Rm=parseFloat(document.getElementById('rges-man').value)||0;
+
+  function calcXs(pArr,ma,Rt){
+    const Ra_ma=useHflReturn()?getAuxR():RET_SECS.reduce((s,n)=>s+(secActive[ma][n-1]?getSecR(n):0),0);
+    const Rka=getKAR('a'),Rkb=getKAR('b');
+    return pArr.map((p,i)=>{
+      const en=ma===1?enabled1[i]:enabled2[i];
+      if(!en||isNaN(p)||p<0||p>100) return null;
+      const f=p/100;
+      const modes=['ra','ba','rb','bb'];
+      const mode=modes[i];
+      if(mode==='ra'){const x=posFromMpAMA(f*Rt-Rka,ma);return x;}
+      if(mode==='ba'){const x=posFromMpAMA(f*Rt-Ra_ma-Rkb,ma);return x!==null?getTotalLenMA(ma)-x:null;}
+      if(mode==='rb'){const x=posFromMpAMA(f*Rt-Rkb,ma);return x!==null?getTotalLenMA(ma)-x:null;}
+      if(mode==='bb'){const x=posFromMpAMA(f*Rt-Ra_ma-Rka,ma);return x;}
+      return null;
+    });
+  }
+
+  function writeErgebnis(Rt,label){
+    const L1=getTotalLenMA(1),L2=getTotalLenMA(2);
+    const xs1=calcXs(pVals1,1,Rt);
+    const xs2=calcXs(pVals2,2,Rt);
+    const allXs=[...xs1,...xs2];
+    const valid=allXs.filter(x=>x!==null&&x>=-0.5);
+    if(!valid.length){rw(label,'Keine auswertbaren Messwerte');return;}
+    const mean=valid.reduce((a,b)=>a+b,0)/valid.length;
+    const minX=Math.min(...valid),maxX=Math.max(...valid);
+    y+=2;
+    doc.setFont('helvetica','bold');doc.setFontSize(8.5);doc.setTextColor(60,90,130);
+    doc.text(label,M,y);y+=6;dk();
+    // MA1 Einzelwerte
+    xs1.forEach((x,i)=>{
+      if(x===null) return;
+      rw('  Schleife '+(i+1)+' MA1 ab MP-A',fL(x),'m ab MP-A');
+    });
+    // MA2 Einzelwerte
+    xs2.forEach((x,i)=>{
+      if(x===null) return;
+      rw('  Schleife '+(i+1)+' MA2 ab MP-A',fL(x),'m ab MP-A');
+    });
+    y+=2;
+    rw('Mittlere Fehlerposition',fL(mean),'m ab MP-A');
+    if(L1>0) rw('Mittlere Fehlerposition ab MP-B',fL(L1-mean),'m');
+    rw('Streubereich (min – max)',fL(minX)+' – '+fL(maxX),'m');
+    // 6: Nur grobe Eingrenzung, kein Urteil
+    const spread=maxX-minX;
+    const eingrenzung=spread<5?'eng (< 5 m)':spread<=20?'mittel (5-20 m)':'breit (> 20 m)';
+    rw('Eingrenzung Fehlerbereich',eingrenzung);
+    y+=2;
+  }
+
+  writeErgebnis(getRgesMA(1)>0?getRgesMA(1):getRgesCalc(),'Vermutete Nassstelle bei:');
+  if(Rm>0) writeErgebnis(Rm,'Vermutete Nassstelle bei: (gem. R_ges)');
+
+  // ── FOOTER ──────────────────────────────────────────────────────────────
   for(let i=1;i<=doc.getNumberOfPages();i++){
     doc.setPage(i);
-    doc.setFont('helvetica','normal');doc.setFontSize(8);doc.setTextColor(160,170,185);
-    doc.text(`TipScale · Naesse-Ortung · Seite ${i}/${doc.getNumberOfPages()}`,W/2,290,{align:'center'});
+    doc.setFont('helvetica','normal');doc.setFontSize(7);doc.setTextColor(160,170,185);
+    doc.text('TipScale  Naesse-Ortung  Seite '+i+'/'+doc.getNumberOfPages(),W/2,285,{align:'center'});
   }
 
   const lid=document.getElementById('proj-lid').value||'Messung';
-  doc.save(`Messbericht_${lid.replace(/[^a-zA-Z0-9_-]/g,'_')}_${now.toISOString().slice(0,10)}.pdf`);
+  doc.save('Messbericht_'+lid.replace(/[^a-zA-Z0-9_-]/g,'_')+'_'+now.toISOString().slice(0,10)+'.pdf');
 }
 
 function fR4(v){
