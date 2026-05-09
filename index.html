@@ -289,11 +289,9 @@
       <span class="toggle-arr open" id="arr-s0">▼</span>
     </div>
     <div class="card-body open" id="s0">
-      <div class="proj-grid">
-        <div class="field"><label>Kunde / Projekt</label>
-          <input class="fld" type="text" id="proj-name" placeholder="z. B. Muster AG"></div>
-        <div class="field"><label>Leitungs-ID</label>
-          <input class="fld" type="text" id="proj-lid" placeholder="z. B. VL-Nord-03"></div>
+      <div style="display:grid;grid-template-columns:1fr 1fr;gap:6px;margin-top:6px">
+        <input class="fld" type="text" id="proj-name" placeholder="Kunde / Projekt" style="font-size:13px;padding:7px 10px">
+        <input class="fld" type="text" id="proj-lid" placeholder="Leitungs-ID" style="font-size:13px;padding:7px 10px">
       </div>
     </div>
   </div>
@@ -309,8 +307,8 @@
 
       <!-- Info Topologie -->
       <p style="font-size:12px;color:var(--text2);margin-top:8px;margin-bottom:10px;line-height:1.5">
-        MP-A → <b style="color:var(--red)">Abs. 1–4</b> (Nässebefall) → MP-B →
-        <b style="color:var(--blue-t)">Abs. 5–8</b> (trockene Rückführung) → MP-A.
+        MP-A → <b style="color:var(--red)">Abs. 1–5</b> (Nässebefall) → MP-B →
+        <b style="color:var(--blue-t)">Abs. 6–10</b> (trockene Rückführung) → MP-A.
         Leere Abschnitte werden übersprungen.
       </p>
 
@@ -347,7 +345,7 @@
     </div>
     <div class="card-body" id="s3">
       <p style="font-size:12px;color:var(--text2);margin-top:8px;margin-bottom:10px;line-height:1.4">
-        Ausführungskabel von MKL bis Meldeader · Cu DIN 47001.
+        von MKL über Ausführungskabel zu Meldeader mit <span id="ka-rho-lbl">ρ = [Ω·mm²/m]</span>
       </p>
       <div class="ka-cols">
         <div class="ka-col ka-a"><h3>🔴 Messpunkt A</h3>
@@ -563,6 +561,28 @@
     </div>
   </div>
 
+  <!-- LINIE 2: Ergebnis aus gemessenem R_ges (unabhängig von Linie 1) -->
+  <div class="results" id="results-l2" style="display:none;margin-top:10px;border-top:2px solid rgba(200,164,90,0.3)">
+    <div class="res-title" style="display:flex;align-items:center;gap:8px">
+      <span>📐 Linie 2 — aus gemessenem R<sub>ges</sub></span>
+      <span style="font-size:10px;font-weight:400;color:var(--text2);margin-left:4px">Längen rückgerechnet · unabhängig von Leitungsabschnitten</span>
+    </div>
+
+    <!-- Berechnete Längen -->
+    <div id="l2-laengen" style="display:flex;flex-wrap:wrap;gap:6px;margin:8px 0"></div>
+
+    <!-- Duale Skala -->
+    <div id="dual-scale-l2"></div>
+
+    <!-- Detailzeilen MA1 + MA2 -->
+    <div id="detail-l2-1" style="margin-top:10px"></div>
+    <div id="detail-l2-2" style="margin-top:6px"></div>
+
+    <!-- Konsistenz -->
+    <div class="cons" id="cons-l2"></div>
+    <div class="rec-box" id="rec-l2" style="display:none"></div>
+  </div>
+
 </div>
 <script>
 // ═══ 6 LEITUNGSABSCHNITTE ════════════════════════════════════════════════
@@ -570,37 +590,41 @@
 // Abschnitte 4-6: Trockene Rückführ-Meldeader (Rückweg MP-B→MP-A)
 // Alternativer Rückweg: HFL (ersetzt Abs. 4-6)
 const RHO_CU=0.01724; //Ohm·mm²/m — spez. Widerstand Kupfer bei 20°C nach IEC 60228
-const WIRE_R20={nicr:5.820,curet:0.03517,cu15:0.01175};
+const WIRE_R20={nicr:1.100/0.189, curet:0.01724/0.49, cu15:0.017625/1.5};
 const WIRE_ALPHA={nicr:0.00017,curet:0.00393,cu15:0.00393};
 const WIRE_NAME={nicr:'Brandes Fühlerader NiCr 80/20',curet:'Brandes Rückführader Cu 0,490 mm²',cu15:'Nordic Cu blank 1,5 mm²'};
 
 // ρ-Quellen je Adertyp
+// ρ [Ω·mm²/m] ist die Materialbasis — querschnittsunabhängig
+// r [Ω/m] = ρ / Querschnitt [mm²] — für den jeweiligen Adertyp
 const RHO_SOURCES={
   cu15:[
-    {id:'iec_nom',  rho:0.01724, r:0.01149, label:'IEC 60228 · Nominalwert',
-     desc:'ρ = 0,01724Ohm·mm²/m · Berechnungsnominalwert für Cu-Leiter nach IEC-Norm. Standardwert.'},
-    {id:'praxis',   rho:0.01750, r:0.01167, label:'Praxiswert Leitungsdraht',
-     desc:'ρ = 0,01750Ohm·mm²/m · Typischer Mittelwert für handelsüblichen Cu-Leitungsdraht inkl. Legierungsanteile.'},
-    {id:'feldwert', rho:0.01763, r:0.01175, label:'Feldmesswert · 0,01175 Ohm/m',
-     desc:'r = 0,01175 Ohm/m · Empirischer Feldmesswert. Liegt zwischen Praxiswert und IEC-Grenzwert.'},
-    {id:'iec_max',  rho:0.01777, r:0.01185, label:'IEC 60228 · Max. Grenzwert',
-     desc:'ρ = 0,01777Ohm·mm²/m · Maximaler zulässiger Widerstand für Klasse-1-Leiter 1,5 mm² nach IEC 60228. Konservativster Wert.'},
+    {id:'iec_nom',  rho:0.01724, r:0.01724/1.5, label:'IEC 60228 · Nominalwert',
+     desc:'ρ = 0,01724 Ω·mm²/m · Berechnungsnominalwert für Cu-Leiter nach IEC-Norm.'},
+    {id:'praxis',   rho:0.01750, r:0.01750/1.5, label:'Praxiswert Leitungsdraht',
+     desc:'ρ = 0,01750 Ω·mm²/m · Typischer Mittelwert für handelsüblichen Cu-Leitungsdraht inkl. Legierungsanteile.'},
+    {id:'feldwert', rho:0.017625, r:0.017625/1.5, label:'Feldmesswert · 0,017625 Ω·mm²/m',
+     desc:'ρ = 0,017625 Ω·mm²/m · Empirischer Feldmesswert aus Praxismessungen.'},
+    {id:'iec_max',  rho:0.01777, r:0.01777/1.5, label:'IEC 60228 · Max. Grenzwert',
+     desc:'ρ = 0,01777 Ω·mm²/m · Maximaler zulässiger Widerstand für Klasse-1-Leiter 1,5 mm² nach IEC 60228.'},
   ],
   curet:[
-    {id:'iec_nom',  rho:0.01724, r:0.03517, label:'IEC 60228 · Nominalwert',
-     desc:'ρ = 0,01724Ohm·mm²/m · Nominalwert Cu nach IEC. r = ρ/0,490 mm² = 0,03517 Ohm/m.'},
-    {id:'praxis',   rho:0.01750, r:0.03571, label:'Praxiswert Leitungsdraht',
-     desc:'ρ = 0,01750Ohm·mm²/m · Praxistypischer Mittelwert. r = 0,03571 Ohm/m.'},
-    {id:'iec_max',  rho:0.01777, r:0.03626, label:'IEC 60228 · Max. Grenzwert',
-     desc:'ρ = 0,01777Ohm·mm²/m · Maximaler IEC-Grenzwert. r = 0,03626 Ohm/m.'},
+    {id:'iec_nom',  rho:0.01724, r:0.01724/0.49, label:'IEC 60228 · Nominalwert',
+     desc:'ρ = 0,01724 Ω·mm²/m · Nominalwert Cu nach IEC. r = ρ/0,490 mm².'},
+    {id:'praxis',   rho:0.01750, r:0.01750/0.49, label:'Praxiswert Leitungsdraht',
+     desc:'ρ = 0,01750 Ω·mm²/m · Praxistypischer Mittelwert.'},
+    {id:'feldwert', rho:0.017625, r:0.017625/0.49, label:'Feldmesswert · 0,017625 Ω·mm²/m',
+     desc:'ρ = 0,017625 Ω·mm²/m · Empirischer Feldmesswert aus Praxismessungen.'},
+    {id:'iec_max',  rho:0.01777, r:0.01777/0.49, label:'IEC 60228 · Max. Grenzwert',
+     desc:'ρ = 0,01777 Ω·mm²/m · Maximaler IEC-Grenzwert.'},
   ],
   nicr:[
-    {id:'nicr_iec', rho:1.090, r:5.767, label:'IEC/DIN NiCr80 · Nominalwert',
-     desc:'ρ = 1,090Ohm·mm²/m · Normwert für NiCr 80/20-Widerstandslegierung nach IEC/DIN. Etwas tiefer als Brandes-Nennwert.'},
-    {id:'nicr_nom', rho:1.100, r:5.820, label:'Herstellerangabe Brandes · Nennwert',
-     desc:'ρ = 1,100Ohm·mm²/m · Offizieller Nennwert laut Brandes-Systemdokumentation. Standardwert.'},
-    {id:'nicr_praxis', rho:1.120, r:5.926, label:'Praxiswert · Alterung / Oxidation',
-     desc:'ρ = 1,120Ohm·mm²/m · Erfahrungswert für gealterte oder leicht oxidierte NiCr-Adern. Konservativster Ansatz für ältere Leitungen.'},
+    {id:'nicr_iec', rho:1.090, r:1.090/0.189, label:'IEC/DIN NiCr80 · Nominalwert',
+     desc:'ρ = 1,090 Ω·mm²/m · Normwert für NiCr 80/20-Widerstandslegierung nach IEC/DIN.'},
+    {id:'nicr_nom', rho:1.100, r:1.100/0.189, label:'Herstellerangabe Brandes · Nennwert',
+     desc:'ρ = 1,100 Ω·mm²/m · Offizieller Nennwert laut Brandes-Systemdokumentation.'},
+    {id:'nicr_praxis', rho:1.120, r:1.120/0.189, label:'Praxiswert · Alterung / Oxidation',
+     desc:'ρ = 1,120 Ω·mm²/m · Erfahrungswert für gealterte oder leicht oxidierte NiCr-Adern.'},
   ],
 };
 
@@ -843,23 +867,25 @@ let rhoSel={1:{cu15:'feldwert',curet:'praxis',nicr:'nicr_praxis'},
             2:{cu15:'feldwert',curet:'praxis',nicr:'nicr_praxis'}};
 
 // Abschnitt-Bereiche — zentral definiert für einfache Erweiterung
-const FWD_SECS=[1,2,3,4];   // Fühlerader mit Nässebefall (MP-A → MP-B)
-const RET_SECS=[5,6,7,8];   // Trockene Rückführader (MP-B → MP-A)
+const FWD_SECS=[1,2,3,4,5];   // Fühlerader mit Nässebefall (MP-A → MP-B)
+const RET_SECS=[6,7,8,9,10];   // Trockene Rückführader (MP-B → MP-A)
 
 const SEC_DEF=[
-  {n:1,label:'Abschnitt 1 · Fühlerader mit Nässebefall', color:'#C0392B', type:'fwd'},
-  {n:2,label:'Abschnitt 2 · Fühlerader mit Nässebefall', color:'#C0392B', type:'fwd'},
-  {n:3,label:'Abschnitt 3 · Fühlerader mit Nässebefall', color:'#C0392B', type:'fwd'},
-  {n:4,label:'Abschnitt 4 · Fühlerader mit Nässebefall', color:'#C0392B', type:'fwd'},
-  {n:5,label:'Abschnitt 5 · Trockene Rückführader',      color:'#1A6FA8', type:'ret'},
-  {n:6,label:'Abschnitt 6 · Trockene Rückführader',      color:'#1A6FA8', type:'ret'},
-  {n:7,label:'Abschnitt 7 · Trockene Rückführader',      color:'#1A6FA8', type:'ret'},
-  {n:8,label:'Abschnitt 8 · Trockene Rückführader',      color:'#1A6FA8', type:'ret'},
+  {n:1, label:'Abschnitt 1 · Fühlerader mit Nässebefall', color:'#C0392B', type:'fwd'},
+  {n:2, label:'Abschnitt 2 · Fühlerader mit Nässebefall', color:'#C0392B', type:'fwd'},
+  {n:3, label:'Abschnitt 3 · Fühlerader mit Nässebefall', color:'#C0392B', type:'fwd'},
+  {n:4, label:'Abschnitt 4 · Fühlerader mit Nässebefall', color:'#C0392B', type:'fwd'},
+  {n:5, label:'Abschnitt 5 · Fühlerader mit Nässebefall', color:'#C0392B', type:'fwd'},
+  {n:6, label:'Abschnitt 6 · Trockene Rückführader',      color:'#1A6FA8', type:'ret'},
+  {n:7, label:'Abschnitt 7 · Trockene Rückführader',      color:'#1A6FA8', type:'ret'},
+  {n:8, label:'Abschnitt 8 · Trockene Rückführader',      color:'#1A6FA8', type:'ret'},
+  {n:9, label:'Abschnitt 9 · Trockene Rückführader',      color:'#1A6FA8', type:'ret'},
+  {n:10,label:'Abschnitt 10 · Trockene Rückführader',     color:'#1A6FA8', type:'ret'},
 ];
 
 // Per-Abschnitt Zustand (Adertyp, r20, temp)
 const secState={}; // n → {wireType, rhoId, temp}
-for(let i=1;i<=8;i++) secState[i]={wireType:'cu15',rhoId:'feldwert',temp:NaN};
+for(let i=1;i<=10;i++) secState[i]={wireType:'cu15',rhoId:'feldwert',temp:NaN};
 
 const DN_OPTIONS=[20,25,32,40,50,65,80,100,125,150,200,250,300];
 
@@ -1046,17 +1072,17 @@ function buildSections(){
     <div style="margin-top:8px;padding:8px 12px;background:#0F1923;border-radius:8px;border:1px solid var(--border)">
       <label style="display:flex;align-items:center;gap:10px;cursor:pointer;user-select:none">
         <input type="checkbox" id="use-hfl-return" onchange="onHflReturnToggle()" style="width:18px;height:18px;cursor:pointer;accent-color:#C8A45A">
-        <span style="font-size:13px;font-weight:600;color:#C8A45A">HFL als Rückführung (ersetzt Abschnitte 4–6)</span>
+        <span style="font-size:13px;font-weight:600;color:#C8A45A">HFL als Rückführung (ersetzt Abschnitte 6–10)</span>
       </label>
       <div style="font-size:11px;color:var(--text2);margin-top:3px;margin-left:28px">
-        Wenn aktiv: Abschnitte 4–6 werden ignoriert, der Widerstand aus der HFL-Rubrik wird verwendet.
+        Wenn aktiv: Abschnitte 6–10 werden ignoriert, der Widerstand aus der HFL-Rubrik wird verwendet.
       </div>
     </div>`;
 
   el.innerHTML=html;
 
   // Init per section
-  for(let i=1;i<=8;i++){
+  for(let i=1;i<=10;i++){
     onSecWire(i);
     updateSecRpm(i);
   }
@@ -1206,6 +1232,7 @@ function selectRhoS(n,id){
     if(el) el.textContent=src.label+' · '+src.r.toFixed(5)+' Ohm/m';
   }
   renderRhoOptsS(n);
+  if(n===1) updateKARhoLabel();
   updateSecRpm(n);
   updateSummary(n);
   calc();
@@ -1221,6 +1248,7 @@ function onSecWire(n){
   if(src){WIRE_R20[wt]=src.r; secState[n].rhoId=src.id;}
   const activeEl=document.getElementById('rho-active-s'+n);
   if(activeEl&&src) activeEl.textContent=src.label+' · '+src.r.toFixed(5)+' Ohm/m';
+  if(n===1) updateKARhoLabel();
   updateSecRpm(n);
   updateSummary(n);
   calc();
@@ -1546,6 +1574,7 @@ function init(){
   if(document.getElementById('wire-type2')) onWireType2();
   updateChainDisplay();
   buildSections();
+  updateKARhoLabel();
 }
 
 function toggleCard(id){
@@ -1711,13 +1740,27 @@ function calcKA(side){
   const R=getKAR(side);
   document.getElementById('ka-'+side+'-r').textContent=R.toFixed(4)+' Ω';
   document.getElementById('bdg3').textContent=(getKAR('a')||getKAR('b'))?'aktiv':'optional';
+  updateKARhoLabel();
   updateChainDisplay();updateRgesDisplay();calc();
+}
+function updateKARhoLabel(){
+  const el=document.getElementById('ka-rho-lbl');
+  if(!el) return;
+  const wt1=(document.getElementById('s1-wire')||{}).value||'cu15';
+  const cross1={cu15:1.5, curet:0.49, nicr:0.189}[wt1]||1.5;
+  const rho=(WIRE_R20[wt1]||WIRE_R20['cu15'])*cross1;
+  el.textContent='ρ = '+rho.toFixed(5)+' Ω·mm²/m';
 }
 function getKAR(side){
   const cross=document.getElementById('ka-'+side+'-cross').value;
   if(cross==='0') return 0;
   if(cross==='cust') return parseFloat(document.getElementById('ka-'+side+'-ohm').value)||0;
-  return (RHO_CU/parseFloat(cross))*(parseFloat(document.getElementById('ka-'+side+'-len').value)||0);
+  // ρ aus aktiver ρ-Quelle von Abschnitt 1 (Materialbasis, querschnittsunabhängig)
+  const wt1=(document.getElementById('s1-wire')||{}).value||'cu15';
+  const cross1={cu15:1.5, curet:0.49, nicr:0.189}[wt1]||1.5;
+  const rho=WIRE_R20[wt1]*cross1; // r20 × cross1 = ρ [Ω·mm²/m]
+  const r_ka=rho/parseFloat(cross); // r_KA [Ω/m] für KA-Querschnitt
+  return r_ka*(parseFloat(document.getElementById('ka-'+side+'-len').value)||0);
 }
 
 function updateRgesDisplay(){
@@ -1844,8 +1887,8 @@ function getWeights(offsets){
 // ── Abschnitt-Aktivierung per Meldeader ──────────────────────────────────
 // secActive[ma][n] = true/false  (ma=1|2, n=1..6)
 const secActive={
-  1:[true,true,true,true,true,true,true,true],   // MA1: alle Abschnitte aktiv
-  2:[true,true,true,true,true,true,true,true],   // MA2: alle Abschnitte aktiv
+  1:[true,true,true,true,true,true,true,true,true,true],   // MA1: alle Abschnitte aktiv
+  2:[true,true,true,true,true,true,true,true,true,true],   // MA2: alle Abschnitte aktiv
 };
 
 function toggleSecActive(ma,n,val){
@@ -2087,9 +2130,9 @@ function renderDetailRows(L, xs, enabled, suffix, maderIdx){
   const maxProx=Math.max(...xs.map((x,i)=>x!==null&&enabled[i]?proximity[i](x):0),0.001);
 
   // Abschnitt-Chips: 1-3 rot, 4-6 blau
-  const chipColors={1:'#C0392B',2:'#C0392B',3:'#C0392B',4:'#C0392B',5:'#1A6FA8',6:'#1A6FA8',7:'#1A6FA8',8:'#1A6FA8'};
+  const chipColors={1:'#C0392B',2:'#C0392B',3:'#C0392B',4:'#C0392B',5:'#C0392B',6:'#1A6FA8',7:'#1A6FA8',8:'#1A6FA8',9:'#1A6FA8',10:'#1A6FA8'};
   let chips='';
-  for(let n=1;n<=8;n++){
+  for(let n=1;n<=10;n++){
     const act=secActive[maderIdx][n-1];
     const col=chipColors[n];
     chips+=`<span data-ma="${maderIdx}" data-sec="${n}"
@@ -2132,7 +2175,22 @@ function renderResults(Rt,suffix){
   const L1=getTotalLenMA(1);
   const L2=getTotalLenMA(2);
   const L=Math.max(L1,L2);
-  if(!L||!Rt) return;
+  if(!Rt) return;
+
+  // Warnung in eigenem div — zerstört nicht die Struktur des Panes
+  const warnId='warn-'+suffix;
+  let warnEl=document.getElementById(warnId);
+  if(!warnEl){
+    warnEl=document.createElement('div');
+    warnEl.id=warnId;
+    const pane=document.getElementById('pane-'+suffix);
+    if(pane) pane.insertBefore(warnEl,pane.firstChild);
+  }
+  if(!L){
+    warnEl.innerHTML='<p style="color:var(--amber);font-size:12px;padding:6px 0">⚠ Mindestens Abschnitt 1 mit Leitungslänge eintragen.</p>';
+    return;
+  }
+  warnEl.innerHTML='';
 
   const pRA =parseFloat(document.getElementById('pRA').value);
   const pBA =parseFloat(document.getElementById('pBA').value);
@@ -2143,8 +2201,10 @@ function renderResults(Rt,suffix){
   const pRB2=parseFloat(document.getElementById('pRB2').value);
   const pBB2=parseFloat(document.getElementById('pBB2').value);
 
-  const Rc1=getRgesMA(1);
-  const Rc2=getRgesMA(2);
+  // Rt: wenn 'calc' → je MA eigener berechneter R_ges
+  //     wenn 'man'  → manuell gemessener R_ges für beide MA
+  const Rc1=suffix==='calc'?getRgesMA(1):Rt;
+  const Rc2=suffix==='calc'?getRgesMA(2):Rt;
   const xs1=computeXsMA(pRA,pBA,pRB,pBB,Rc1,L1,1);
   const xs2=computeXsMA(pRA2,pBA2,pRB2,pBB2,Rc2,L2,2);
 
@@ -2173,6 +2233,137 @@ function renderResults(Rt,suffix){
   ce.className='cons '+cls;ce.innerHTML=`<span class="ci">${icon}</span>${msg}`;
 }
 
+// ── LINIE 2: Rückrechnung aus gemessenem R_ges ───────────────────────────
+// Vollständig unabhängig von Linie 1 (renderResults / computeXsMA).
+// Nutzt Rm, r1, r6, KA, HFL um Längen zu berechnen und Fehlerposition zu orten.
+
+function computeLinie2(){
+  const Rm=parseFloat(document.getElementById('rges-man').value)||0;
+  const l2=document.getElementById('results-l2');
+  if(!l2) return;
+
+  // Mindestanforderung: Rm und mindestens ein %-Wert
+  const pRA =parseFloat(document.getElementById('pRA').value);
+  const pBA =parseFloat(document.getElementById('pBA').value);
+  const pRB =parseFloat(document.getElementById('pRB').value);
+  const pBB =parseFloat(document.getElementById('pBB').value);
+  const pRA2=parseFloat(document.getElementById('pRA2').value);
+  const pBA2=parseFloat(document.getElementById('pBA2').value);
+  const pRB2=parseFloat(document.getElementById('pRB2').value);
+  const pBB2=parseFloat(document.getElementById('pBB2').value);
+  const anyVal=[pRA,pBA,pRB,pBB,pRA2,pBA2,pRB2,pBB2].some(v=>!isNaN(v));
+
+  if(!Rm||!anyVal){l2.style.display='none';return;}
+
+  // r1: temperaturkorrigierter Leiterwiderstand Abs.1 (Fühlerader)
+  // r6: temperaturkorrigierter Leiterwiderstand Abs.6 (Rückführader)
+  const r1=getSecRpm(1)||WIRE_R20['cu15'];
+  const r6=getSecRpm(6)||r1; // fallback: gleicher r wie Fühlerader
+
+  const Rka=getKAR('a');
+  const Rkb=getKAR('b');
+  const hfl=useHflReturn();
+  const R_HFL=hfl?getAuxR():0;
+
+  // Nettowiderstand: Rm minus alle bekannten fixen Anteile
+  let R_fwd, R_ret, L_fwd, L_ret;
+  if(hfl){
+    // Fall HFL: R_netto = Rm − Rka − Rkb − R_HFL
+    const R_netto=Rm - Rka - Rkb - R_HFL;
+    if(R_netto<=0){l2.style.display='none';return;}
+    L_fwd=R_netto/r1;
+    L_ret=0; // HFL hat keine räumliche Länge im Leitungsplan
+    R_fwd=R_netto;
+    R_ret=R_HFL;
+  } else {
+    // Fall Rückführader: R_netto = Rm − 2·Rka − 2·Rkb
+    // Symmetrische Schleife: L_fwd = L_ret = L
+    // R_netto = L·r1 + L·r6 = L·(r1+r6)
+    const R_netto=Rm - 2*Rka - 2*Rkb;
+    if(R_netto<=0){l2.style.display='none';return;}
+    const L=R_netto/(r1+r6);
+    L_fwd=L;
+    L_ret=L;
+    R_fwd=L*r1;
+    R_ret=L*r6;
+  }
+
+  // Positionsberechnung — vereinfachte Version für einen homogenen Abschnitt
+  // pA(R): R/r1 = Länge auf Fühlerader
+  // pB(R): R/r6 = Länge auf Rückführader
+  const pA=(R)=>{
+    if(R<0||R>R_fwd+0.001) return null;
+    return R/r1;
+  };
+  const L=L_fwd;
+  const Ra=R_ret; // Rückweg-Widerstand (R_ret oder R_HFL)
+
+  function xiL2(p,mode){
+    if(isNaN(p)||p<0||p>100) return null;
+    const f=p/100;
+    let x;
+    if(hfl){
+      if(mode==='ra') return pA(f*Rm - Rka);
+      if(mode==='ba'){x=pA(f*Rm - Ra - Rkb - Rka);return x!==null?L-x:null;}
+      if(mode==='rb'){x=pA(f*Rm - Rkb);return x!==null?L-x:null;}
+      if(mode==='bb') return pA(f*Rm - Ra - Rka);
+    } else {
+      if(mode==='ra') return pA(f*Rm - Rka);
+      if(mode==='ba'){x=pA(f*Rm - Rka - Ra - 2*Rkb);return x!==null?L-x:null;}
+      if(mode==='rb'){x=pA(f*Rm - Rkb);return x!==null?L-x:null;}
+      if(mode==='bb') return pA(f*Rm - Rkb - Ra - 2*Rka);
+    }
+    return null;
+  }
+
+  const xs1=[xiL2(pRA,'ra'),xiL2(pBA,'ba'),xiL2(pRB,'rb'),xiL2(pBB,'bb')];
+  const xs2=[xiL2(pRA2,'ra'),xiL2(pBA2,'ba'),xiL2(pRB2,'rb'),xiL2(pBB2,'bb')];
+
+  // Längen-Info anzeigen
+  const laengenEl=document.getElementById('l2-laengen');
+  if(laengenEl){
+    laengenEl.innerHTML=
+      `<div class="chip">r₁ = <b>${r1.toFixed(5)} Ω/m</b></div>`+
+      (!hfl?`<div class="chip">r₆ = <b>${r6.toFixed(5)} Ω/m</b></div>`:'')+
+      `<div class="chip">L Fühlerader = <b>${fL(L_fwd)} m</b></div>`+
+      (!hfl?`<div class="chip">L Rückführader = <b>${fL(L_ret)} m</b></div>`:'')+
+      `<div class="chip" style="color:var(--amber)">R<sub>ges</sub> gem. = <b>${fR4(Rm)} Ω</b></div>`;
+  }
+
+  l2.style.display='block';
+
+  // Skala und Detailzeilen — eigene IDs für Linie 2
+  const sets=[
+    {xs:xs1,enabled:enabled1,label:'Meldeader 1',color:'#C0392B'},
+    {xs:xs2,enabled:enabled2,label:'Meldeader 2',color:'#1A6FA8'},
+  ];
+  renderDualScale(L,sets,'l2');
+  renderDetailRows(L,xs1,enabled1,'l2',1);
+  renderDetailRows(L,xs2,enabled2,'l2',2);
+
+  // Konsistenz
+  const ce=document.getElementById('cons-l2');
+  const re=document.getElementById('rec-l2');
+  const valid=xs1.filter((x,i)=>x!==null&&enabled1[i]&&x>=-0.5&&x<=L+0.5);
+  if(!valid.length){
+    ce.className='cons warn';ce.innerHTML='◑ Messwerte MA1 eingeben.';
+    re.style.display='none';return;
+  }
+  const mean=valid.reduce((a,b)=>a+b,0)/valid.length;
+  const maxD=Math.max(...valid.map(x=>Math.abs(x-mean)));
+  let cls,icon,msg;
+  if(maxD<5){cls='good';icon='✓';msg=`<b>Nassstelle</b> · max. Δ ${fL(maxD)} m — Ortung zuverlässig.`;re.style.display='none';}
+  else if(maxD<=10){cls='warn';icon='⚠';msg=`<b>Nasszone</b> · max. Δ ${fL(maxD)} m — ausgedehnte Feuchtigkeit.`;re.style.display='none';}
+  else{
+    cls='bad';icon='✗';msg=`<b>Sondierungsgraben empfohlen</b> · max. Δ ${fL(maxD)} m.`;
+    re.style.display='block';
+    re.innerHTML=`<b>📍 Grabenmittelpunkt:</b> ${fL(mean)} m ab MP-A · ${fL(L-mean)} m ab MP-B`;
+  }
+  ce.className='cons '+cls;
+  ce.innerHTML=`<span class="ci">${icon}</span>${msg}`;
+}
+
+
 function calc(){
   updateRMain();updateChainDisplay();updateRgesDisplay();
   const L1=getTotalLenMA(1);
@@ -2192,29 +2383,55 @@ function calc(){
 
   const Rc1=getRgesMA(1);
   const Rc2=getRgesMA(2);
-  const Rc=getRgesCalc(); // für R_ges-Anzeige
-  const anyVal=[pRA,pBA,pRB,pBB,pRA2,pBA2,pRB2,pBB2].some(v=>!isNaN(v));
-  if(!L||!anyVal){showEmpty();return;}
-
+  const Rc=getRgesCalc();
   const Rm=parseFloat(document.getElementById('rges-man').value)||0;
+  const anyVal=[pRA,pBA,pRB,pBB,pRA2,pBA2,pRB2,pBB2].some(v=>!isNaN(v));
+
+  // Berechnet-Tab braucht Leitungsabschnitte + %-Werte
+  const calcOk=L>0&&anyVal&&Rc>0;
+  // Manuell-Tab braucht nur Rm + %-Werte (keine Abschnitte nötig)
+  const manOk=Rm>0&&anyVal;
+
+  if(!calcOk&&!manOk){showEmpty();return;}
 
   const R_ret=getRetR();
   document.getElementById('chips').innerHTML=
-    `<div class="chip">R<sub>ges</sub> MA1 = <b>${fR4(Rc1)} Ω</b></div>`+
-    `<div class="chip">R<sub>ges</sub> MA2 = <b>${fR4(Rc2)} Ω</b></div>`+
+    (Rc1>0?`<div class="chip">R<sub>ges</sub> MA1 = <b>${fR4(Rc1)} Ω</b></div>`:'')+
+    (Rc2>0?`<div class="chip">R<sub>ges</sub> MA2 = <b>${fR4(Rc2)} Ω</b></div>`:'')+
+    (Rm>0?`<div class="chip">R<sub>ges</sub> manuell = <b>${fR4(Rm)} Ω</b></div>`:'')+
     (getKAR('a')?`<div class="chip">KA-A = <b>${getKAR('a').toFixed(4)} Ω</b></div>`:'')+
     (getKAR('b')?`<div class="chip">KA-B = <b>${getKAR('b').toFixed(4)} Ω</b></div>`:'')+
-    `<div class="chip">L1 = <b>${fL(L1)} m</b></div>`+
-    (L2!==L1?`<div class="chip">L2 = <b>${fL(L2)} m</b></div>`:'');
+    (L1>0?`<div class="chip">L1 = <b>${fL(L1)} m</b></div>`:'')+
+    (L2>0&&L2!==L1?`<div class="chip">L2 = <b>${fL(L2)} m</b></div>`:'');
 
   document.getElementById('no-res').style.display='none';
   document.getElementById('res-content').style.display='block';
 
-  renderResults(Rc,'calc');
-
   const tabs=document.getElementById('res-tabs');
-  if(Rm>0){tabs.style.display='flex';renderResults(Rm,'man');}
-  else{tabs.style.display='none';if(activeTab==='man')switchTab('calc');}
+
+  if(calcOk) renderResults(Rc,'calc');
+  else{
+    let wc=document.getElementById('warn-calc');
+    if(!wc){
+      wc=document.createElement('div');
+      wc.id='warn-calc';
+      const pc=document.getElementById('pane-calc');
+      if(pc) pc.insertBefore(wc,pc.firstChild);
+    }
+    wc.innerHTML='<p style="color:var(--text2);font-size:12px;padding:6px 0">Leitungsabschnitte eintragen für Berechnung aus Eingaben.</p>';
+  }
+
+  if(manOk){
+    tabs.style.display='flex';
+    renderResults(Rm,'man');
+    // Automatisch manuellen Tab zeigen wenn kein calc
+    if(!calcOk) switchTab('man');
+  } else {
+    tabs.style.display='none';
+    if(activeTab==='man') switchTab('calc');
+  }
+
+  computeLinie2();
 }
 
 function showEmpty(){
@@ -2354,13 +2571,15 @@ function exportPDF(){
     'Abs. 2  Fühlerader mit Nässebefall',
     'Abs. 3  Fühlerader mit Nässebefall',
     'Abs. 4  Fühlerader mit Nässebefall',
-    'Abs. 5  Trockene Rückführader',
+    'Abs. 5  Fühlerader mit Nässebefall',
     'Abs. 6  Trockene Rückführader',
     'Abs. 7  Trockene Rückführader',
     'Abs. 8  Trockene Rückführader',
+    'Abs. 9  Trockene Rückführader',
+    'Abs. 10 Trockene Rückführader',
   ];
   const activeSecsPDF=[];
-  for(let sn=1;sn<=8;sn++){
+  for(let sn=1;sn<=10;sn++){
     if(getSecLen(sn)>0) activeSecsPDF.push(sn);
   }
   if(activeSecsPDF.length>0){
